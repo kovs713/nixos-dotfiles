@@ -1,7 +1,8 @@
 {
+  pkgs,
   config,
   lib,
-  pkgs,
+  inputs,
   ...
 }:
 {
@@ -14,6 +15,8 @@
   boot.loader.limine.efiInstallAsRemovable = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  hardware.graphics.enable = true;
+
   swapDevices = [
     {
       device = "/swap/swapfile";
@@ -23,12 +26,6 @@
 
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
-
-  services.syncthing = {
-    enable = true;
-    dataDir = "/home/kovs/Documents/tony-stark";
-    configDir = "/home/kovs/.config/syncthing";
-  };
 
   fonts.packages = with pkgs; [
     nerd-fonts.caskaydia-mono
@@ -44,7 +41,7 @@
   services.getty.autologinUser = "kovs";
 
   services.kmscon = {
-    enable = true;
+    enable = false;
     fonts = [
       {
         name = "CaskaydiaMono Nerd Font";
@@ -73,42 +70,12 @@
     extraGroups = [
       "wheel"
       "networkmanager"
+      "render"
+      "input"
     ];
     initialPassword = " ";
     shell = pkgs.fish;
   };
-
-  environment.systemPackages = with pkgs; [
-    git
-    vim
-    neovim
-    wget
-    curl
-    fish
-
-    fastfetch
-    lazygit
-    ripgrep
-    fd
-    zoxide
-    tmux
-    tree
-    tree-sitter
-    lua-language-server
-    nil
-    nixfmt
-    rust-analyzer
-    python3Packages.python-lsp-server
-    stylua
-    nodejs
-    pnpm
-    bun
-    go
-    gopls
-    gofumpt
-    gcc
-    gnumake
-  ];
 
   programs.nix-ld = {
     enable = true;
@@ -137,9 +104,55 @@
     21027
   ];
 
+  environment.systemPackages = (
+    with pkgs;
+    [
+      git
+      vim
+      wget
+      curl
+      fish
+      fastfetch
+
+      ghostty
+
+      fastfetch
+      lazygit
+      ripgrep
+      fd
+      zoxide
+      tmux
+      tree
+      tree-sitter
+      lua-language-server
+      nil
+      nixfmt
+      rust-analyzer
+      python3Packages.python-lsp-server
+      stylua
+      nodejs
+      pnpm
+      bun
+      go
+      gopls
+      gofumpt
+      gcc
+      gnumake
+    ]
+  );
+  #  ++ (with inputs.nixpkgs-unstable; [
+  #    opencode
+  #  ]);
+
+  environment.pathsToLink = [
+    "/share/applications"
+    "/share/xdg-desktop-portal"
+  ];
+
   environment.sessionVariables = {
     EDITOR = "nvim";
     VISUAL = "nvim";
+    TERMINAL = "ghostty";
   };
 
   system.stateVersion = "26.05";

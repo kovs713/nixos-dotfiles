@@ -1,0 +1,336 @@
+local function hi(group, opts)
+  opts = opts or {}
+  local guifg = opts.guifg or 'NONE'
+  local guibg = opts.guibg or 'NONE'
+  local guisp = opts.guisp or 'NONE'
+  local gui = opts.gui or 'NONE'
+  local ctermfg = opts.ctermfg or 'NONE'
+  local ctermbg = opts.ctermbg or 'NONE'
+  local cterm = opts.cterm or 'NONE'
+
+  local cmd = string.format('hi! %s guifg=%s guibg=%s guisp=%s gui=%s ctermfg=%s ctermbg=%s cterm=%s', group, guifg, guibg, guisp, gui, ctermfg, ctermbg, cterm)
+  vim.cmd(cmd)
+end
+
+local function link(from, to)
+  vim.cmd(string.format('hi! link %s %s', from, to))
+end
+
+-- PALETTE
+local palette = {
+  bg = '#000000',
+  fg = '#dadada',
+  elevated = '#1c1c1c',
+  subtle = '#303030',
+  muted = '#707070',
+  noise = '#191919',
+
+  add = '#416241',
+  remove = '#722529',
+
+  change = '#1d2b3a',
+  change_text = '#2d4560',
+
+  visual = '#d70000',
+  -- visual = '#ffaf00',
+  -- visual = '#d85f44',
+
+  cursor = '#d70000',
+  -- cursor = '#ffaf00',
+
+  error = '#ff005f',
+  -- error = '#ffaf00',
+
+  search = '#00d7ff',
+  -- search = '#00afff',
+}
+
+local bg = vim.o.background
+
+if bg == 'light' then
+  palette.bg = '#eeeeee'
+  palette.fg = '#000000'
+  palette.elevated = '#d7d7d7'
+  palette.subtle = '#e4e4e4'
+  palette.muted = '#626262'
+  palette.add = '#8dda9e'
+  palette.remove = '#da8d8d'
+  palette.change = '#b8d8f0'
+  palette.change_text = '#7ab5e0'
+  palette.noise = '#cccccc'
+end
+
+-- Set up colorscheme
+vim.cmd 'set termguicolors'
+vim.cmd 'let g:colors_name = "monochrome"'
+vim.cmd('set background=' .. bg)
+
+-- BASE GROUPS
+hi('Normal', { guifg = palette.fg, guibg = palette.bg })
+hi('CursorLine', { guibg = palette.subtle })
+hi('CursorLineNr', { guifg = palette.fg, guibg = palette.subtle })
+hi('ColorColumn', { guibg = palette.subtle })
+hi('LineNr', { guifg = palette.muted })
+hi('FoldColumn', { guifg = palette.muted })
+hi('Folded', { guifg = palette.muted, guibg = palette.bg })
+hi('EndOfBuffer', { guifg = palette.muted })
+hi('Conceal', { guifg = palette.muted })
+hi('NonText', { guifg = palette.noise })
+hi('SpecialKey', { guifg = palette.noise, gui = 'bold' })
+
+-- SYNTAX ELEMENTS
+hi('Comment', { guifg = palette.muted })
+hi('Keyword', { guifg = palette.muted })
+hi('Statement', { guifg = palette.fg })
+hi('Function', { guifg = palette.fg, gui = 'bold' })
+hi('Identifier', { guifg = palette.fg })
+hi('Type', { guifg = palette.fg, gui = 'underline' })
+hi('Typedef', { guifg = palette.fg, gui = 'underline' })
+hi('StorageClass', { guifg = palette.fg })
+hi('Structure', { guifg = palette.fg })
+
+hi('Constant', { guifg = palette.fg, gui = 'italic' })
+hi('String', { guifg = palette.fg, gui = 'italic' })
+hi('Number', { guifg = palette.fg, gui = 'italic' })
+hi('Boolean', { guifg = palette.fg, gui = 'italic' })
+hi('Float', { guifg = palette.fg, gui = 'italic' })
+hi('Character', { guifg = palette.fg, gui = 'italic' })
+
+hi('PreProc', { guifg = palette.fg })
+hi('Include', { guifg = palette.fg })
+hi('Define', { guifg = palette.fg })
+hi('Macro', { guifg = palette.fg })
+hi('PreCondit', { guifg = palette.fg })
+
+hi('Special', { guifg = palette.fg })
+hi('SpecialChar', { guifg = palette.fg })
+hi('Tag', { guifg = palette.fg })
+hi('Delimiter', { guifg = palette.fg })
+hi('SpecialComment', { guifg = palette.fg })
+
+hi('Underlined', { guifg = palette.fg, gui = 'underline' })
+hi('Ignore', { guifg = palette.fg })
+
+-- Oil
+hi('OilDir', { guifg = palette.fg, gui = 'bold' })
+
+-- TREESITTER LINKS
+link('@function', 'Function')
+link('@function.call', 'Function')
+link('@function.builtin', 'Function')
+link('@function.method', 'Function')
+link('@function.method.call', 'Function')
+
+link('@type', 'Type')
+link('@type.builtin', 'Type')
+link('@type.definition', 'Type')
+
+for _, lang in ipairs { 'javascript', 'javascriptreact', 'jsx', 'typescript', 'typescriptreact', 'tsx' } do
+  hi('@type.' .. lang, { guifg = palette.fg })
+  hi('@type.builtin.' .. lang, { guifg = palette.fg })
+  hi('@type.definition.' .. lang, { guifg = palette.fg })
+
+  hi('@type.annotation.' .. lang, { guifg = palette.fg, gui = 'underline' })
+  hi('@type.annotation.builtin.' .. lang, { guifg = palette.fg, gui = 'underline' })
+  hi('@type.annotation.definition.' .. lang, { guifg = palette.fg, gui = 'underline' })
+end
+
+link('@type.annotation', 'Type')
+link('@type.annotation.builtin', 'Type')
+link('@type.annotation.definition', 'Type')
+
+for _, lang in ipairs { 'javascriptreact', 'jsx', 'typescriptreact', 'tsx' } do
+  hi('@tag.attribute.' .. lang, { guifg = palette.fg })
+end
+
+link('@keyword', 'Keyword')
+link('@keyword.return', 'Keyword')
+link('@keyword.function', 'Keyword')
+link('@keyword.operator', 'Keyword')
+link('@keyword.import', 'Keyword')
+link('@keyword.type', 'Keyword')
+link('@keyword.modifier', 'Keyword')
+link('@keyword.repeat', 'Keyword')
+link('@keyword.conditional', 'Keyword')
+link('@keyword.exception', 'Keyword')
+
+link('@comment', 'Comment')
+link('@comment.documentation', 'Comment')
+
+link('@variable', 'Identifier')
+link('@variable.parameter', 'Identifier')
+link('@variable.member', 'Identifier')
+link('@constant', 'Constant')
+link('@constant.builtin', 'Constant')
+link('@string', 'String')
+link('@string.documentation', 'String')
+link('@string.regexp', 'String')
+link('@string.escape', 'String')
+link('@string.special', 'String')
+link('@string.special.symbol', 'String')
+link('@string.special.url', 'String')
+link('@string.special.path', 'String')
+
+link('@character', 'Character')
+link('@character.special', 'Character')
+
+link('@number', 'Number')
+link('@number.float', 'Number')
+
+link('@boolean', 'Boolean')
+
+link('@number', 'Number')
+
+link('@operator', 'Operator')
+
+link('@punctuation.delimiter', 'Delimiter')
+link('@punctuation.bracket', 'Delimiter')
+
+link('@tag', 'Tag')
+link('@tag.attribute', 'Type')
+
+-- SEARCH AND VISUAL
+hi('Search', { guifg = palette.search, guibg = palette.bg, gui = 'reverse' })
+hi('IncSearch', { guifg = palette.visual, guibg = palette.bg, gui = 'reverse' })
+hi('CurSearch', { guifg = palette.visual, guibg = palette.bg, gui = 'reverse' })
+hi('Visual', { guifg = palette.visual, guibg = palette.elevated })
+hi('VisualNOS', { guibg = palette.subtle })
+
+-- DIFF
+hi('DiffAdd', { guibg = palette.add })
+hi('DiffDelete', { guibg = palette.remove })
+hi('DiffChange', { guibg = palette.change })
+hi('DiffText', { guibg = palette.change_text })
+
+link('@diff.plus', 'DiffAdd')
+link('@diff.minus', 'DiffDelete')
+link('@diff.delta', 'DiffChange')
+
+link('diffAdded', 'DiffAdd')
+link('diffRemoved', 'DiffDelete')
+
+-- UI ELEMENTS
+hi('MiniStatuslineFilename', { guifg = palette.fg, guibg = palette.elevated })
+hi('MiniStatuslineDevinfo', { guifg = palette.fg, guibg = palette.elevated })
+hi('MiniStatuslineMode', { guifg = palette.bg, guibg = palette.fg, gui = 'bold' })
+hi('MiniStatuslineModeNormal', { guifg = palette.bg, guibg = palette.search, gui = 'bold' })
+hi('MiniStatuslineModeInsert', { guifg = palette.bg, guibg = palette.muted, gui = 'bold' })
+hi('MiniStatuslineModeVisual', { guifg = palette.bg, guibg = palette.visual, gui = 'bold' })
+hi('MiniStatuslineModeReplace', { guifg = palette.bg, guibg = palette.subtle, gui = 'bold' })
+hi('MiniStatuslineModeCommand', { guifg = palette.bg, guibg = palette.muted, gui = 'bold' })
+hi('MiniStatuslineModeOther', { guifg = palette.bg, guibg = palette.muted, gui = 'bold' })
+hi('WinSeparator', { guifg = palette.muted, guibg = palette.bg })
+
+hi('NormalFloat', { guifg = palette.fg, guibg = palette.elevated })
+
+hi('Pmenu', { guifg = palette.fg, guibg = palette.elevated })
+hi('PmenuSel', { guifg = palette.bg, guibg = palette.fg })
+hi('PmenuExtra', { guifg = palette.fg, guibg = palette.elevated })
+hi('PmenuExtraSel', { guifg = palette.bg, guibg = palette.fg })
+hi('PmenuKind', { guifg = palette.fg, guibg = palette.elevated, gui = 'bold' })
+hi('PmenuKindSel', { guifg = palette.bg, guibg = palette.fg, gui = 'bold' })
+hi('PmenuSbar', { guibg = palette.subtle })
+hi('PmenuThumb', { guibg = palette.muted })
+
+hi('WildMenu', { guifg = palette.search, guibg = palette.bg, gui = 'bold' })
+hi('Directory', { guifg = palette.fg })
+hi('Title', { guifg = palette.fg })
+hi('Question', { guifg = palette.fg })
+hi('MoreMsg', { guifg = palette.fg })
+hi('ModeMsg', { guifg = palette.fg, gui = 'bold' })
+
+-- MATCH AND SPELL
+hi('MatchParen', { guifg = palette.visual, gui = 'bold,underline' })
+hi('SpellBad', {
+  guifg = palette.error,
+  guisp = palette.error,
+  gui = 'undercurl',
+})
+hi('SpellCap', { guisp = palette.error, gui = 'undercurl' })
+hi('SpellLocal', { guisp = palette.error, gui = 'undercurl' })
+hi('SpellRare', { guisp = palette.error, gui = 'undercurl' })
+
+-- ERROR AND TODO
+hi('Error', { guifg = palette.error, guibg = palette.bg, gui = 'bold,reverse' })
+hi('ErrorMsg', { guibg = palette.error })
+hi('WarningMsg', { guifg = palette.fg })
+hi('Todo', { guifg = palette.search, gui = 'bold,reverse' })
+
+-- DIAGNOSTICS
+hi('DiagnosticError', { guifg = palette.error, gui = 'bold' })
+hi('DiagnosticUnderlineError', { guisp = palette.error, gui = 'undercurl' })
+hi('DiagnosticVirtualTextError', { guifg = palette.error })
+hi('DiagnosticFloatingError', { guifg = palette.error })
+link('DiagnosticSignError', 'DiagnosticError')
+
+hi('DiagnosticWarn', { guisp = palette.noise })
+hi('DiagnosticInfo', { guisp = palette.noise })
+hi('DiagnosticHint', { guisp = palette.noise })
+hi('DiagnosticOk', { guisp = palette.noise })
+
+hi('DiagnosticVirtualTextWarn', { guisp = palette.noise })
+hi('DiagnosticVirtualTextInfo', { guisp = palette.noise })
+hi('DiagnosticVirtualTextHint', { guisp = palette.noise })
+hi('DiagnosticVirtualTextOk', { guisp = palette.noise })
+
+hi('DiagnosticUnderlineWarn', { guisp = palette.noise, gui = 'undercurl' })
+hi('DiagnosticUnderlineInfo', { guisp = palette.noise, gui = 'undercurl' })
+hi('DiagnosticUnderlineHint', { guisp = palette.noise, gui = 'undercurl' })
+hi('DiagnosticUnderlineOk', { guisp = palette.noise, gui = 'undercurl' })
+
+link('DiagnosticSignWarn', 'DiagnosticWarn')
+link('DiagnosticSignInfo', 'DiagnosticInfo')
+link('DiagnosticSignHint', 'DiagnosticHint')
+link('DiagnosticSignOk', 'DiagnosticOk')
+
+-- CURSOR
+hi('Cursor', { guibg = palette.cursor })
+
+-- SIGN COLUMN
+hi('SignColumn', { guifg = palette.fg })
+hi('LineNr', { guifg = palette.muted })
+
+-- QUICKFIX
+hi('QuickFixLine', { guifg = palette.search, gui = 'reverse' })
+hi('qfFileName', { gui = 'bold' })
+
+-- FUGITIVE
+link('fugitiveStagedHeading', 'Include')
+link('fugitiveUnstagedHeading', 'Macro')
+link('fugitiveUntrackedHeading', 'PreCondit')
+link('fugitiveStagedModifier', 'Typedef')
+link('fugitiveUnstagedModifier', 'Structure')
+link('fugitiveUntrackedModifier', 'StorageClass')
+link('fugitiveHeader', 'Label')
+link('fugitiveHelpHeader', 'fugitiveHeader')
+link('fugitiveHelpTag', 'Tag')
+link('fugitiveHash', 'Identifier')
+link('fugitiveSymbolicRef', 'Function')
+link('fugitiveCount', 'Number')
+link('fugitiveInstruction', 'Type')
+link('fugitiveStop', 'Function')
+
+-- MISC LINKS
+link('Added', 'Normal')
+link('Changed', 'Normal')
+link('Removed', 'Normal')
+link('Boolean', 'Constant')
+link('Character', 'Constant')
+link('Float', 'Constant')
+link('Number', 'Constant')
+link('String', 'Constant')
+link('Conditional', 'Statement')
+link('Repeat', 'Statement')
+link('Label', 'Statement')
+link('Operator', 'Statement')
+link('Exception', 'Statement')
+link('Debug', 'Special')
+link('define', 'PreProc')
+link('include', 'PreProc')
+
+-- SNACKS PICKER
+hi('SnacksPickerFile', { guifg = palette.fg })
+hi('SnacksPickerDir', { guifg = palette.muted })
+hi('SnacksPickerDirectory', { guifg = palette.fg, gui = 'bold' })
+hi('SnacksLazygitSelected', { guibg = palette.muted, guifg = palette.bg })
+hi('SnacksLazygitCursor', { guibg = palette.visual, guifg = palette.bg })
