@@ -1,0 +1,26 @@
+module Shell.Core
+
+BarButton 1.0 BarButton.qml
+singleton Calendar 1.0 Calendar.qml
+singleton DeviceIcons 1.0 DeviceIcons.qml
+EmptyState 1.0 EmptyState.qml
+ExpandableList 1.0 ExpandableList.qml
+singleton Fuzzy 1.0 Fuzzy.qml
+IconButton 1.0 IconButton.qml
+singleton Icons 1.0 Icons.qml
+LauncherView 1.0 LauncherView.qml
+ListRow 1.0 ListRow.qml
+singleton ModelSync 1.0 ModelSync.qml
+singleton OsdController 1.0 OsdController.qml
+singleton Paths 1.0 Paths.qml
+PopupHeader 1.0 PopupHeader.qml
+singleton PopupManager 1.0 PopupManager.qml
+PopupSurface 1.0 PopupSurface.qml
+ResultsView 1.0 ResultsView.qml
+SectionHeader 1.0 SectionHeader.qml
+SwipeRow 1.0 SwipeRow.qml
+singleton SwipeState 1.0 SwipeState.qml
+TextField 1.0 TextField.qml
+singleton Theme 1.0 Theme.qml
+singleton Util 1.0 Util.qml
+VolumeSlider 1.0 VolumeSlider.qml

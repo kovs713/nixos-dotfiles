@@ -1,0 +1,32 @@
+{
+  "policies": {
+    "ai": 0,
+    "weeb": 0
+  },
+  "appearance": {
+    "fonts": {
+      "main": "SFProDisplay Nerd Font",
+      "numbers": "SFProDisplay Nerd Font",
+      "title": "SFProDisplay Nerd Font",
+      "serif": "SFProDisplay Nerd Font",
+      "expressive": "SFProDisplay Nerd Font",
+      "reading": "Inter",
+      "iconNerd": "CaskaydiaMono Nerd Font",
+      "monospace": "CaskaydiaMono Nerd Font"
+    }
+  },
+  "apps": {
+    "bluetooth": "blueman-manager",
+    "fileManager": "nautilus",
+    "network": "gnome-connections",
+    "networkEthernet": "gnome-connections",
+    "taskManager": "gnome-system-monitor",
+    "terminal": "foot",
+    "changePassword": "foot --hold=true passwd",
+    "volumeMixer": "pavucontrol"
+  },
+  "dock": {
+    "enable": true,
+    "macStyleDock": true
+  }
+}

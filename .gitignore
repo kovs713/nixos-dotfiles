@@ -1,1 +1,9 @@
 tmp*
+.direnv/
+
+result
+result-*
+
+packages/x/x
+
+.opencode

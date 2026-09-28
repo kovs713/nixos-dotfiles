@@ -1,0 +1,19 @@
+module Shell.Services
+
+singleton NotesService 1.0 NotesService.qml
+singleton NotificationServer 1.0 NotificationServer.qml
+singleton NetworkService 1.0 NetworkService.qml
+singleton BluetoothService 1.0 BluetoothService.qml
+singleton BatteryService 1.0 BatteryService.qml
+singleton AudioService 1.0 AudioService.qml
+singleton NightLightService 1.0 NightLightService.qml
+singleton BrightnessService 1.0 BrightnessService.qml
+singleton AppsService 1.0 AppsService.qml
+singleton ShellService 1.0 ShellService.qml
+singleton ReminderService 1.0 ReminderService.qml
+singleton LauncherService 1.0 LauncherService.qml
+singleton ClipboardService 1.0 ClipboardService.qml
+singleton EmojiService 1.0 EmojiService.qml
+singleton PrivacyService 1.0 PrivacyService.qml
+singleton PolkitService 1.0 PolkitService.qml
+singleton TimerService 1.0 TimerService.qml
