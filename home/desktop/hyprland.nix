@@ -15,6 +15,12 @@ let
   anim = spec: {
     _args = [ (lua spec) ];
   };
+  bind = keys: disp: {
+    _args = [
+      keys
+      (lua disp)
+    ];
+  };
 in
 {
   # The other half of the macOS look. The frosted panels are only frosted if
@@ -27,6 +33,10 @@ in
   # (a top-level `decoration` next to `config.decoration`) is not one — both get
   # rendered, and which wins is the order the settings happen to be sorted in.
   wayland.windowManager.hyprland.settings = {
+    bind = [
+      (bind "SUPER + SPACE" "hl.dsp.exec_cmd([[vicinae toggle]])")
+    ];
+
     config = {
       decoration = {
         rounding = lib.mkForce 10;
