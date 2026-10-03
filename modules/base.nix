@@ -36,7 +36,16 @@
     QT_AUTO_SCREEN_SCALE_FACTOR = "1";
   };
 
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    randomizedDelaySec = "45min";
+    options = "--delete-older-than 7d";
+  };
+
   nix.settings = {
+    auto-optimise-store = true;
+
     substituters = [
       "https://cache.nixos.org/"
     ];

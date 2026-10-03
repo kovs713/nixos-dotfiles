@@ -50,11 +50,6 @@ let
     ];
 in
 {
-  # hyprland itself comes from the kovs713 fork (feat/omit-capture), which
-  # publishes only `hyprland` and `xdg-desktop-portal-hyprland` -- hypridle,
-  # hyprlock, hyprpicker and hyprcursor are separate hyprwm repos, so nixpkgs
-  # is the only source for them. What has to track the fork is the *syntax*:
-  # 0.55 replaced hyprlang with Lua, so dispatch is hl.dsp.* not `hyprctl dispatch dpms on`.
   home.packages = with pkgs; [
     awww
     hyprcursor
@@ -64,11 +59,6 @@ in
     hyprpicker
   ];
 
-  # hyprlock's own UI is the last unstyled thing on this machine. Flat fill, no
-  # blur, no noise, no image; `animations { enabled = false }` also kills the
-  # fadeIn/fadeOut the launcher does on its own. `rounding` and `dots_rounding`
-  # both default to -1 (a circle), so zero has to be said out loud -- there is
-  # no way to inherit that from the hyprland config, this is a separate program.
   xdg.configFile."hypr/hyprlock.conf".text = ''
     animations {
         enabled = false
@@ -92,20 +82,15 @@ in
         dots_size = 0.22
         dots_spacing = 0.18
 
-        # hairline outline, inner painted the same as the background so the
-        # field reads as a flat rectangle rather than a filled box
         outline_thickness = 1
         outer_color = ${c "base02"}
         inner_color = ${c "base00"}
         font_color = ${c "base05"}
 
-        # dots and text share font_color (PasswordInputField.cpp renders both
-        # with fontCol), and there is no font_size on this widget
         font_family = ${config.stylix.fonts.sansSerif.name}
         fade_on_empty = false
         placeholder_text = <i>$USER</i>
 
-        # same roles quickshell/theme.json gives the shell
         check_color = ${c "base0B"}
         fail_color = ${c "base08"}
 
@@ -114,9 +99,6 @@ in
     }
   '';
 
-  # Idle handling left the compositor in 0.55: `hyprctl getoption idle:*` answers
-  # "no such option" and the fork's binary carries no dpms_timeout/lock_timeout
-  # strings. hypridle owns it, and it will not start without a config file.
   xdg.configFile."hypr/hypridle.conf".text = ''
     general {
         lock_cmd = pidof hyprlock || hyprlock
@@ -160,8 +142,6 @@ in
       Install.WantedBy = [ "graphical-session.target" ];
     };
 
-    # launched as a user service rather than exec-once: the hyprland config is
-    # generated into Lua, where there is no exec-once to hang it off
     hypridle = {
       Unit.Description = "Hyprland idle management";
       Service = {

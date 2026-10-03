@@ -5,22 +5,19 @@
   ...
 }:
 {
-  home.packages =
-    (with pkgs; [
-      lazygit
-      tmux
-      git
-      gh
+  home.packages = with pkgs; [
+    opencode
+    lazygit
+    tmux
+    git
+    gh
 
-      tree-sitter
-      nixfmt
-      nodejs
-      nil
+    tree-sitter
+    nixfmt
+    nodejs
+    nil
 
-      nixvim
-      x
-    ])
-    ++ (with pkgs; [
-      opencode
-    ]);
+    nixvim
+    x
+  ];
 }
