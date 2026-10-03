@@ -134,34 +134,34 @@
 
         formatters_by_ft = {
           javascript = [
+            "oxfmt"
             "oxlint"
-            "prettier"
           ];
           typescript = [
+            "oxfmt"
             "oxlint"
-            "prettier"
           ];
           javascriptreact = [
+            "oxfmt"
             "oxlint"
-            "prettier"
           ];
           typescriptreact = [
+            "oxfmt"
             "oxlint"
-            "prettier"
           ];
           vue = [
+            "oxfmt"
             "oxlint"
-            "prettier"
           ];
           svelte = [
+            "oxfmt"
             "oxlint"
-            "prettier"
+          ];
+          astro = [
+            "oxfmt"
+            "oxlint"
           ];
           solidity = [ "solhint" ];
-          astro = [
-            "oxlint"
-            "prettier"
-          ];
           css = [ "prettier" ];
           html = [ "prettier" ];
           json = [ "prettier" ];
@@ -220,8 +220,8 @@
       lintersByFt = {
         java = [ "checkstyle" ];
         go = [ "golangcilint" ];
-        typescript = [ "eslint_d" ];
-        typescriptreact = [ "eslint_d" ];
+        typescript = [ "oxlint" ];
+        typescriptreact = [ "oxlint" ];
         lua = [ "luacheck" ];
         python = [ "ruff" ];
         sql = [ "postgres-language-server" ];

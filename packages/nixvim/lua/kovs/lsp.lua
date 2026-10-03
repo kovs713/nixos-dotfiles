@@ -22,12 +22,16 @@ do
     settings = {
       typescript = { preferences = { autoImportFileExcludePatterns = drizzle } },
       javascript = { preferences = { autoImportFileExcludePatterns = drizzle } },
-      vtsls = { tsserver = { globalPlugins = { {
-        name = '@vue/typescript-plugin',
-        location = vim.g.kovs_vue_ls_path,
-        languages = { 'vue' },
-        configNamespace = 'typescript',
-      } } } },
+      vtsls = {
+        tsserver = {
+          globalPlugins = { {
+            name = '@vue/typescript-plugin',
+            location = vim.g.kovs_vue_ls_path,
+            languages = { 'vue' },
+            configNamespace = 'typescript',
+          } }
+        }
+      },
     },
   })
   vim.lsp.enable 'vtsls'
@@ -37,7 +41,10 @@ do
     filetypes = { 'typescript', 'javascript', 'typescriptreact', 'javascriptreact' },
     settings = { ['js/ts'] = { preferences = { autoImportFileExcludePatterns = drizzle } } },
     on_attach = function(client, bufnr)
-      if detect.is_vue_project(detect.nearest_package_root(bufnr)) then client:stop(true) return end
+      if detect.is_vue_project(detect.nearest_package_root(bufnr)) then
+        client:stop(true)
+        return
+      end
       client.server_capabilities.documentFormattingProvider = false
       vim.keymap.set('n', '<leader>i', function()
         vim.lsp.buf.code_action { context = { only = { 'source.organizeImports' } }, apply = true }
@@ -52,10 +59,10 @@ do
   tw.settings.tailwindCSS.experimental = tw.settings.tailwindCSS.experimental or {}
   local cr = tw.settings.tailwindCSS.experimental.classRegex or {}
   vim.list_extend(cr, {
-    { 'clsx\\(([^)]*)\\)', "(?:'|\"|`)([^']*)(?:'|\"|`)" },
+    { 'clsx\\(([^)]*)\\)',       "(?:'|\"|`)([^']*)(?:'|\"|`)" },
     { 'classnames\\(([^)]*)\\)', "'([^']*)'" },
-    { 'cva\\(([^)]*)\\)', '["\'`]([^"\'`]*).*?["\'`]' },
-    { 'cn\\(([^)]*)\\)', "(?:'|\"|`)([^']*)(?:'|\"|`)" },
+    { 'cva\\(([^)]*)\\)',        '["\'`]([^"\'`]*).*?["\'`]' },
+    { 'cn\\(([^)]*)\\)',         "(?:'|\"|`)([^']*)(?:'|\"|`)" },
   })
   tw.settings.tailwindCSS.experimental.classRegex = cr
   -- snippetSupport=false + no color/folding (verbatim from lspconfigs.lua)
