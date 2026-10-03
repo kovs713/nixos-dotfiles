@@ -349,6 +349,7 @@
           "gitignore"
           "http"
           "nix"
+          "proto"
         ];
       };
     };

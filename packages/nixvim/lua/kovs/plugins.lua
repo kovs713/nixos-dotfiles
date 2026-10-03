@@ -18,9 +18,9 @@ do
       layout = { preview = 'main', layout = {
         backdrop = false, width = 40, min_width = 40, height = 0,
         position = 'left', border = 'none', box = 'vertical',
-        { win = 'input', height = 1, border = 'single', title = '{title} {live} {flags}', title_pos = 'center' },
-        { win = 'list', border = 'none' },
-        { win = 'preview', title = '{preview}', height = 0.4, border = 'top' },
+        { win = 'input',   height = 1,          border = 'single', title = '{title} {live} {flags}', title_pos = 'center' },
+        { win = 'list',    border = 'none' },
+        { win = 'preview', title = '{preview}', height = 0.4,      border = 'top' },
       } },
       exclude = { '/node_modules/*', '/dist/*', '/.git/*', '/.DS_Store/*', '/coverage/*' },
     },
@@ -94,17 +94,25 @@ do
   local ts_moves = require 'nvim-treesitter-textobjects.move'
   local function setup_selects()
     local buf_opts = { buffer = true }
-    vim.keymap.set({ 'o', 'x' }, 'aa', function() ts_select.select_textobject('@parameter.outer', 'textobjects') end, buf_opts)
-    vim.keymap.set({ 'o', 'x' }, 'ia', function() ts_select.select_textobject('@parameter.inner', 'textobjects') end, buf_opts)
-    vim.keymap.set({ 'o', 'x' }, 'af', function() ts_select.select_textobject('@function.outer', 'textobjects') end, buf_opts)
-    vim.keymap.set({ 'o', 'x' }, 'if', function() ts_select.select_textobject('@function.inner', 'textobjects') end, buf_opts)
-    vim.keymap.set({ 'o', 'x' }, 'ac', function() ts_select.select_textobject('@class.outer', 'textobjects') end, buf_opts)
-    vim.keymap.set({ 'o', 'x' }, 'ic', function() ts_select.select_textobject('@class.inner', 'textobjects') end, buf_opts)
+    vim.keymap.set({ 'o', 'x' }, 'aa', function() ts_select.select_textobject('@parameter.outer', 'textobjects') end,
+      buf_opts)
+    vim.keymap.set({ 'o', 'x' }, 'ia', function() ts_select.select_textobject('@parameter.inner', 'textobjects') end,
+      buf_opts)
+    vim.keymap.set({ 'o', 'x' }, 'af', function() ts_select.select_textobject('@function.outer', 'textobjects') end,
+      buf_opts)
+    vim.keymap.set({ 'o', 'x' }, 'if', function() ts_select.select_textobject('@function.inner', 'textobjects') end,
+      buf_opts)
+    vim.keymap.set({ 'o', 'x' }, 'ac', function() ts_select.select_textobject('@class.outer', 'textobjects') end,
+      buf_opts)
+    vim.keymap.set({ 'o', 'x' }, 'ic', function() ts_select.select_textobject('@class.inner', 'textobjects') end,
+      buf_opts)
   end
   local function setup_moves()
     local buf_opts = { buffer = true }
-    vim.keymap.set({ 'n', 'o', 'x' }, ']f', function() ts_moves.goto_previous_start('@function.outer', 'textobjects') end, buf_opts)
-    vim.keymap.set({ 'n', 'o', 'x' }, '[f', function() ts_moves.goto_next_start('@function.outer', 'textobjects') end, buf_opts)
+    vim.keymap.set({ 'n', 'o', 'x' }, ']f', function() ts_moves.goto_previous_start('@function.outer', 'textobjects') end,
+      buf_opts)
+    vim.keymap.set({ 'n', 'o', 'x' }, '[f', function() ts_moves.goto_next_start('@function.outer', 'textobjects') end,
+      buf_opts)
   end
   -- `ac` is class in the code filetypes and code span here, so markdown gets
   -- its own FileType hook rather than joining the list above.
@@ -123,7 +131,7 @@ do
   end
   local ts_group = vim.api.nvim_create_augroup('kovs-treesitter', {})
   vim.api.nvim_create_autocmd('FileType', {
-    pattern = { 'lua', 'python', 'go', 'javascript', 'typescript', 'typescriptreact', 'vim' },
+    pattern = { 'lua', 'python', 'go', 'javascript', 'typescript', 'typescriptreact', 'vim', 'proto' },
     callback = function()
       vim.treesitter.start()
       setup_selects()
@@ -164,9 +172,9 @@ do
         local path = get_relative_path()
         local git = MiniStatusline.section_git { trunc_width = 40 }
         return MiniStatusline.combine_groups {
-          { hl = mode_hl, strings = { mode } },
+          { hl = mode_hl,                  strings = { mode } },
           { hl = 'MiniStatuslineFilename', strings = { path } },
-          { hl = 'MiniStatuslineDevinfo', strings = { git } },
+          { hl = 'MiniStatuslineDevinfo',  strings = { git } },
         }
       end,
       inactive = function()
@@ -205,7 +213,11 @@ do
   end
   local function roll_day(now)
     local today = os.date('%F', now)
-    if state.day ~= today then flush(now) state.day = today state.start = now end
+    if state.day ~= today then
+      flush(now)
+      state.day = today
+      state.start = now
+    end
   end
   vim.filetype.add {
     pattern = {
@@ -239,8 +251,8 @@ do
         activity.assets.small_text = string.format('Neovim %d.%d.%d', v.major, v.minor, v.patch)
         local f = opts.filename or ''
         if f:match '%.module%.ts$' or f:match '%.controller%.ts$' or f:match '%.service%.ts$'
-          or f:match '%.guard%.ts$' or f:match '%.interceptor%.ts$' or f:match '%.gateway%.ts$'
-          or f:match '%.filter%.ts$' or f:match '%.resolver%.ts$' then
+            or f:match '%.guard%.ts$' or f:match '%.interceptor%.ts$' or f:match '%.gateway%.ts$'
+            or f:match '%.filter%.ts$' or f:match '%.resolver%.ts$' then
           activity.assets.large_image = require('cord.api.icon').get 'typescript'
           activity.assets.large_text = 'NestJS'
         end
@@ -257,7 +269,8 @@ do
       end,
       workspace_change = function(opts)
         local now = os.time()
-        roll_day(now) flush(now)
+        roll_day(now)
+        flush(now)
         state.ws = opts.workspace or 'global'
         state.start = now
         state.active = not opts.is_idle
@@ -265,7 +278,8 @@ do
       end,
       idle_enter = function(_)
         local now = os.time()
-        roll_day(now) flush(now)
+        roll_day(now)
+        flush(now)
         state.active = false
         save_json(data_path, state.data)
       end,
@@ -275,7 +289,8 @@ do
       end,
       shutdown = function()
         local now = os.time()
-        roll_day(now) flush(now)
+        roll_day(now)
+        flush(now)
         save_json(data_path, state.data)
       end,
     }),

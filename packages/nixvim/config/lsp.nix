@@ -227,6 +227,12 @@ in
         package = pkgs.vscode-solidity-server;
       };
 
+      protols = {
+        enable = true;
+        filetypes = [ "proto" ];
+        package = pkgs.protols;
+      };
+
       nil_ls = {
         enable = true;
         settings.nil = {
