@@ -10,6 +10,7 @@ import (
 const (
 	TARGET_FILE   = "/etc/x/target"
 	DOTFILES_PATH = "/home/kovs/dotfiles"
+	SYSTEM        = "x86_64-linux"
 )
 
 func printUsage() {
@@ -20,7 +21,8 @@ func printUsage() {
   x b             nixos-rebuild build current target
   x gc            nix store gc
   x upd [input]   nix flake update [input]
-  x ch            parse, format and evaluate, as the README says`)
+  x ch            parse, format and evaluate, as the README says
+  x sh [stack...] dev shell for one or more stacks; no name lists them`)
 	os.Exit(2)
 }
 
@@ -35,8 +37,9 @@ func liveTarget() string {
 	raw, err := os.ReadFile(TARGET_FILE)
 	if err != nil {
 		fmt.Fprintf(os.Stderr,
-			"x: %s: %v\n  no switch has run yet; start with:\n    sudo nixos-rebuild switch --flake %s#laptop-black\n",
-			TARGET_FILE, err, flakeDir())
+			`x: %s: %v no switch has run yet; start with:
+				sudo nixos-rebuild switch --flake %s#laptop-black`,
+			TARGET_FILE, err, DOTFILES_PATH)
 		os.Exit(1)
 	}
 
@@ -49,16 +52,6 @@ func liveTarget() string {
 	return target
 }
 
-// never the cwd: nix resolves a relative flake against where it runs, so
-// `x` from some other repo would build that repo instead of this one
-func flakeDir() string {
-	return DOTFILES_PATH
-}
-
-func flakeRef(target string) string {
-	return flakeDir() + "#" + target
-}
-
 func run(argv ...string) {
 	cmd := exec.Command(argv[0], argv[1:]...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
@@ -67,18 +60,6 @@ func run(argv ...string) {
 		os.Exit(1)
 	}
 }
-
-const checkScript = `
-set -e
-cd "$1"
-files=$(find modules home packages -name '*.nix')
-for file in $files; do nix-instantiate --parse "$file" >/dev/null; done
-nixfmt --check $files
-nix eval --no-update-lock-file "$2#nixosConfigurations.$3.config.system.build.toplevel.drvPath"
-for test in model-sync fuzzy calendar launcher-search; do
-  node home/laptop/quickshell/$test.test.mjs
-done
-`
 
 func main() {
 	args := os.Args[1:]
@@ -96,28 +77,99 @@ func main() {
 
 		fmt.Println("theme:", from, "->", to)
 
-		// no --profile-name: a named profile leaves /nix/var/nix/profiles/system
-		// where it was, so the next boot runs that older system instead
-		run("sudo", "-n", "nixos-rebuild", "switch", "--flake", flakeRef(to))
+		run(
+			"sudo",
+			"-n",
+			"nixos-rebuild",
+			"switch",
+			"--flake",
+			DOTFILES_PATH+"#"+to,
+		)
 
 	case "rb":
-		run("sudo", "-n", "nixos-rebuild", "switch", "--flake", flakeRef(target))
+		run(
+			"sudo",
+			"-n",
+			"nixos-rebuild",
+			"switch",
+			"--flake",
+			DOTFILES_PATH+"#"+target,
+		)
 
 	case "b":
-		run("sudo", "-n", "nixos-rebuild", "build", "--flake", flakeRef(target))
+		run(
+			"sudo",
+			"-n",
+			"nixos-rebuild",
+			"build",
+			"--flake",
+			DOTFILES_PATH+"#"+target,
+		)
 
 	case "gc":
-		run("sudo", "-n", "nix", "store", "gc")
+		run(
+			"sudo",
+			"-n",
+			"nix",
+			"store",
+			"gc",
+		)
 
 	case "upd":
-		run(append([]string{"nix", "flake", "update", "--flake", flakeDir()}, args[1:]...)...)
+		run(
+			append([]string{
+				"nix",
+				"flake",
+				"update",
+				"--flake",
+				DOTFILES_PATH,
+			}, args[1:]...)...,
+		)
 
 	case "ch":
-		run("nix", "develop", "--command", "bash", "-c", checkScript,
-			"x check", flakeDir(), flakeDir(), target)
+		run(
+			"nix",
+			"develop",
+			DOTFILES_PATH+"#checks",
+			"--command",
+			"bash",
+			DOTFILES_PATH+"/packages/x/check.sh", target,
+		)
 
-	case "test":
-		fmt.Println(flakeDir())
+	case "sh":
+		if len(args) == 1 {
+			run(
+				"nix",
+				"eval",
+				DOTFILES_PATH+"#devShells."+SYSTEM,
+				"--apply", "builtins.attrNames",
+			)
+			return
+		}
+
+		stacks := make([]string, 0, len(args)-1)
+		for _, name := range args[1:] {
+			stacks = append(
+				stacks,
+				DOTFILES_PATH+"#devShells."+SYSTEM+"."+name,
+			)
+		}
+
+		if len(stacks) == 1 {
+			run(
+				"nix",
+				"develop",
+				stacks[0],
+			)
+		}
+
+		run(
+			append(append([]string{
+				"nix", "shell",
+			}, stacks...),
+				"--command",
+				"bash")...,
+		)
 
 	default:
 		printUsage()

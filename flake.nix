@@ -25,7 +25,7 @@
 
       x = pkgs.buildGoModule {
         pname = "x";
-        version = "0.2.0";
+        version = "0.3.0";
 
         src = ./packages/x;
         vendorHash = null;
@@ -69,7 +69,6 @@
                   zen-browser = inputs.zen-browser.packages.${system}.default;
                 })
               ];
-
             }
 
             ({ config, pkgs, ... }: {
@@ -88,6 +87,83 @@
             ./hosts/${hostname}
           ];
         };
+
+      common = with pkgs; [
+        gcc
+        pkg-config
+        libpulseaudio
+        gnumake
+        jq
+      ];
+
+      stacks = {
+        # quickshell/qml
+        quickshell = with pkgs; [
+          gtk4
+          gtk4-layer-shell
+          qt6.qtdeclarative
+        ];
+
+        rust = with pkgs; [
+          cargo
+          rustc
+          rustfmt
+          clippy
+          rust-analyzer
+        ];
+
+        go = with pkgs; [
+          go
+          gopls
+          gofumpt
+          golangci-lint
+        ];
+
+        node = with pkgs; [
+          pnpm
+          bun
+          biome
+          prettier
+          oxfmt
+          oxlint
+          eslint_d
+          typescript-language-server
+          vtsls
+          astro-language-server
+          svelte-language-server
+          emmet-ls
+          tailwindcss-language-server
+          vscode-langservers-extracted
+        ];
+
+        python = with pkgs; [
+          python3Packages.python-lsp-server
+          ruff
+          pyright
+        ];
+
+        lua = with pkgs; [
+          lua-language-server
+          stylua
+          luaPackages.luacheck
+        ];
+
+        # languages that here are only ever a language server
+        data = with pkgs; [
+          postgres-language-server
+          sqlfluff
+          pgformatter
+          vscode-solidity-server
+          checkstyle
+        ];
+
+        infra = with pkgs; [ kubectl ];
+
+        checks = with pkgs; [
+          nixfmt
+          nodejs
+        ];
+      };
     in
     {
       packages.${system} = {
@@ -95,63 +171,11 @@
         nvim = nixvim;
       };
 
-      devShells.${system}.default = pkgs.mkShell {
-        packages = with pkgs; [
-          # gtk
-          gtk4
-          gtk4-layer-shell
-
-          # cli
-          cargo
-          rustc
-          rustfmt
-          clippy
-          pkg-config
-          libpulseaudio
-          jq
-          gcc
-          pnpm
-          bun
-          go
-          gnumake
-          kubectl
-
-          # lsp
-          qt6.qtdeclarative
-          rust-analyzer
-          python3Packages.python-lsp-server
-          typescript-language-server
-          vtsls
-          vue-language-server
-          astro-language-server
-          svelte-language-server
-          emmet-ls
-          gopls
-          tailwindcss-language-server
-          vscode-langservers-extracted
-          biome
-          ruff
-          pyright
-          postgres-language-server
-          vscode-solidity-server
-          lua-language-server
-
-          # formatters
-          prettier
-          oxlint
-          stylua
-          gofumpt
-          shfmt
-          pgformatter
-
-          # linters
-          eslint_d
-          golangci-lint
-          luaPackages.luacheck
-          checkstyle
-          sqlfluff
-        ];
-      };
+      devShells.${system} =
+        (builtins.mapAttrs (_: p: pkgs.mkShell { packages = common ++ p; }) stacks)
+        // {
+          default = pkgs.mkShell { };
+        };
 
       nixosConfigurations = {
         laptop-black = mkHost {

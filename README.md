@@ -79,26 +79,34 @@ x b             # nixos-rebuild build, live target
 x gc            # nix store gc
 x upd [input]   # nix flake update
 x ch            # everything under checks
+x sh            # list the dev shell stacks
+x sh <stack>... # enter one or more: node, rust, go, python, lua,
+                #   quickshell, data, infra
 ```
 
 it reads the live target from `/etc/x/target`, written at every switch, so it
 never has to guess the machine or the theme.
 
+`x sh` is one dev shell per stack instead of one dev shell with everything in
+it, because the union is a rust toolchain, four language servers and a
+`qtdeclarative` build nobody wants at the same time. `flake.nix` holds the map,
+`x sh` reads the names out of it. every stack gets gcc, pkg-config, make and jq
+on top of its own list; `checks` is the one `x ch` uses. one stack goes through
+`nix develop`; two or more go through `nix shell`, because `nix develop` takes a
+single attribute and merges nothing while `nix shell` unions the PATH of
+several. `default` is empty, because `nix develop` with no name should ask which
+stack rather than answer for you.
+
 ---
 
 ## checks
 
-`x check` runs it all inside the dev shell, because `nixfmt` and `node` are in
-neither the system nor the user `PATH`:
+`x ch` is `packages/x/check.sh`, run inside the `checks` dev shell because
+`nixfmt` and `node` are in neither the system nor the user `PATH`. the script
+takes the live target as its only argument:
 
 ```bash
-nix develop --command bash -c '
-  files=$(find modules home packages -name "*.nix")
-  for file in $files; do nix-instantiate --parse "$file" >/dev/null; done
-  nixfmt --check $files
-  nix eval --no-update-lock-file .#nixosConfigurations.laptop-black.config.system.build.toplevel.drvPath
-  for t in model-sync fuzzy calendar launcher-search; do node home/laptop/quickshell/$t.test.mjs; done
-'
+nix develop .#checks --command bash packages/x/check.sh laptop-black
 ```
 
 those four node tests lift the bar's pure logic out of QML and assert it, which
