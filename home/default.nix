@@ -18,7 +18,9 @@ in
   home-manager.users.kovs.imports = [
     inputs.hyprland.homeManagerModules.default
     inputs.zen-browser.homeModules.default
-    ./home.nix
+    inputs.agenix.homeManagerModules.age
+
     hostnameDir
+    ./home.nix
   ];
 }

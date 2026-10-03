@@ -14,6 +14,10 @@
   security.polkit.enable = true;
   services.openssh.enable = true;
 
+  networking.nameservers = [
+    "8.8.8.8"
+    "1.1.1.1"
+  ];
   networking.firewall.enable = true;
   networking.firewall.interfaces.zt0.allowedTCPPorts = [
     22000

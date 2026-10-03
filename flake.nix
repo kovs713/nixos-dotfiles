@@ -89,79 +89,80 @@
         };
 
       common = with pkgs; [
-        gcc
-        pkg-config
         libpulseaudio
+        pkg-config
         gnumake
+        gcc
         jq
+
+        kubectl
+        age
+
+        nixfmt
+        nodejs
       ];
 
       stacks = {
         # quickshell/qml
         quickshell = with pkgs; [
-          gtk4
-          gtk4-layer-shell
           qt6.qtdeclarative
+          gtk4-layer-shell
+          gtk4
         ];
 
         rust = with pkgs; [
-          cargo
-          rustc
+          rust-analyzer
           rustfmt
           clippy
-          rust-analyzer
+          cargo
+          rustc
         ];
 
         go = with pkgs; [
-          go
-          gopls
-          gofumpt
           golangci-lint
+          gofumpt
+          gopls
+          go
         ];
 
         node = with pkgs; [
+          vscode-langservers-extracted
+          tailwindcss-language-server
+          svelte-language-server
+          astro-language-server
+          typescript
+          emmet-ls
+          vtsls
+
+          prettier
+          eslint_d
+          oxlint
+          biome
+          oxfmt
+
           pnpm
           bun
-          biome
-          prettier
-          oxfmt
-          oxlint
-          eslint_d
-          typescript-language-server
-          vtsls
-          astro-language-server
-          svelte-language-server
-          emmet-ls
-          tailwindcss-language-server
-          vscode-langservers-extracted
         ];
 
         python = with pkgs; [
           python3Packages.python-lsp-server
-          ruff
           pyright
+          ruff
         ];
 
         lua = with pkgs; [
+          luaPackages.luacheck
           lua-language-server
           stylua
-          luaPackages.luacheck
         ];
 
         # languages that here are only ever a language server
         data = with pkgs; [
           postgres-language-server
-          sqlfluff
-          pgformatter
           vscode-solidity-server
           checkstyle
-        ];
-
-        infra = with pkgs; [ kubectl ];
-
-        checks = with pkgs; [
-          nixfmt
-          nodejs
+          pgformatter
+          sqlfluff
         ];
       };
     in
@@ -216,5 +217,8 @@
     hyprland.url = "github:kovs713/Hyprland?ref=feat/omit-capture";
 
     voxtype.url = "github:peteonrails/voxtype/v1.0.1";
+
+    agenix.url = "github:Mic92/agenix";
+    agenix.inputs.nixpkgs.follows = "nixpkgs";
   };
 }

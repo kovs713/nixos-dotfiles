@@ -128,12 +128,9 @@ func main() {
 
 	case "ch":
 		run(
-			"nix",
-			"develop",
-			DOTFILES_PATH+"#checks",
-			"--command",
 			"bash",
-			DOTFILES_PATH+"/packages/x/check.sh", target,
+			DOTFILES_PATH+"/packages/x/check.sh",
+			target,
 		)
 
 	case "sh":

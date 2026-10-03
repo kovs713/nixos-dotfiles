@@ -106,7 +106,7 @@ stack rather than answer for you.
 takes the live target as its only argument:
 
 ```bash
-nix develop .#checks --command bash packages/x/check.sh laptop-black
+bash packages/x/check.sh laptop-black 
 ```
 
 those four node tests lift the bar's pure logic out of QML and assert it, which
