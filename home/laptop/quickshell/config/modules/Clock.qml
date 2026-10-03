@@ -34,8 +34,6 @@ Core.BarButton {
     }
 
     Row {
-        id: timeRow
-
         anchors.centerIn: parent
 
         spacing: 0

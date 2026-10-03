@@ -5,12 +5,10 @@ import Quickshell
 
 // Util
 //
-// The three things services kept rewriting for themselves, none of which knows
+// The four things services kept rewriting for themselves, none of which knows
 // anything about a particular device, protocol or app.
 
 QtObject {
-    id: root
-
     // get(object, name, fallback)
     //
     // Read any property off a D-Bus or Quickshell object that the sender is

@@ -58,6 +58,7 @@ in
       zen-browser = {
         enable = true;
         profileNames = [ "default" ];
+        enableCss = false;
       };
       anki.enable = true;
       btop.enable = true;

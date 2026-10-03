@@ -1,9 +1,9 @@
 {
   imports = [
-    ./laptop
     ./packages
     ./themed
 
+    ./voxtype.nix
     ./session.nix
   ];
 }

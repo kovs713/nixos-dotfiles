@@ -64,7 +64,6 @@ QtObject {
     ]
 
     readonly property string batteryAlert: "\udb80\udc83"   // F0083
-    readonly property string batteryUnknown: "\udb80\udc8f" // F008F
     readonly property string plug: "\udb81\udea5"           // F06A5
 
     readonly property string profileSaver: "\udb80\udf2a"       // F032A
@@ -72,16 +71,10 @@ QtObject {
     readonly property string profilePerformance: "\udb81\udcc5" // F04C5
     readonly property string health: "\udb81\uddf6"             // F05F6
 
-    readonly property string brightness: "\udb80\udce0"     // F00E0
-
     // Night light — the two ends of the colour-temperature range.
     readonly property string sunNeutral: "\udb81\udd99"     // F0599  weather-sunny
     readonly property string moonWarm: "\udb81\udd94"       // F0594  weather-night
     readonly property string whiteBalance: "\udb81\udda8"   // F05A8  white-balance-sunny
-
-    // Launcher rows.
-    readonly property string paletteSwatch: "\udb80\udfd8" // F03D8  palette
-    readonly property string circleHalf: "\udb84\udf95"    // F1395  circle-half
 
     // Brightness ramp, dim -> bright (mdi-brightness-4..7).
     readonly property var brightnessRamp: ["\udb80\udcde", "\udb80\udcdf", "\udb80\udce0", "\udb80\udce1"]
@@ -95,15 +88,11 @@ QtObject {
         return brightnessRamp[i];
     }
 
-    readonly property string bell: "\udb80\udc9c"            // F009C  bell-outline
-    readonly property string bellFilled: "\udb80\udc9a"      // F009A  bell
-    readonly property string bellOff: "\udb80\udc9b"         // F009B  bell-off
-    readonly property string bellRing: "\udb80\udc9e"        // F009E  bell-ring
-    readonly property string bellRingOutline: "\udb80\udc9f" // F009F  bell-ring-outline
+    readonly property string bell: "\udb80\udc9c"     // F009C  bell-outline
+    readonly property string bellOff: "\udb80\udc9b"  // F009B  bell-off
+    readonly property string bellRing: "\udb80\udc9e" // F009E  bell-ring
 
     // App-class glyphs.
-    readonly property string alert: "\udb80\udc26"        // F0026
-    readonly property string alertCircle: "\udb80\udc28"  // F0028
     readonly property string email: "\udb80\uddee"        // F01EE
     readonly property string message: "\udb80\udf61"      // F0361
     readonly property string musicNote: "\udb80\udf87"    // F0387
@@ -114,10 +103,8 @@ QtObject {
     readonly property string power: "\udb81\udc25"        // F0425
     readonly property string web: "\udb81\udd9f"          // F059F
     readonly property string timer: "\udb81\udd1b"        // F051B
-    readonly property string play: "\udb81\udc0a"        // F040A
     readonly property string pause: "\udb80\udfe4"       // F03E4
     readonly property string restart: "\udb80\udfe5"     // F03E5
-    readonly property string flag: "\udb80\udd41"        // F0141
     readonly property string target: "\udb81\udcbb"      // F04BB
     readonly property string timerSand: "\udb82\udc3b"   // F083B
 
@@ -219,7 +206,6 @@ QtObject {
     readonly property string clipboard: "\udb80\udd47"
     readonly property string trash: "\udb80\uddb4"
     readonly property string save: "\udb80\udd93"      // F0193  content-save
-    readonly property string note: "\udb80\udfeb"      // F03EB  pencil
     readonly property string emoji: "\uf118"
 
     // Device classes (Bluetooth / battery peripherals)

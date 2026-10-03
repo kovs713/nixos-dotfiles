@@ -29,7 +29,11 @@ PanelWindow {
         right: true
     }
 
-    margins.bottom: Core.Theme.barMarginTop
+    // Flush to the bottom of the screen, so the trigger strip below is the last
+    // `barMarginTop` pixels of it rather than a band floating above them. The
+    // pill keeps `surfaceTop` between itself and the window's bottom edge, so it
+    // moves 10px closer to the edge and the strip fills the gap it left.
+    margins.bottom: 0
 
     // Fixed, and deliberately never animated: tall enough for the largest
     // launcher plus the pill above it. Animating this would move the reserved
@@ -46,10 +50,10 @@ PanelWindow {
     // Keyboard only while a launcher is up; the bar itself never wants focus.
     WlrLayershell.keyboardFocus: root.launcherOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
-    // Where the surface sits inside the window. Reproduces the old geometry: the
-    // pill used to be centred in a (pillHeight + 20) window. It is the margin the
-    // window itself sits at, and PopupSurface measures the bar's band in its
-    // input mask off the same number -- two literals that have to agree.
+    // Where the surface sits inside the window: the pill floats this far above
+    // the window's bottom edge, and the trigger strip fills the gap down to the
+    // screen. PopupSurface measures the bar's band in its input mask off
+    // barMarginTop + pillHeight -- two literals that have to agree.
     readonly property int surfaceTop: Core.Theme.barMarginTop
 
     // Launchers
@@ -78,13 +82,25 @@ PanelWindow {
     readonly property bool launcherOpen: root.activeLauncher !== null
 
     // While a launcher is open the whole window takes input, so clicking beside
-    // the popup still dismisses it. Otherwise only the pill is clickable and
-    // everything else passes through to the desktop.
-    property Region surfaceRegion: Region {
+    // the popup still dismisses it. Otherwise only the pill and the edge strip
+    // are clickable and everything else passes through to the desktop.
+    //
+    // ONE Region holding a LIST, for the reason PopupSurface spells out: `mask`
+    // is a PendingRegion whose `regions` is its default property, so a JS array
+    // was never assignable to it.
+    property Region surfaceInput: Region {
         item: surface
     }
 
-    mask: root.launcherOpen ? null : root.surfaceRegion
+    property Region edgeInput: Region {
+        item: edge
+    }
+
+    property Region barInput: Region {
+        regions: [root.surfaceInput, root.edgeInput]
+    }
+
+    mask: root.launcherOpen ? null : root.barInput
 
     // Reveal state
 
@@ -112,7 +128,12 @@ PanelWindow {
         return true;
     }
 
-    readonly property bool wantExpanded: !root.launcherOpen && ((root.autoReveal && surfaceHover.hovered) || root.modulePopupOpen)
+    // Both hover sources, not just the pill. The strip is the edge trigger; the
+    // pill is in the union so that reaching from the strip up into the expanded
+    // bar does not drop it -- the two are adjacent, so that move crosses no dead
+    // pixels, and a HoverHandler re-arms on pointer motion rather than on the
+    // window changing, which is what used to close the bar under a still cursor.
+    readonly property bool wantExpanded: !root.launcherOpen && ((root.autoReveal && (surfaceHover.hovered || edgeHover.hovered)) || root.modulePopupOpen)
 
     property bool autoReveal: true
     property bool expanded: false
@@ -256,6 +277,36 @@ PanelWindow {
     // So `reveal` owns hover motion, and the Behaviors below own only the
     // pill <-> card morph and the launcher's live resize as results filter.
     readonly property int morphDuration: root.fromPill ? 0 : ((root.launcherOpen || root.closing) ? Core.Theme.barRevealDuration : 0)
+
+    // THE TRIGGER
+    //
+    // A full-width strip on the last `barMarginTop` pixels of the screen, and the
+    // only reason the window's bottom margin is 0. The bar used to open on hover
+    // over its own collapsed pill -- a 240x32 area that is transparent when
+    // collapsed, so it asked to be found. macOS's auto-hidden dock asks for the
+    // edge instead, and so does this.
+    //
+    // Hover only, no MouseArea: the strip has to stay in the input region while
+    // the bar is expanded, or a cursor sitting on it would collapse the bar and
+    // then have no region left to re-hover. The price is that those pixels of
+    // every window stop reaching it, which is the trade macOS makes too.
+    Item {
+        id: edge
+
+        // Parent-relative, not the `left: true` form the window itself uses:
+        // that one is Quickshell's anchors group, and a plain Item's anchors
+        // take an AnchorLine. qmllint reports both as the same
+        // `incompatible-type`, and only one of them loads.
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
+        height: Core.Theme.barMarginTop
+
+        HoverHandler {
+            id: edgeHover
+        }
+    }
 
     // THE SURFACE
 

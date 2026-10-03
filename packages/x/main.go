@@ -10,14 +10,15 @@ import (
 
 const targetFile = "/etc/x/target"
 
-func usage() {
+func printUsage() {
 	fmt.Fprintln(os.Stderr, `usage: x [command]
-
-  x              rebuild the live target
-  x theme        switch to the other theme variant and rebuild
-  x gc           nix store gc
-  x update [in…] nix flake update
-  x check        parse, format and evaluate, as the README says`)
+  x               this help
+  x theme         switch to the other theme variant and rebuild
+  x rb            nixos-rebuild switch current target
+  x b             nixos-rebuild build current target
+  x gc            nix store gc
+  x upd [input]   nix flake update [input]
+  x ch            parse, format and evaluate, as the README says`)
 	os.Exit(2)
 }
 
@@ -79,11 +80,6 @@ func run(argv ...string) {
 	}
 }
 
-func switchTo(target string) {
-	run("sudo", "-n", "nixos-rebuild", "switch",
-		"--flake", flakeRef(target), "--profile-name", target)
-}
-
 const checkScript = `
 set -e
 cd "$1"
@@ -96,33 +92,44 @@ for test in model-sync fuzzy calendar launcher-search; do
 done
 `
 
-func check() {
-	run("nix", "develop", "--command", "bash", "-c", checkScript,
-		"x check", flakeDir(), flakeDir(), liveTarget())
-}
-
 func main() {
 	args := os.Args[1:]
 
 	if len(args) == 0 {
-		switchTo(liveTarget())
+		printUsage()
 		return
 	}
 
+	target := liveTarget()
+
 	switch args[0] {
-	case "rebuild":
-		switchTo(liveTarget())
 	case "theme":
-		from, to := liveTarget(), flip(liveTarget())
+		from, to := target, flip(target)
+
 		fmt.Println("theme:", from, "->", to)
-		switchTo(to)
+
+		run("sudo", "-n", "nixos-rebuild", "switch",
+			"--flake", flakeRef(to), "--profile-name", to)
+
+	case "rb":
+		run("sudo", "-n", "nixos-rebuild", "switch",
+			"--flake", flakeRef(target), "--profile-name", target)
+
+	case "b":
+		run("sudo", "-n", "nixos-rebuild", "build",
+			"--flake", flakeRef(target), "--profile-name", target)
+
 	case "gc":
 		run("sudo", "-n", "nix", "store", "gc")
-	case "update":
+
+	case "upd":
 		run(append([]string{"nix", "flake", "update"}, args[1:]...)...)
-	case "check":
-		check()
+
+	case "ch":
+		run("nix", "develop", "--command", "bash", "-c", checkScript,
+			"x check", flakeDir(), flakeDir(), target)
+
 	default:
-		usage()
+		printUsage()
 	}
 }

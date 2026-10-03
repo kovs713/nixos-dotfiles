@@ -111,8 +111,6 @@ Item {
             color: Core.Theme.surface
 
             Rectangle {
-                id: fill
-
                 height: parent.height
 
                 radius: parent.radius

@@ -285,8 +285,6 @@ Item {
                 }
 
                 Core.IconButton {
-                    id: sendButton
-
                     width: 24
                     height: 24
 

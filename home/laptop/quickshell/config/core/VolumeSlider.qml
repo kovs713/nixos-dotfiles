@@ -15,11 +15,8 @@ Item {
 
     property color fillColor: Core.Theme.accent
 
-    // Emitted continuously while dragging and on click.
+    // Emitted while dragging and on click.
     signal moved(real value)
-
-    // Emitted once when the drag finishes.
-    signal released(real value)
 
     implicitHeight: 24
 
@@ -154,10 +151,6 @@ Item {
             if (!sliderMouse.pressed)
                 return;
             sliderMouse.apply(event.x);
-        }
-
-        onReleased: function (event) {
-            root.released(sliderMouse.apply(event.x));
         }
 
         onWheel: function (event) {

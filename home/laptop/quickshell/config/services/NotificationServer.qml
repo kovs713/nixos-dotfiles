@@ -78,7 +78,7 @@ Singleton {
     // A toast the user is already looking at does not need to be heard, which is
     // the whole point of dnd — so dnd silences the bell as well as the overlay.
     // Critical is exempt, for the same reason it is exempt from dnd.
-    readonly property string sounds: Quickshell.shellDir + "/assets/sounds/"
+    readonly property string sounds: Core.Paths.assets + "/assets/sounds/"
 
     readonly property Process sound: Process {
         id: soundProcess

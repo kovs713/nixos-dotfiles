@@ -428,8 +428,6 @@ PanelWindow {
                                 mipmap: true
                             }
 
-                            // Nerd Font fallback
-
                             // Nerd Font fallback, picked from the app name.
                             //
                             // Was a hardcoded F007F, which is the 60%-battery

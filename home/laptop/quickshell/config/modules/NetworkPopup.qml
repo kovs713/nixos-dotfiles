@@ -282,8 +282,6 @@ Core.PopupSurface {
                         }
 
                         Core.IconButton {
-                            id: pwGo
-
                             width: 26
                             height: 26
 

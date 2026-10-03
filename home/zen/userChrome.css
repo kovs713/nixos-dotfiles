@@ -1,0 +1,233 @@
+/* Square / borderless Zen. Prefs that do the same job live in home/session.nix;
+   what is left is unreachable from a pref — Zen re-declares the var on the
+   element itself, or the radius is a hardcoded pixel with no var behind it. */
+
+:root {
+  /* Zen: max(5px, ...) floor survives a 0 radius, no pref writes it */
+  --zen-native-inner-radius: 0px !important;
+
+  --border-radius-small: 0px !important;
+  --border-radius-medium: 0px !important;
+  --border-radius-large: 0px !important;
+  --button-border-radius: 0px !important;
+  --toolbarbutton-border-radius: 0px !important;
+
+  /* set on the element by #PopupAutoComplete, so inheritance can't reach it */
+  --popup-border-radius: 0px !important;
+
+  /* 1 = plain rectangle; not 0, several rules divide by this var */
+  --zen-squircle-value: 1 !important;
+}
+
+#navigator-toolbox {
+  --border-radius-medium: 0px !important;
+  --tab-border-radius: 0px !important;
+}
+
+.toolbarbutton-1:not(#tabs-newtab-button),
+.urlbar-page-action,
+.identity-box-button {
+  --tab-border-radius: 0px !important;
+  --toolbarbutton-border-radius: 0px !important;
+}
+
+:root[zen-single-toolbar="true"],
+:root:not([zen-single-toolbar="true"]) {
+  --urlbar-icon-border-radius: 0px !important;
+  --urlbar-inner-border-radius: 0px !important;
+}
+
+/* Glance + split view */
+.tabbrowser-tab .tabbrowser-tab,
+#zen-split-view-drag-image > .tabbrowser-tab {
+  --border-radius-medium: 0px !important;
+  --tab-border-radius: 0px !important;
+}
+
+/* hardcoded pixel radii, no var behind them */
+#urlbar,
+.urlbar-background,
+.urlbar-input-container,
+#zen-sidebar-splitter,
+#zen-sidebar-splitter::before, /* hover handle */
+#urlbar-label-box,
+#urlbar-search-mode-indicator,
+.dialogBox,
+.workspace-trigger,
+#editBMPanel_workspaceList,
+#zen-toast-container .zen-toast,
+#zen-toast-container .zen-toast button {
+  border-radius: 0 !important;
+}
+
+/* Centred urlbar + nav buttons tucked against its left edge.
+   margin-inline:auto is not enough: ~40 extension buttons sit right of the
+   urlbar, so it centres in the leftover space, not the window. */
+#nav-bar {
+  position: relative !important;
+
+  /* #nav-bar fills only the lower 31px of the 38px toolbar; stretch it up
+     into the dead band so the gaps above/below the urlbar match */
+  --tb-top: -7px;
+  /* a stretched toolbarbutton's icon sits 3px above the row centre */
+  --btn-drop: 3px;
+  /* the float popup rides high against the row top */
+  --pop-drop: 4px;
+
+  /* fixed, not max-width: the nav buttons compute the urlbar's left edge */
+  --ub-w: min(92%, 46rem);
+  --ub-half: calc(var(--ub-w) / 2);
+  /* nav button pitch = box + gap, derived from Firefox's own token */
+  --navbtn: calc(var(--size-item-medium) + 10px);
+}
+
+/* Zen's float popup repoints #urlbar and turns this node into the popup frame
+   (height: var(--urlbar-height)), so inset must not over-constrain it — hence
+   the :has([open]) gating below. The width cap has to hold in both states. */
+#urlbar-container {
+  --zen-urlbar-width: var(--ub-w) !important;
+}
+
+#nav-bar:not(:has(#urlbar[open])) #urlbar-container {
+  position: absolute !important;
+  /* inset:0 stretches the box full-height, else the urlbar background pins
+     to the top and leaves a gap only above it */
+  inset: 0 !important;
+  top: var(--tb-top) !important;
+  /* left:0 + right:0 + auto inline margins centres a shrink-to-fit abs box
+     without transform (Zen overrides `translate` here) */
+  margin-inline: auto !important;
+  width: var(--ub-w) !important;
+  max-width: var(--ub-w) !important;
+  min-width: 0 !important;
+  flex: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  /* frame is 1px taller at the bottom, which biases centring down by ~1px */
+  padding-bottom: 2px !important;
+}
+
+/* back / forward / reload sit immediately left of the urlbar. Not gated on
+   :has([open]): the popup is capped and centred the same way. */
+:is(#stop-reload-button, #forward-button, #back-button) {
+  position: absolute !important;
+  top: calc(var(--tb-top) + var(--btn-drop)) !important;
+  bottom: calc(-1 * var(--btn-drop)) !important;
+  margin: 0 !important;
+}
+
+#stop-reload-button {
+  right: calc(50% + var(--ub-half)) !important;
+}
+
+#forward-button {
+  right: calc(50% + var(--ub-half) + var(--navbtn)) !important;
+}
+
+#back-button {
+  right: calc(50% + var(--ub-half) + var(--navbtn) * 2) !important;
+}
+
+/* Zen hard-codes min-width: min(90%, 62rem) on the float popup, and min-width
+   beats width — cap both, on the input and its frame. */
+#urlbar[open],
+#urlbar[open][zen-floating-urlbar="true"] {
+  min-width: var(--ub-w) !important;
+  max-width: var(--ub-w) !important;
+  width: var(--ub-w) !important;
+}
+
+/* Popup state: re-centre the frame, but keep Zen's geometry — bottom: auto
+   stops inset from fighting its height, display: block drops our flex
+   centring so its top: var(--zen-urlbar-top) keeps working. */
+#urlbar-container:has(#urlbar[open]) {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: var(--pop-drop) !important;
+  bottom: auto !important;
+  margin-inline: auto !important;
+  display: block !important;
+  padding-bottom: 0 !important;
+  width: var(--ub-w) !important;
+  max-width: var(--ub-w) !important;
+  min-width: 0 !important;
+}
+
+/* No unfold animation: the float popup should appear at its final size. */
+#nav-bar:has(#urlbar[open]) #urlbar-container,
+#nav-bar:has(#urlbar[open]) .urlbar-background,
+#nav-bar:has(#urlbar[open]) #urlbar {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Width follows the URL via the cap above. `field-sizing: content` on the
+   input was tried and collapses the *empty* bar to ~265px — ask if you want it. */
+#urlbar-input-container {
+  min-width: 0 !important;
+}
+
+/* Popups / panels: Zen paints the radius on ::part(content) as
+   calc(var(--panel-border-radius) / var(--zen-squircle-value)), so the token
+   alone squares it. */
+menupopup,
+panel {
+  --panel-border-radius: 0px !important;
+  --arrowpanel-menuitem-border-radius: 0px !important;
+}
+
+/* Compact sidebar. Rows measured at ~40px, essentials 46px. No pref reads
+   --tab-min-height, so it is set here. */
+#zen-essentials {
+  --tab-min-height: 32px !important;
+}
+
+#tabbrowser-tabs {
+  --tab-min-height: 32px !important;
+  --tab-inline-padding: 6px !important;
+}
+
+/* folder children, indented right of the label so the nesting reads */
+zen-folder > .tab-group-container > .tabbrowser-tab {
+  --tab-min-height: 30px !important;
+}
+
+/* folder header reads as a band, not as another tab */
+zen-folder > .tab-group-label-container {
+  min-height: 30px !important;
+  background: var(--zen-toolbar-element-bg) !important;
+}
+
+/* Folder rows: drop the glyph, mark the folder "/" instead, reclaim the space */
+zen-folder > .tab-group-label-container .tab-group-folder-icon {
+  display: none !important;
+}
+
+zen-folder > .tab-group-label-container .tab-group-label::before {
+  content: "/";
+  opacity: 0.45;
+  margin-inline-end: 1px;
+}
+
+zen-folder > .tab-group-label-container {
+  /* 2px inset, same as the tab rows. Symmetric on purpose: a negative
+     inline-start clipped the "/" prefix against the sidebar border. */
+  margin: 2px !important;
+
+  /* pack="center" still centres label+reset button with the glyph gone, which
+     left the text floating mid-band. Label goes where the glyph sat. */
+  justify-content: flex-start !important;
+  padding-inline-start: 5px !important;
+}
+
+zen-folder > .tab-group-label-container .tab-group-label {
+  /* the ~27px that made the gap lived here, not on the container */
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+zen-folder > .tab-group-label-container .tab-reset-button {
+  margin-inline-start: auto !important;
+}

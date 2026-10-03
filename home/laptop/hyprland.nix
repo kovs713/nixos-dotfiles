@@ -32,6 +32,10 @@ let
 
   wallpaper = config.lib.stylix.pixel "base00";
 
+  # same accessor quickshell/theme.json uses; hyprlock wants colours as
+  # strings, and #rrggbb is what Hyprlang colours are everywhere else too
+  c = n: config.lib.stylix.colors.withHashtag.${n};
+
   quickshellBinds =
     lib.optionals (hostname == "desktop") [
       (bind "${mod} + SPACE" (exec "vicinae toggle"))
@@ -46,12 +50,103 @@ let
     ];
 in
 {
+  # hyprland itself comes from the kovs713 fork (feat/omit-capture), which
+  # publishes only `hyprland` and `xdg-desktop-portal-hyprland` -- hypridle,
+  # hyprlock, hyprpicker and hyprcursor are separate hyprwm repos, so nixpkgs
+  # is the only source for them. What has to track the fork is the *syntax*:
+  # 0.55 replaced hyprlang with Lua, so dispatch is hl.dsp.* not `hyprctl dispatch dpms on`.
   home.packages = with pkgs; [
     awww
     hyprcursor
+    hypridle
+    hyprlock
     hyprshot
     hyprpicker
   ];
+
+  # hyprlock's own UI is the last unstyled thing on this machine. Flat fill, no
+  # blur, no noise, no image; `animations { enabled = false }` also kills the
+  # fadeIn/fadeOut the launcher does on its own. `rounding` and `dots_rounding`
+  # both default to -1 (a circle), so zero has to be said out loud -- there is
+  # no way to inherit that from the hyprland config, this is a separate program.
+  xdg.configFile."hypr/hyprlock.conf".text = ''
+    animations {
+        enabled = false
+    }
+
+    general {
+        hide_cursor = true
+    }
+
+    background {
+        monitor =
+        color = ${c "base00"}
+    }
+
+    input-field {
+        monitor =
+        size = 320, 56
+
+        rounding = 0
+        dots_rounding = 0
+        dots_size = 0.22
+        dots_spacing = 0.18
+
+        # hairline outline, inner painted the same as the background so the
+        # field reads as a flat rectangle rather than a filled box
+        outline_thickness = 1
+        outer_color = ${c "base02"}
+        inner_color = ${c "base00"}
+        font_color = ${c "base05"}
+
+        # dots and text share font_color (PasswordInputField.cpp renders both
+        # with fontCol), and there is no font_size on this widget
+        font_family = ${config.stylix.fonts.sansSerif.name}
+        fade_on_empty = false
+        placeholder_text = <i>$USER</i>
+
+        # same roles quickshell/theme.json gives the shell
+        check_color = ${c "base0B"}
+        fail_color = ${c "base08"}
+
+        halign = center
+        valign = center
+    }
+  '';
+
+  # Idle handling left the compositor in 0.55: `hyprctl getoption idle:*` answers
+  # "no such option" and the fork's binary carries no dpms_timeout/lock_timeout
+  # strings. hypridle owns it, and it will not start without a config file.
+  xdg.configFile."hypr/hypridle.conf".text = ''
+    general {
+        lock_cmd = pidof hyprlock || hyprlock
+        before_sleep_cmd = loginctl lock-session
+        # without this the display stays off and you need a second keypress
+        after_sleep_cmd = hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })'
+    }
+
+    listener {
+        timeout = 150
+        on-timeout = brightnessctl -s set 10
+        on-resume = brightnessctl -r
+    }
+
+    listener {
+        timeout = 300
+        on-timeout = loginctl lock-session
+    }
+
+    listener {
+        timeout = 330
+        on-timeout = hyprctl dispatch 'hl.dsp.dpms({ action = "disable" })'
+        on-resume = hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })' && brightnessctl -r
+    }
+
+    listener {
+        timeout = 1800
+        on-timeout = systemctl suspend
+    }
+  '';
 
   systemd.user.services = {
     awww = {
@@ -61,6 +156,17 @@ in
         Restart = "on-failure";
 
         ExecStartPost = "${lib.getExe pkgs.bash} -c 'for _ in {1..10}; do ${lib.getExe pkgs.awww} img --transition-type fade --transition-duration 0.2 ${wallpaper} >/dev/null 2>&1; sleep 0.4; ${lib.getExe pkgs.awww} query 2>/dev/null | grep -qF ${wallpaper} && break; done || echo \"awww: ${wallpaper} did not stick\" >&2'";
+      };
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
+
+    # launched as a user service rather than exec-once: the hyprland config is
+    # generated into Lua, where there is no exec-once to hang it off
+    hypridle = {
+      Unit.Description = "Hyprland idle management";
+      Service = {
+        ExecStart = lib.getExe pkgs.hypridle;
+        Restart = "on-failure";
       };
       Install.WantedBy = [ "graphical-session.target" ];
     };

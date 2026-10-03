@@ -1,7 +1,7 @@
 // Lift a QML singleton's logic into a JS class, so it can be asserted on.
 //
 //   import { lift } from './lift.mjs';
-//   const Svc = lift('services/Fuzzy.qml', { Core, Quickshell });
+//   const Svc = lift('core/Fuzzy.qml', { Core, Quickshell });
 //   const fuzzy = new Svc();
 //   assert.ok(fuzzy.subsequence('firefox', 'fx'));
 //

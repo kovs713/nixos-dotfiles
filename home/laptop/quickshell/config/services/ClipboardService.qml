@@ -13,7 +13,6 @@ QtObject {
     id: root
 
     property var items: []
-    property bool ready: false
 
     // cliphist keeps image copies as raw bytes, so there is nothing for QML to
     // load until the entry is decoded to a file. Same directory cliphist's own
@@ -170,7 +169,6 @@ QtObject {
                 }
 
                 root.items = result;
-                root.ready = true;
             }
         }
     }

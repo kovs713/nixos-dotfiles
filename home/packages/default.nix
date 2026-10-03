@@ -1,7 +1,5 @@
 {
   pkgs,
-  inputs,
-  system,
   ...
 }:
 {
@@ -10,14 +8,14 @@
   ];
 
   home.packages = with pkgs; [
-    inputs.ayugram-desktop.packages.${system}.default
+    ayugram-desktop
 
     # cli
     bitwarden-cli
-    fastfetch
     ripgrep
     ffmpeg
     zoxide
+    nitch
     unzip
     btop
     cloc

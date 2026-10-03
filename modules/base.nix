@@ -39,11 +39,6 @@
   nix.settings = {
     substituters = [
       "https://cache.nixos.org/"
-      "https://ayugram-desktop.cachix.org"
-      "https://tg-owt.cachix.org"
-    ];
-    trusted-public-keys = [
-      "ayugram-desktop.cachix.org-1:AZ5EqHrJsAKL5YkZYLPEsb1FdD9QlypUwQ0REcJftgA="
     ];
     experimental-features = [
       "nix-command"

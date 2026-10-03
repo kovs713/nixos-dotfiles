@@ -254,8 +254,6 @@ Core.PopupSurface {
             // One filled button, full width: it is the only thing in the panel
             // that has to be found without reading.
             Rectangle {
-                id: runButton
-
                 width: body.width
                 height: 38
 

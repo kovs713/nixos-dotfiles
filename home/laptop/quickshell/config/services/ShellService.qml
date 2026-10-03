@@ -12,11 +12,9 @@ QtObject {
     id: root
 
     readonly property string shell: "fish"
-    property bool ready: false
     property var commands: []
 
     function refresh() {
-        root.ready = false;
         Core.Util.restart(scan);
     }
 
@@ -56,7 +54,6 @@ QtObject {
         });
 
         root.commands = out;
-        root.ready = true;
     }
 
     function search(rawQuery) {

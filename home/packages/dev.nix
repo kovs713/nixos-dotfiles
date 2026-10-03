@@ -1,6 +1,5 @@
 {
   pkgs,
-  pkgs-unstable,
   nixvim,
   x,
   ...
@@ -21,7 +20,7 @@
       nixvim
       x
     ])
-    ++ (with pkgs-unstable; [
+    ++ (with pkgs; [
       opencode
     ]);
 }

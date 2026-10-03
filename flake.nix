@@ -5,7 +5,6 @@
     {
       self,
       nixpkgs,
-      nixpkgs-unstable,
       home-manager,
       ...
     }@inputs:
@@ -17,15 +16,10 @@
         config.allowUnfree = true;
       };
 
-      pkgs-unstable = import nixpkgs-unstable {
-        inherit system;
-        config.allowUnfree = true;
-      };
-
       nixvim = inputs.nixvim.legacyPackages.${system}.makeNixvimWithModule {
         module = import ./packages/nixvim/config {
           inherit pkgs;
-          nixpkgsSource = inputs.nixpkgs-unstable.outPath;
+          nixpkgsSource = inputs.nixpkgs.outPath;
         };
       };
 
@@ -48,18 +42,22 @@
           variant,
           target ? "${hostname}-${variant}",
         }:
-        nixpkgs.lib.nixosSystem {
+        let
           specialArgs = {
             inherit
-              pkgs-unstable
-              x
-              nixvim
               system
-              inputs
               hostname
               variant
+
+              nixvim
+              x
+
+              inputs
               ;
           };
+        in
+        nixpkgs.lib.nixosSystem {
+          inherit specialArgs;
 
           modules = [
             {
@@ -116,6 +114,7 @@
           bun
           go
           gnumake
+          kubectl
 
           # lsp
           qt6.qtdeclarative
@@ -172,30 +171,25 @@
     };
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
-
-    home-manager.url = "github:nix-community/home-manager/release-26.05";
+    home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     nixvim.url = "github:nix-community/nixvim";
-    nixvim.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    nixvim.inputs.nixpkgs.follows = "nixpkgs";
 
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
     zen-browser.inputs.nixpkgs.follows = "nixpkgs";
     zen-browser.inputs.home-manager.follows = "home-manager";
 
-    stylix.url = "github:nix-community/stylix/release-26.05";
+    stylix.url = "github:nix-community/stylix/master";
     stylix.inputs.nixpkgs.follows = "nixpkgs";
 
     apple-fonts.url = "github:Lyndeno/apple-fonts.nix";
     apple-fonts.inputs.nixpkgs.follows = "nixpkgs";
 
     hyprland.url = "github:kovs713/Hyprland?ref=feat/omit-capture";
-
-    ayugram-desktop.url = "github:ndfined-crp/ayugram-desktop";
-    ayugram-desktop.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
     voxtype.url = "github:peteonrails/voxtype/v1.0.1";
   };

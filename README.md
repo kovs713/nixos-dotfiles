@@ -72,11 +72,13 @@ that's also why `stylix.targets.nixvim` is off.
 ## x
 
 ```bash
-x                # rebuild whatever is live
-x theme          # flip black <-> white, then rebuild
-x gc             # nix store gc
-x update [input] # nix flake update
-x check          # everything under checks
+x               # this help
+x theme         # flip black <-> white, then rebuild
+x rb            # nixos-rebuild switch, live target
+x b             # nixos-rebuild build, live target
+x gc            # nix store gc
+x upd [input]   # nix flake update
+x chk           # everything under checks
 ```
 
 it reads the live target from `/etc/x/target`, written at every switch, so it

@@ -65,9 +65,4 @@ QtObject {
         root.kind = kind;
         root.hideTimer.restart();
     }
-
-    function hide() {
-        root.hideTimer.stop();
-        root.kind = "";
-    }
 }

@@ -99,8 +99,6 @@ QtObject {
         return out
     }
 
-    readonly property int count: root.entries.length
-
     // Matching
 
     // Tiers, strongest first.

@@ -4,7 +4,7 @@
 # The qmllint loop from CONTEXT.md, as a script. qmllint needs both Qt's and
 # Quickshell's QML paths on -I or it cannot resolve anything, and without both
 # it reports nothing useful. The per-file warning counts are the point: the tree
-# sits at a baseline of 346 warnings and 0 errors, almost all of them
+# sits at a baseline of 340 warnings and 0 errors, almost all of them
 # `Unqualified access` and `PanelWindow is not creatable`, so a change is judged
 # by the diff against that number and not by expecting zero.
 set -u

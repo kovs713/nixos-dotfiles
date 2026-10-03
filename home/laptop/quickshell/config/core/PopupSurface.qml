@@ -186,12 +186,14 @@ PanelWindow {
 
                 // No transform animation here on purpose.
                 //
-                // This is a layer surface, so Hyprland already animates it on map via
-                // layersIn + fadeLayersIn (see hyprland/config/animation.lua). Scaling
-                // it again from QML meant two independent scale animations running on
-                // the same window with different durations and curves, which is what
-                // made the motion read as unstable. The compositor owns the entrance;
-                // the card just draws itself at its final size.
+                // It used to scale in from here as well as from a compositor
+                // layer animation -- two scale animations on the same window
+                // with different durations and curves, which is what made the
+                // motion read as unstable. The compositor owns no entrance
+                // either: this config sets `animations.enabled = false`
+                // (home/laptop/hyprland.nix), so there is no `layersIn` /
+                // `fadeLayersIn` to double up with. The card draws itself at its
+                // final size and the opacity below is the whole entrance.
                 opacity: root.open ? 1.0 : 0.0
 
                 Rectangle {

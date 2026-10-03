@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ pkgs, ... }:
 {
   services.syncthing = {
     user = "nixos-laptop";
@@ -21,7 +16,17 @@
 
   services.libinput.enable = true;
 
+  security.pam.services.hyprlock = { };
+
+  services.logind.settings.Login = {
+    HandleLidSwitch = "suspend";
+    HandleLidSwitchExternalPower = "ignore";
+    HandleLidSwitchDocked = "ignore";
+  };
+
   environment.systemPackages = with pkgs; [
     acpi
+    iw
+    powertop
   ];
 }

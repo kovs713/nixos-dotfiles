@@ -30,8 +30,6 @@ in
 
     prefix = "C-Space";
 
-    # mkAfter: stylix's tmux target добавляет свой `source-file` в
-    # extraConfig, и без mkAfter это конфликт определений, а не конкатенация.
     extraConfig = lib.mkAfter ''
       ### Behaviour
       set -g allow-passthrough on
@@ -58,7 +56,7 @@ in
       set -g @tmux_muted       "#${colors.base03}"
 
       set -g status-left  ""
-      set -g status-right " #[bg=#{@tmux_accent},fg=#{@tmux_accent_text}]#(hyprctl devices 2>/dev/null | sed -n 's/^.*active keymap:[[:space:]]*//p' | head -1 | cut -c1-2 | tr '[:lower:]' '[:upper:]')#[default] "
+      set -g status-right " #[bg=#{@tmux_accent},fg=#{@tmux_accent_text}]#(i=$(hyprctl devices 2>/dev/null | sed -n 's/.*active layout index:[[:space:]]*//p' | sort -n | tail -1); hyprctl getoption input:kb_layout 2>/dev/null | sed -n 's/^str:[[:space:]]*//p' | cut -d, -f$((i+1)) | tr '[:lower:]' '[:upper:]')#[default] "
 
       set -g window-status-format         " #[fg=#{@tmux_muted}]#I:#W "
       set -g window-status-current-format " #[bg=#{@tmux_accent},fg=#{@tmux_accent_text}]#I:#W*#[default] "

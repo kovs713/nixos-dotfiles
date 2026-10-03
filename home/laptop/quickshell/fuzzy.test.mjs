@@ -31,9 +31,9 @@ assert.deepStrictEqual(F.words('nixos-rebuild switch'), ['nixos', 'rebuild', 'sw
 assert.deepStrictEqual(F.words('org.gnome.nautilus'), ['org', 'gnome', 'nautilus']);
 assert.deepStrictEqual(F.words('a  b'), ['a', 'b'], 'a run of separators is one gap');
 assert.deepStrictEqual(F.words(''), [], 'no words in an empty name');
-// The dash has to lead the class. In the middle it would read as a range from
-// "." to "_" and swallow every capital letter in between, N included.
-assert.deepStrictEqual(F.words('org.gnome.nautilus'), ['org', 'gnome', 'nautilus']);
+// The dash has to trail the separator class. Leading it, the class reads as a
+// range from "." to "_" and swallows every capital letter in between, N
+// included -- and `nixos-rebuild` above is the case that would break first.
 
 // --- wordPrefix -----------------------------------------------------------
 // The case that was broken in one of the two copies: whitespace was not in the
