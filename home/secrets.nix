@@ -33,6 +33,20 @@ in
 
   programs.ssh = {
     enable = true;
+    enableDefaultConfig = false;
+
+    settings."*" = {
+      ForwardAgent = false;
+      AddKeysToAgent = "no";
+      Compression = false;
+      ServerAliveInterval = 0;
+      ServerAliveCountMax = 3;
+      HashKnownHosts = false;
+      UserKnownHostsFile = "~/.ssh/known_hosts";
+      ControlMaster = "no";
+      ControlPath = "~/.ssh/master-%r@%n:%p";
+      ControlPersist = "no";
+    };
 
     settings = {
       "github.com" = {
@@ -49,8 +63,12 @@ in
   programs.git = {
     enable = true;
 
-    userName = "kovs713";
-    userEmail = "ovsyannikov.k.k@gmail.com";
+    settings = {
+      user.name = "kovs713";
+      user.email = "ovsyannikov.k.k@gmail.com";
+
+      init.defaultBranch = "master";
+    };
 
     signing = {
       format = "ssh";
@@ -59,7 +77,5 @@ in
 
       allowedSigners = "kovs713@ovsyannikov.k.k@gmail.com namespaces=\"git\" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAwMk8AqJNeWl7haZKq/mYXigjYQmQJ/OgYVaK2bDcX5";
     };
-
-    extraConfig.init.defaultBranch = "master";
   };
 }
