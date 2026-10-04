@@ -16,6 +16,10 @@
     "nvidia"
   ];
 
+  services.udev.extraRules = ''
+    SUBSYSTEM=="i2c-dev", KERNEL=="i2c-[0-9]*", TAG+="uaccess"
+  '';
+
   environment.sessionVariables = {
     LIBVA_DRIVER_NAME = "nvidia";
     NVD_BACKEND = "direct";
@@ -34,7 +38,10 @@
   services.udisks2.enable = true;
 
   # 2TB NTFS data disk
-  boot.kernelModules = [ "ntfs3" ];
+  boot.kernelModules = [
+    "ntfs3"
+    "i2c-dev" # /dev/i2c-*, for the ddcutil monitor brightness
+  ];
 
   fileSystems."/mnt/storage" = {
     device = "/dev/disk/by-uuid/0C6711E40C6711E4";
