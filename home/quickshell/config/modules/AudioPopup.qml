@@ -3,8 +3,6 @@ import QtQuick
 import "../core" as Core
 import "../services" as Services
 
-// AudioPopup
-
 Core.PopupSurface {
     id: popup
 
@@ -15,7 +13,6 @@ Core.PopupSurface {
 
     readonly property var svc: Services.AudioService
 
-    // Collapsible sections, so the card stays short by default and springs open when you actually want to switch devices.
     property bool showOutputs: false
     property bool showInputs: false
 
@@ -24,7 +21,6 @@ Core.PopupSurface {
         popup.showInputs = false;
     }
 
-    // Right-click menu shared by every device row.
     function deviceMenu(node, mx, my) {
         const target = node;
         const svc = popup.svc;
@@ -68,8 +64,6 @@ Core.PopupSurface {
         Column {
             spacing: Core.Theme.spacing
 
-            // Header
-
             Core.PopupHeader {
                 width: parent.width
 
@@ -86,8 +80,6 @@ Core.PopupSurface {
                     }
                 ]
             }
-
-            // Output level
 
             Rectangle {
                 width: parent.width
@@ -177,13 +169,9 @@ Core.PopupSurface {
                 }
             }
 
-            // Output device picker
-
             Core.SectionHeader {
                 width: parent.width
 
-                // 22 rather than the header's own 16: this one is a button, and
-                // 16 is a thin target.
                 height: 22
 
                 text: "OUTPUT DEVICES"
@@ -242,8 +230,6 @@ Core.PopupSurface {
                     }
                 }
             }
-
-            // Microphone level
 
             Rectangle {
                 width: parent.width
@@ -333,8 +319,6 @@ Core.PopupSurface {
                 }
             }
 
-            // Input device picker
-
             Core.SectionHeader {
                 width: parent.width
 
@@ -351,10 +335,6 @@ Core.PopupSurface {
 
                     cursorShape: Qt.PointingHandCursor
 
-                    // Right click reveals the monitor sources, which are hidden
-                    // by default; left collapses and expands the list. Losing the
-                    // right button left showMonitors with no way to be set, and
-                    // the loopback devices with no way to be seen.
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
 
                     onClicked: function (event) {
@@ -413,8 +393,6 @@ Core.PopupSurface {
                 }
             }
 
-            // Per-application mixer
-
             Core.SectionHeader {
                 width: parent.width
 
@@ -423,12 +401,6 @@ Core.PopupSurface {
                 text: "PLAYING"
             }
 
-            // Capped like the two device lists above it. The Column this
-            // replaced grew to fit its content with no clip at all, so a machine
-            // playing more streams than fit drew them past the card's rounded
-            // bottom edge. Capping it at the *card's* budget would not have fixed
-            // that either: the header and the two level cards already come to
-            // about 250px of the 520 the card allows.
             Core.ExpandableList {
                 id: streamList
 
@@ -498,8 +470,6 @@ Core.PopupSurface {
                 }
             }
 
-            // Empty state
-
             Core.EmptyState {
                 width: parent.width
 
@@ -509,7 +479,6 @@ Core.PopupSurface {
 
                 text: "No audio device found"
             }
-
         }
     }
 }

@@ -5,8 +5,6 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// NotificationPopup
-
 Core.PopupSurface {
     id: popup
 
@@ -15,9 +13,6 @@ Core.PopupSurface {
     cardWidth: 360
     maxCardHeight: 480
 
-    // Live entries plus whatever survived the last restart, as one array. Both
-    // kinds render from the same delegate, so a restart does not change the shape
-    // of the panel -- only where the rows came from.
     readonly property var list: Services.NotificationServer.history
 
     readonly property int count: popup.list.length
@@ -28,9 +23,6 @@ Core.PopupSurface {
         Services.NotificationServer.dnd = value;
     }
 
-    // Closing is the service's business, not the panel's: a restored row has no
-    // server object to close, only a file entry to drop, and the service knows
-    // which of the two it is looking at.
     function dismiss(n) {
         Services.NotificationServer.dismiss(n);
     }
@@ -39,8 +31,6 @@ Core.PopupSurface {
         Services.NotificationServer.clearAll();
     }
 
-    // Both of these live on the service so the toast overlay and this panel
-    // cannot disagree about what a notification is called or how urgent it is.
     function appLabel(n) {
         return Services.NotificationServer.appLabel(n);
     }
@@ -49,15 +39,11 @@ Core.PopupSurface {
         return Services.NotificationServer.isCritical(n);
     }
 
-    // Content
-
     contentComponent: Component {
         Column {
             id: body
 
             spacing: Core.Theme.spacing
-
-            // Header
 
             Core.PopupHeader {
                 width: body.width
@@ -68,7 +54,6 @@ Core.PopupSurface {
 
                 showToggle: true
 
-                // The toggle drives do-not-disturb; on means "allowed".
                 toggled: !popup.dnd
 
                 onToggleRequested: popup.setDnd(!popup.dnd)
@@ -82,8 +67,6 @@ Core.PopupSurface {
                     }
                 ]
             }
-
-            // Do-not-disturb banner
 
             Rectangle {
                 width: body.width
@@ -119,8 +102,6 @@ Core.PopupSurface {
                 }
             }
 
-            // The list
-
             Core.ExpandableList {
                 id: list
 
@@ -139,15 +120,11 @@ Core.PopupSurface {
 
                     width: list.width
 
-                    // The icon is a fixed 32 and can outrun a one-line body, so
-                    // the row has to be tall enough for whichever is bigger.
                     implicitHeight: Math.max(noteLayout.implicitHeight, iconBox.height) + 20
                     height: implicitHeight
 
                     onSwiped: popup.dismiss(noteRow.modelData)
 
-                    // Fades as it travels, so a throw reads as a throw and not
-                    // as a row that slid under the edge of the card.
                     opacity: noteRow.travelFade
 
                     Rectangle {
@@ -165,9 +142,6 @@ Core.PopupSurface {
                         }
                     }
 
-                    // Press feedback rides on the row rather than on the fill, so
-                    // it travels with a swipe instead of sliding out from under
-                    // the finger.
                     scale: noteMouse.pressed ? 0.97 : 1.0
 
                     Behavior on scale {
@@ -177,7 +151,6 @@ Core.PopupSurface {
                         }
                     }
 
-                    // Urgency stripe
                     Rectangle {
                         anchors.left: parent.left
                         anchors.top: parent.top
@@ -193,13 +166,6 @@ Core.PopupSurface {
                         opacity: popup.isCritical(noteRow.modelData) ? 1.0 : 0.55
                     }
 
-                    // Application icon or attached image.
-                    //
-                    // The centre used to render neither. Every avatar, album
-                    // cover and app icon the sender went to the trouble of
-                    // attaching was resolved by the toast and then thrown away
-                    // here, which is why history read as an undifferentiated
-                    // wall of text.
                     Rectangle {
                         id: iconBox
 
@@ -265,7 +231,6 @@ Core.PopupSurface {
 
                         spacing: 3
 
-                        // App name, with how long ago it arrived.
                         Item {
                             width: parent.width
 
@@ -289,16 +254,12 @@ Core.PopupSurface {
                                 color: Core.Theme.foregroundFaint
                             }
 
-                            // The notification spec has no timestamp, so this
-                            // comes from the arrival time the service records.
                             Text {
                                 id: ageText
 
                                 anchors.right: parent.right
                                 anchors.baseline: appText.baseline
 
-                                // Reading ageTick is what makes this binding
-                                // re-evaluate as the label goes stale.
                                 text: {
                                     const tick = Services.NotificationServer.ageTick;
 
@@ -339,12 +300,6 @@ Core.PopupSurface {
                             maximumLineCount: 3
                             elide: Text.ElideRight
 
-                            // The server advertises body-markup and
-                            // body-hyperlinks, so senders may send <b> and
-                            // <a href>. This was PlainText while the toast left
-                            // textFormat at its default, so the same
-                            // notification rendered differently in the two
-                            // surfaces. Both are StyledText now.
                             textFormat: Text.StyledText
 
                             linkColor: Core.Theme.accent
@@ -359,11 +314,6 @@ Core.PopupSurface {
                             color: Core.Theme.foregroundMuted
                         }
 
-                        // Named actions, action icons and the reply field.
-                        //
-                        // Shared with the toast overlay. Replaces a local chip
-                        // implementation that rendered action text only, never
-                        // action icons, and had no reply field at all.
                         NotificationActions {
                             width: parent.width
 
@@ -373,7 +323,6 @@ Core.PopupSurface {
                         }
                     }
 
-                    // Per-notification close button
                     Rectangle {
                         anchors.right: parent.right
                         anchors.top: parent.top
@@ -440,7 +389,6 @@ Core.PopupSurface {
                                 return;
                             }
 
-                            // Capture values now — the delegate is recycled and modelData can change before the menu action runs.
                             const note = noteRow.modelData;
 
                             const summary = note.summary ? String(note.summary) : "";
@@ -497,8 +445,6 @@ Core.PopupSurface {
                 }
             }
 
-            // Empty state
-
             Core.EmptyState {
                 width: body.width
 
@@ -508,7 +454,6 @@ Core.PopupSurface {
 
                 text: "Nothing to catch up on"
             }
-
         }
     }
 }

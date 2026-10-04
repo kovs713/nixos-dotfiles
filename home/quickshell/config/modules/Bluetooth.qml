@@ -3,8 +3,6 @@ import QtQuick
 import "../core" as Core
 import "../services" as Services
 
-// Bluetooth bar module
-
 Core.BarButton {
     id: root
 
@@ -45,11 +43,8 @@ Core.BarButton {
             }
         }
 
-        // Little pop whenever the icon changes
         onTextChanged: root.pop()
     }
-
-    // Scanning pulse
 
     Rectangle {
         anchors.top: parent.top
@@ -98,7 +93,6 @@ Core.BarButton {
         value: root.open
     }
 
-    // Stop scanning when the popup closes — saves battery
     onOpenChanged: {
         if (!root.open && Services.BluetoothService.discovering)
             Services.BluetoothService.setDiscovering(false);

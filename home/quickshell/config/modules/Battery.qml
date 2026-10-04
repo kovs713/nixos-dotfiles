@@ -3,8 +3,6 @@ import QtQuick
 import "../core" as Core
 import "../services" as Services
 
-// Battery bar module
-
 Core.BarButton {
     id: root
 
@@ -15,7 +13,6 @@ Core.BarButton {
 
     readonly property var svc: Services.BatteryService
 
-    // Hide the module entirely on desktops with no battery.
     visible: root.svc.available
 
     popTarget: icon
@@ -31,8 +28,6 @@ Core.BarButton {
         if (delta !== 0)
             root.cycleProfile(delta > 0 ? 1 : -1);
     }
-
-    // Critical-battery breathing glow
 
     Rectangle {
         anchors.fill: parent
@@ -95,7 +90,6 @@ Core.BarButton {
                 }
             }
 
-            // Pop whenever the glyph changes (level crossed, charger plugged in, etc.)
             onTextChanged: root.pop()
         }
 
@@ -119,8 +113,6 @@ Core.BarButton {
         }
     }
 
-    // Interaction
-
     function cycleProfile(direction) {
         if (!root.svc.profilesAvailable)
             return;
@@ -128,9 +120,6 @@ Core.BarButton {
 
         const max = root.svc.hasPerformance ? 2 : 1;
 
-        // From what was asked for, not from what powerprofilesd has echoed back:
-        // a press inside the round trip would otherwise compute the same next
-        // value again, so a burst of presses was one change.
         let next = root.svc.requestedProfile + step;
 
         if (next > max)

@@ -4,8 +4,6 @@ import QtQuick.Layouts
 import "../core" as Core
 import "../services" as Services
 
-// Brightness (bar module)
-
 Core.BarButton {
     id: root
 
@@ -14,8 +12,6 @@ Core.BarButton {
 
     readonly property int level: Services.BrightnessService.level
 
-    // No popup: the wheel and the click are the whole control, and there is
-    // nothing to configure behind it.
     onPrimary: function () {
         Services.BrightnessService.step(true);
     }
@@ -30,7 +26,6 @@ Core.BarButton {
         spacing: 5
 
         Text {
-            // Ramps with the level instead of showing the same sun at 5% and at 100%.
             text: Core.Icons.forBrightness(Services.BrightnessService.fraction)
 
             font.family: Core.Theme.iconFont
@@ -54,5 +49,4 @@ Core.BarButton {
             renderType: Text.QtRendering
         }
     }
-
 }

@@ -5,15 +5,6 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// Action buttons and the inline reply field for one notification.
-//
-// Shared by the toast overlay and the notification centre, so the two surfaces
-// cannot drift on what a notification is allowed to do. The server advertises
-// `actions`, `action-icons` and `inline-reply` to clients, and this is what makes
-// good on all three.
-//
-// The parent must give this a width; the chips wrap inside it.
-
 Item {
     id: root
 
@@ -31,17 +22,12 @@ Item {
         }
     }
 
-    // When the sender set the action-icons hint, each action's `identifier` is a
-    // freedesktop icon name rather than an opaque key.
     readonly property bool iconActions: Services.NotificationServer.hasActionIcons(root.notification)
 
     readonly property bool canReply: Services.NotificationServer.hasInlineReply(root.notification)
 
     readonly property bool replying: Services.NotificationServer.isReplying(root.notification)
 
-    // The reply in progress. Kept here rather than read off the field so the
-    // send button can ask whether there is anything to send, and so opening the
-    // field can clear it.
     property string reply: ""
 
     implicitHeight: layout.implicitHeight
@@ -59,19 +45,10 @@ Item {
         if (root.replying) {
             root.reply = "";
 
-            // Deferred: the field is made visible by this same change, and an
-            // invisible item cannot take focus. TextField.autofocus would do this
-            // on its own, but the field is created once and hidden between
-            // replies, so it does not re-complete.
             Qt.callLater(root.focusReply);
         }
     }
 
-    // Absorbs clicks that land in the gaps between chips.
-    //
-    // Declared first so it sits under the controls. Without it those clicks reach
-    // the toast card underneath, whose handler fires the notification's default
-    // action and takes the card away mid-interaction.
     MouseArea {
         anchors.fill: parent
 
@@ -86,8 +63,6 @@ Item {
         width: parent.width
 
         spacing: 6
-
-        // ACTION CHIPS
 
         Flow {
             width: parent.width
@@ -188,8 +163,6 @@ Item {
                 }
             }
 
-            // Opens the reply field. Kept separate from the action list because
-            // inline reply is not an action in the spec, it is a capability.
             Rectangle {
                 visible: root.canReply && !root.replying
 
@@ -235,8 +208,6 @@ Item {
                 }
             }
         }
-
-        // REPLY FIELD
 
         Item {
             width: parent.width
@@ -298,6 +269,5 @@ Item {
                 }
             }
         }
-
     }
 }

@@ -3,8 +3,6 @@ import QtQuick
 import "../core" as Core
 import "../services" as Services
 
-// BatteryPopup
-
 Core.PopupSurface {
     id: popup
 
@@ -15,7 +13,6 @@ Core.PopupSurface {
 
     readonly property var svc: Services.BatteryService
 
-    // Whether the peripheral section is expanded
     property bool showPeripherals: true
 
     contentComponent: Component {
@@ -23,8 +20,6 @@ Core.PopupSurface {
             id: body
 
             spacing: Core.Theme.spacing
-
-            // Header
 
             Core.PopupHeader {
                 width: body.width
@@ -58,8 +53,6 @@ Core.PopupSurface {
                 ]
             }
 
-            // Big charge gauge
-
             Rectangle {
                 id: gauge
 
@@ -73,8 +66,6 @@ Core.PopupSurface {
 
                 border.width: Core.Theme.borderWidth
                 border.color: Core.Theme.border
-
-                // Percentage + state
 
                 Text {
                     id: bigIcon
@@ -126,8 +117,6 @@ Core.PopupSurface {
                     color: Core.Theme.foregroundMuted
                 }
 
-                // Springy fill bar
-
                 Rectangle {
                     id: barTrack
 
@@ -145,17 +134,6 @@ Core.PopupSurface {
 
                     color: Core.Theme.separator
 
-                    // The charging shimmer travels from x = -40 to x = the track's
-                    // own width, i.e. it starts a whole shimmer-width to the LEFT
-                    // of this rectangle and ends a whole one past its right edge.
-                    // Without this it painted outside the track, over the card --
-                    // which is what it looked like: a bar leaving the component.
-                    //
-                    // The clip is rectangular and the track is a pill, so the two
-                    // ends keep a square corner while the shimmer passes them. It
-                    // is a 4px artifact on an 8px-tall bar moving past in 1.6s,
-                    // which is cheaper than a second rounded container to clip
-                    // through.
                     clip: true
 
                     Rectangle {
@@ -184,7 +162,6 @@ Core.PopupSurface {
                         }
                     }
 
-                    // Charging shimmer
                     Rectangle {
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
@@ -219,8 +196,6 @@ Core.PopupSurface {
                     }
                 }
 
-                // Footnote: health
-
                 Text {
                     anchors.left: parent.left
                     anchors.leftMargin: 14
@@ -248,8 +223,6 @@ Core.PopupSurface {
 
                     color: Core.Theme.accent
                 }
-
-                // Right-click the gauge
 
                 MouseArea {
                     anchors.fill: parent
@@ -282,8 +255,6 @@ Core.PopupSurface {
                     }
                 }
             }
-
-            // Power profiles
 
             Core.SectionHeader {
                 width: body.width
@@ -356,8 +327,6 @@ Core.PopupSurface {
                 }
             }
 
-            // Degradation warning
-
             Rectangle {
                 width: body.width
 
@@ -387,10 +356,6 @@ Core.PopupSurface {
                 }
             }
 
-            // Peripherals
-
-            // A button, like AudioPopup's two device pickers: 22 rather than
-            // the header's own 16, because 16 is a thin target.
             Core.SectionHeader {
                 width: body.width
 
@@ -413,7 +378,6 @@ Core.PopupSurface {
                 }
             }
 
-            // The clipped, spring-sized list container.
             Core.ExpandableList {
                 id: peripheralList
 

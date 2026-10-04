@@ -2,10 +2,7 @@ pragma Singleton
 
 import QtQuick
 
-// Icons
-
 QtObject {
-    // Network — Wi-Fi strength ramp
 
     readonly property string wifi0: "\udb82\udd1f"        // F091F
     readonly property string wifi1: "\udb82\udd22"        // F0922
@@ -16,13 +13,9 @@ QtObject {
 
     readonly property string ethernet: "\udb80\ude00"     // F0200
 
-    // Bluetooth
-
     readonly property string bluetooth: "\udb80\udcaf"    // F00AF
     readonly property string btConnected: "\udb80\udcb1"  // F00B1
     readonly property string btOff: "\udb80\udcb2"        // F00B2
-
-    // Audio
 
     readonly property string volumeHigh: "\udb81\udd7e"   // F057E
     readonly property string volumeLow: "\udb81\udd7f"    // F057F
@@ -34,8 +27,6 @@ QtObject {
 
     readonly property string speaker: "\udb81\udd8f"      // F058F
     readonly property string headset: "\udb81\udcd0"      // F04D0
-
-    // Battery — discharging ramp, 0% .. 100%
 
     readonly property var batteryRamp: ["\udb80\udc8e"  // F008E  empty
         , "\udb80\udc7a"  // F007A  10
@@ -71,15 +62,12 @@ QtObject {
     readonly property string profilePerformance: "\udb81\udcc5" // F04C5
     readonly property string health: "\udb81\uddf6"             // F05F6
 
-    // Night light — the two ends of the colour-temperature range.
     readonly property string sunNeutral: "\udb81\udd99"     // F0599  weather-sunny
     readonly property string moonWarm: "\udb81\udd94"       // F0594  weather-night
     readonly property string whiteBalance: "\udb81\udda8"   // F05A8  white-balance-sunny
 
-    // Brightness ramp, dim -> bright (mdi-brightness-4..7).
     readonly property var brightnessRamp: ["\udb80\udcde", "\udb80\udcdf", "\udb80\udce0", "\udb80\udce1"]
 
-    // fraction is 0..1.
     function forBrightness(fraction) {
         const f = Math.max(0, Math.min(1, fraction));
 
@@ -92,7 +80,6 @@ QtObject {
     readonly property string bellOff: "\udb80\udc9b"  // F009B  bell-off
     readonly property string bellRing: "\udb80\udc9e" // F009E  bell-ring
 
-    // App-class glyphs.
     readonly property string email: "\udb80\uddee"        // F01EE
     readonly property string message: "\udb80\udf61"      // F0361
     readonly property string musicNote: "\udb80\udf87"    // F0387
@@ -108,7 +95,6 @@ QtObject {
     readonly property string target: "\udb81\udcbb"      // F04BB
     readonly property string timerSand: "\udb82\udc3b"   // F083B
 
-    // Best-effort app-name -> glyph mapping.
     function forApp(appName) {
         const n = String(appName === undefined ? "" : appName).toLowerCase();
 
@@ -166,12 +152,8 @@ QtObject {
         return bell;
     }
 
-    // Generic UI
-
     readonly property string check: "\udb80\udc93"
 
-    // Material add/remove, which are the plus and minus a stepper wants. BMP
-    // codepoints, so no surrogate pair.
     readonly property string plus: "\uf067"
     readonly property string minus: "\uf068"
 
@@ -207,8 +189,6 @@ QtObject {
     readonly property string trash: "\udb80\uddb4"
     readonly property string save: "\udb80\udd93"      // F0193  content-save
     readonly property string emoji: "\uf118"
-
-    // Device classes (Bluetooth / battery peripherals)
 
     readonly property string phone: "\udb80\udcb6"
     readonly property string camera: "\udb80\udd00"

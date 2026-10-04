@@ -37,10 +37,6 @@ Core.LauncherView {
 
     readonly property var selected: clipboard.results.length > clipboard.selectedIndex ? clipboard.results[clipboard.selectedIndex] : null
 
-    // Decoding spawns a process per image row, so loading on every selectedChanged
-    // meant a fast scroll queued dozens of `cliphist decode` runs and the cursor
-    // visibly trailed the list. liveSelect is LauncherView's own debounce: the
-    // preview follows only once the selection has been still for liveSelectDelay.
     liveSelect: true
     liveSelectDelay: 120
 
@@ -56,8 +52,6 @@ Core.LauncherView {
         Services.ClipboardService.refresh();
         confirmClear = false;
 
-        // liveSelect debounces arrow keys, but the first row still needs a
-        // preview, and onDidOpen is the only place that knows the list is live.
         Services.ClipboardService.loadPreview(clipboard.selected);
     }
 
@@ -130,9 +124,6 @@ Core.LauncherView {
 
             readonly property bool previewVisible: clipboard.selected !== null && clipboard.selected.image === true
 
-            // Both columns are fixed for the life of the card. A list width that
-            // tracked the selection re-wrapped and re-elided every row on each
-            // arrow key, and that is what read as the list flickering.
             Row {
                 anchors.left: parent.left
                 anchors.top: parent.top
@@ -166,11 +157,6 @@ Core.LauncherView {
 
                         radius: Core.Theme.radiusRow
 
-                        // No animation on the selection, and no scale. Both
-                        // animated the row you are leaving as well as the row you
-                        // are arriving on, so a single keypress moved two rows at
-                        // once and neither looked settled. Selection is a state,
-                        // not a transition. See ResultsView.
                         color: row.selected ? Core.Theme.surface : "transparent"
 
                         Rectangle {
@@ -204,10 +190,6 @@ Core.LauncherView {
 
                             color: Core.Theme.surfaceHover
 
-                            // Glyph, not a thumbnail. This row's Image and the large
-                            // pane's Image both pointed at previewSource, so every
-                            // arrow key re-decoded the file twice and the two landed
-                            // a frame apart -- the double blink. One image, one decode.
                             Text {
                                 anchors.centerIn: parent
 
@@ -293,8 +275,6 @@ Core.LauncherView {
                     }
                 }
 
-                // Fixed box, always laid out. It used to be created and destroyed
-                // with the selection, which moved the list under the cursor.
                 Item {
                     width: content.previewWidth
                     height: content.height - 24
@@ -317,26 +297,12 @@ Core.LauncherView {
                         anchors.margins: 8
                         anchors.bottomMargin: 28
 
-                        // Never cleared to "". Qt drops the old pixmap the moment
-                        // the source changes, so a clear-then-set pair blanked the
-                        // pane for a frame on every key. The pane hides instead.
                         source: Services.ClipboardService.previewSource
 
                         fillMode: Image.PreserveAspectFit
 
-                        // cliphist hands over the original bytes, so a 1920x1080
-                        // screenshot was decoded at full size into a 400px pane --
-                        // 2 megapixels of wasted work per selection change, and
-                        // with asynchronous off that work was on the GUI thread,
-                        // which is why fast scrolling lagged behind the cursor.
-                        // sourceSize makes the image plugin scale during decode.
-                        // 2x the pane, so it stays sharp on a hidpi screen.
                         sourceSize: Qt.size(800, 600)
 
-                        // Back on: a repeat visit is a Qt cache hit on the same
-                        // URL and resolves synchronously anyway, so the async
-                        // path only runs on a first visit and costs a blank
-                        // frame once instead of a stalled frame every time.
                         asynchronous: true
                         cache: true
                     }

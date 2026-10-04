@@ -3,16 +3,6 @@ import Quickshell.Io
 
 import "." as Core
 
-// Launcher content, WITHOUT a window.
-//
-// This is the old LauncherSurface with the PanelWindow, the card Rectangle and
-// its border removed. Bar.qml owns the single PanelWindow and its surface, and
-// hosts one of these per launcher inside it, so a picker no longer creates a
-// second layer surface of its own.
-//
-// The property and signal contract is unchanged, so the pickers only had to
-// change which type they inherit.
-
 Item {
     id: root
 
@@ -32,7 +22,6 @@ Item {
     signal deleteRequested
     signal clearAllRequested
 
-    // Bar reads this to size its surface.
     property int cardWidth: 620
 
     property int itemCount: 0
@@ -40,9 +29,6 @@ Item {
     readonly property int headerHeight: 46
     readonly property int separatorHeight: 1
 
-    // Row height each launcher actually renders: delegate height plus the view's
-    // spacing, plus any margins the content view adds. The surface is sized from
-    // these, so a wrong value leaves a half row showing at the bottom.
     property int rowHeight: 40
 
     property int contentMargins: 0
@@ -76,8 +62,6 @@ Item {
 
     readonly property int targetCardHeight: root.headerHeight + root.separatorHeight + root.contentMargins + root.visibleRows * root.rowExtent
 
-    // The height Bar animates its surface to. Not animated here: a second
-    // animation on the same dimension is what made the old popup look unstable.
     readonly property int viewHeight: Math.max(root.cardMinHeight, Math.min(root.cardMaxHeight, root.targetCardHeight))
 
     readonly property bool open: Core.PopupManager.isOpen(root.launcherId)
@@ -167,9 +151,6 @@ Item {
 
             previewTimer.stop();
 
-            // Deferred: `visible` is driven by the same `open` change, and an
-            // invisible item cannot take focus, so focusing inline can lose the
-            // race and leave the launcher unable to type.
             Qt.callLater(root.grabInput);
 
             root.didOpen();
@@ -187,10 +168,6 @@ Item {
             input.forceActiveFocus();
     }
 
-    // Every launcher answers to the same three calls, and Hyprland binds them by
-    // the same names: `qs ipc call <launcherId> toggle`. The target is read off
-    // `launcherId` rather than restated per launcher, which is the only thing the
-    // four copies differed in.
     IpcHandler {
         target: root.launcherId
 
@@ -356,13 +333,6 @@ Item {
 
                     text: root.placeholder
 
-                    // The field is narrower than any sensible hint: the header
-                    // takes a glyph and a result count that grows, so 330px is
-                    // the honest budget in a 460px card. This is the same guard
-                    // TextField's placeholder has, and without it a long hint
-                    // simply ran off the side of the card -- which is what
-                    // "Search apps and shell commands ( > for commands )",
-                    // 517px, did.
                     elide: Text.ElideRight
 
                     width: parent.width

@@ -5,8 +5,6 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// NetworkPopup
-
 Core.PopupSurface {
     id: popup
 
@@ -17,13 +15,9 @@ Core.PopupSurface {
 
     readonly property var svc: Services.NetworkService
 
-    // SSID awaiting a password, "" when the field is hidden
     property string passwordFor: ""
     property string passwordError: ""
 
-    // The password field now lives inside contentComponent, so its id is out of
-    // scope here. It keeps its text in this property and focuses itself when it
-    // appears; nothing has to reach in to drive it.
     property string passwordText: ""
 
     onDidClose: {
@@ -63,13 +57,9 @@ Core.PopupSurface {
         popup.svc.connectWifi(ssid, "");
     }
 
-    // Content
-
     contentComponent: Component {
         Column {
             spacing: Core.Theme.spacing
-
-            // Header
 
             Core.PopupHeader {
                 width: parent.width
@@ -84,9 +74,6 @@ Core.PopupSurface {
 
                 onToggleRequested: popup.svc.toggleWifi()
 
-                // The wifi toggle and the rescan are the two controls that have
-                // nothing to act on without a radio, so they are not drawn rather
-                // than drawn and refused.
                 actions: {
                     const out = [];
 
@@ -110,8 +97,6 @@ Core.PopupSurface {
                     return out;
                 }
             }
-
-            // Ethernet
 
             Item {
                 width: parent.width
@@ -147,7 +132,6 @@ Core.PopupSurface {
                         width: parent.width
 
                         text: "WIRED"
-
                     }
 
                     Core.ListRow {
@@ -168,7 +152,6 @@ Core.PopupSurface {
                         dimmed: popup.svc.ethState === "unavailable"
 
                         onActivated: {
-                            // Clicking one link drops the other
                             popup.svc.toggleEthernet();
                         }
 
@@ -203,15 +186,9 @@ Core.PopupSurface {
                             ]);
                         }
                     }
-
                 }
             }
 
-// WI-FI
-            //
-            // One collapsing box, for the reason the wired section above is one:
-            // a host with no radio has nothing here, and a section header reading
-            // "0 found" over an empty list is a lie rather than an absence.
             Item {
                 width: parent.width
 
@@ -249,8 +226,6 @@ Core.PopupSurface {
 
                         trailing: popup.svc.scanning ? "scanning…" : popup.svc.networkModel.count + " found"
 
-                        // The count is meaningless with the radio off, and the list below
-                        // is collapsed to nothing, so it fades rather than announcing 0.
                         trailingOpacity: popup.svc.wifiEnabled ? 1.0 : 0.0
 
                         Behavior on trailingOpacity {
@@ -260,8 +235,6 @@ Core.PopupSurface {
                             }
                         }
                     }
-
-                    // Inline password field
 
                     Item {
                         width: parent.width
@@ -293,9 +266,6 @@ Core.PopupSurface {
 
                             spacing: 4
 
-                            // The Go button is a sibling of the field rather than
-                            // inside it, so the field keeps one layout rule and the
-                            // button keeps its own hover.
                             Row {
                                 width: parent.width
 
@@ -334,8 +304,6 @@ Core.PopupSurface {
 
                                     icon: Core.Icons.check
 
-                                    // The field's text, so the tick is dim until there
-                                    // is something to send.
                                     color: pwField.text !== "" ? Core.Theme.accent : Core.Theme.foregroundFaint
 
                                     onClicked: {
@@ -366,8 +334,6 @@ Core.PopupSurface {
                         }
                     }
 
-                    // Network list
-
                     Core.ExpandableList {
                         id: list
 
@@ -384,7 +350,6 @@ Core.PopupSurface {
                         delegate: Core.ListRow {
                             id: netRow
 
-                            // `signal` is a reserved QML keyword, so the model role is called `strength`.
                             required property string ssid
                             required property int strength
                             required property string security
@@ -406,8 +371,6 @@ Core.PopupSurface {
 
                             busy: popup.svc.pendingSsid === netRow.ssid && popup.svc.busy
 
-                            // Left click
-
                             onActivated: {
                                 if (netRow.inUse) {
                                     popup.svc.disconnectWifi();
@@ -416,8 +379,6 @@ Core.PopupSurface {
 
                                 popup.requestConnect(netRow.ssid, netRow.secured, netRow.saved);
                             }
-
-                            // Right click
 
                             onContextRequested: function (mx, my) {
                                 const items = [];
@@ -507,8 +468,6 @@ Core.PopupSurface {
                             }
                         }
                     }
-
-                    // Empty / disabled states
 
                     Core.EmptyState {
                         width: parent.width

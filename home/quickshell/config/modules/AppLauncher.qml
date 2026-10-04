@@ -5,15 +5,11 @@ import Quickshell.Io
 import "../core" as Core
 import "../services" as Services
 
-// Application Launcher
-
 Core.LauncherView {
     id: launcher
 
     launcherId: "launcher"
     promptIcon: Core.Icons.search
-    // 285px in a field that is 316px wide with a four digit result count, which
-    // is the most this field can ever be. The old one was 517px.
     placeholder: "Search apps, > for commands"
 
     cardWidth: 460
@@ -40,7 +36,6 @@ Core.LauncherView {
             return;
         }
 
-        // Dismiss first: otherwise the closing surface and the new window race for keyboard focus.
         launcher.dismiss();
         Services.LauncherService.run(entry);
     }
@@ -51,8 +46,6 @@ Core.LauncherView {
 
             anchors.fill: parent
 
-            // The inset is the view's, not the delegate's: a delegate that
-            // offset itself with `x` fought the view for its own position.
             anchors.leftMargin: 12
             anchors.rightMargin: 12
 
@@ -72,10 +65,6 @@ Core.LauncherView {
                 width: list.cellWidth
                 height: list.rowHeight
 
-                // A desktop entry has a real icon; a command or a switch does
-                // not, and falls back to a glyph that names what it is. Adding a
-                // kind without a glyph here reads as "this runs a command", so
-                // every branch stays explicit.
                 iconSource: row.modelData.kind === "app"
                     ? Quickshell.iconPath(row.modelData.icon, "application-x-executable")
                     : ""

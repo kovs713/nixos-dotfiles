@@ -12,12 +12,6 @@ PanelWindow {
     property int maxCardHeight: Core.Theme.popupMaxHeight
     property Component contentComponent: null
 
-    // A click on the empty window around the card dismisses it. That is the usual
-    // way out of a bar popup and it stays the default, but it is a parameter
-    // because a card can be tall enough that the strip of window beside it reads
-    // as "not part of the popup" -- pressing there to reach a button is then the
-    // press that closes the thing you were reaching for. Such a card is dismissed
-    // with Escape or its own close action instead.
     property bool closeOnOutsideClick: true
 
     readonly property bool open: Core.PopupManager.isOpen(root.popupId)
@@ -52,11 +46,6 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "shell-popup"
 
-    // Exclusive, not OnDemand. OnDemand means "keyboard only after the user
-    // clicks this surface", and a popup that nobody clicked -- opened from a
-    // bar button, or opened and dismissed by habit -- never gets it, so Escape
-    // went to whatever window was focused underneath. The launchers take
-    // Exclusive for the same reason.
     WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     property Region noInput: Region {
@@ -64,27 +53,8 @@ PanelWindow {
         height: 0
     }
 
-    // The bar's band, measured up from the bottom of this window: the pill plus
-    // the margin its own window sits at. Everything below it belongs to the bar.
-    //
-    // `barTopOffset` is that same number, and it is why the two are one value and
-    // not two: the card is positioned from it and the input mask is cut from it,
-    // so a token that moved one and not the other would put a hole in the input
-    // region of every popup.
     readonly property int barStrip: Core.Theme.barMarginTop + Core.Theme.pillHeight + Core.Theme.borderWidth
 
-    // What the window is allowed to touch. NOT `null` while open, which is what it
-    // used to be, and that was the bug: the window reaches down to the same 10px
-    // the bar's does, so it sat over the pill with no mask and swallowed the
-    // pointer. The bar's HoverHandler then saw nothing for as long as any card
-    // was up, and a HoverHandler re-arms on pointer MOTION rather than on the
-    // window going away -- so closing a card collapsed the bar under a cursor
-    // that never moved, which read as the bar closing at the end of the close
-    // animation.
-    //
-    // So the mask is the card, and -- for the popups that dismiss on an outside
-    // click -- everything above the bar's band, because a dismissal that needs
-    // the pointer to find the sliver of window beside the card is not one.
     property Region cardInput: Region {
         item: card
     }
@@ -96,13 +66,6 @@ PanelWindow {
         height: Math.max(0, root.height - root.barStrip)
     }
 
-    // ONE Region holding a LIST, not a list of Regions. `mask` is a
-    // PendingRegion with `regions` as its default property, so a JS array was
-    // never assignable to it: QML logged "Unable to assign QJSValue to
-    // PendingRegion" once per open and left the old mask in place -- which was
-    // the empty `noInput`, so the window took no pointer at all. That is why
-    // neither the card nor the space beside it responded, and it failed
-    // silently: the warning is in the log, not on screen.
     property Region cardAndDismiss: Region {
         regions: [root.cardInput, root.dismissArea]
     }
@@ -127,8 +90,6 @@ PanelWindow {
     MouseArea {
         anchors.fill: parent
 
-        // Off means off, not inert: the press falls through to whatever is under
-        // the window instead of being swallowed by a MouseArea that does nothing.
         enabled: root.open && root.closeOnOutsideClick
 
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
@@ -143,17 +104,6 @@ PanelWindow {
         }
     }
 
-    // The card, the context menu and the Escape handler are ONE subtree, and the
-    // handler is its root.
-    //
-    // Escape was on a sibling Item next to the card, which meant it only ever saw
-    // keystrokes that arrived with nothing else focused. A card holding a
-    // `Core.TextField` -- TimerPopup's "what are you working on" -- autofocuses
-    // that field, and a key event goes to the focused item and then up through
-    // its ANCESTORS. A sibling is not an ancestor, so Escape died in the field
-    // and the card could not be dismissed from the keyboard at all. Every popup
-    // without a text field worked, which is why this looked like a Pomodoro bug
-    // and not a scaffolding one.
     Item {
         anchors.fill: parent
 
@@ -184,16 +134,6 @@ PanelWindow {
             Item {
                 anchors.fill: parent
 
-                // No transform animation here on purpose.
-                //
-                // It used to scale in from here as well as from a compositor
-                // layer animation -- two scale animations on the same window
-                // with different durations and curves, which is what made the
-                // motion read as unstable. The compositor owns no entrance
-                // either: this config sets `animations.enabled = false`
-                // (home/laptop/hyprland.nix), so there is no `layersIn` /
-                // `fadeLayersIn` to double up with. The card draws itself at its
-                // final size and the opacity below is the whole entrance.
                 opacity: root.open ? 1.0 : 0.0
 
                 Rectangle {
@@ -290,9 +230,6 @@ PanelWindow {
 
                 antialiasing: true
 
-                // The context menu is drawn inside this window rather than being its
-                // own surface, so Hyprland does not animate it. A plain fade, with no
-                // scale, so it does not pop toward the viewer either.
                 opacity: menuLayer.active ? 1.0 : 0.0
 
                 Behavior on opacity {

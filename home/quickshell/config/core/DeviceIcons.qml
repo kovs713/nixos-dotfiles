@@ -2,32 +2,7 @@ pragma Singleton
 
 import QtQuick
 
-// DeviceIcons
-//
-// One resolver for "what glyph does this peripheral get", over the freedesktop
-// icon name that UPower, BlueZ and NetworkManager all expose.
-//
-// This used to be three functions with three different answers. BatteryService
-// preferred a live UPowerDeviceType enum probe and fell back to the name;
-// BluetoothService matched only the name; AudioService kept its own private
-// glyphs. They overlapped on ten cases and had already diverged — a bluetooth
-// headset rendered as a headphone glyph in the power popup and a speaker glyph
-// in the bluetooth popup, from the same icon name.
-//
-// Name matching only, no enum. The enum probe was best-effort ("prefer it when
-// the build exposes it") and every value it could return was already covered by
-// a name the freedesktop spec requires. With no test harness to exercise a live
-// DBus enum, an internal seam nothing can cross is just indirection.
-//
-// Order matters. Freedesktop names compound, so `audio-headset` and
-// `audio-headphones` are real and must reach the headset glyph — hence
-// headset/headphone is matched before speaker/audio. A bare `audio` prefix
-// names an audio *port*, not a headset, and lands on the speaker.
-
 QtObject {
-    // Any peripheral the table does not recognise. `computer` rather than
-    // `bluetooth`, because the bluetooth popup's own glyph would be a strange
-    // answer for an unknown battery device.
     readonly property string generic: Icons.computer
 
     function forName(name) {

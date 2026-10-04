@@ -4,8 +4,6 @@ import Quickshell
 
 import "../core" as Core
 
-// CalendarPopup
-
 Core.PopupSurface {
     id: popup
 
@@ -14,7 +12,6 @@ Core.PopupSurface {
     cardWidth: 320
     maxCardHeight: 420
 
-    // Seconds precision is only worth the wakeups while visible.
     SystemClock {
         id: clock
 
@@ -23,21 +20,13 @@ Core.PopupSurface {
 
     readonly property date now: clock.date
 
-    // Which month the grid is showing. 0 = current month.
     property int monthOffset: 0
 
-    // Reset to today whenever the popup is dismissed, so it always opens on the current month.
     onDidClose: popup.monthOffset = 0
 
-    // Always 6 rows so the card does not jitter in height as you page between
-    // months. The arithmetic behind the grid is in core/Calendar, which is where
-    // calendar.test.mjs can reach it.
     readonly property int cellCount: Core.Calendar.cellCount
 
-    // Built from the year and month rather than by adding months to a date: see
-    // Calendar.monthStart for what setMonth does to a 31st.
     readonly property date viewDate: Core.Calendar.monthStart(popup.now, popup.monthOffset)
-
 
     readonly property string monthLabel: Qt.formatDate(popup.viewDate, "MMMM yyyy")
 
@@ -53,7 +42,6 @@ Core.PopupSurface {
         return Core.Calendar.isWeekend(index);
     }
 
-    // Day number for a cell index, or 0 for a padding cell.
     function dayFor(index) {
         return Core.Calendar.dayFor(popup.viewDate, index);
     }
@@ -61,8 +49,6 @@ Core.PopupSurface {
     contentComponent: Component {
         Column {
             spacing: Core.Theme.spacing
-
-            // Big clock
 
             Item {
                 width: parent.width
@@ -99,7 +85,6 @@ Core.PopupSurface {
                     }
                 }
 
-                // Seconds ring in the corner, purely decorative.
                 Text {
                     anchors.right: parent.right
                     anchors.rightMargin: 4
@@ -121,8 +106,6 @@ Core.PopupSurface {
 
                 color: Core.Theme.separator
             }
-
-            // Month navigation
 
             Item {
                 width: parent.width
@@ -192,7 +175,6 @@ Core.PopupSurface {
 
                     color: Core.Theme.foreground
 
-                    // Little pop whenever the month changes.
                     onTextChanged: monthPop.restart()
 
                     SequentialAnimation {
@@ -223,7 +205,6 @@ Core.PopupSurface {
 
                         cursorShape: Qt.PointingHandCursor
 
-                        // Click the month name to jump back to today.
                         onClicked: popup.monthOffset = 0
                     }
                 }
@@ -279,7 +260,6 @@ Core.PopupSurface {
                     }
                 }
 
-                // Scroll anywhere on the header to page months.
                 MouseArea {
                     anchors.fill: parent
 
@@ -293,8 +273,6 @@ Core.PopupSurface {
                     }
                 }
             }
-
-            // Weekday labels
 
             Row {
                 id: weekdayRow
@@ -327,8 +305,6 @@ Core.PopupSurface {
                     }
                 }
             }
-
-            // Day grid
 
             Grid {
                 id: dayGrid
@@ -377,7 +353,6 @@ Core.PopupSurface {
                                 }
                             }
 
-                            // Today's marker springs in on open.
                             scale: dayCell.today ? 1.0 : 1.0
 
                             Component.onCompleted: {
@@ -429,8 +404,6 @@ Core.PopupSurface {
                     }
                 }
             }
-
-            // Footer
 
             Item {
                 width: parent.width

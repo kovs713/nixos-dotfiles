@@ -7,8 +7,6 @@ import Quickshell.Wayland
 import "../core" as Core
 import "../services" as Services
 
-// Shell Notifications — transient toast overlay
-
 PanelWindow {
     id: root
 
@@ -26,12 +24,6 @@ PanelWindow {
 
     readonly property int toastSpacing: 0
 
-    // Headroom for maxVisible cards at their tallest. A card carrying action
-    // buttons and an open reply field is roughly twice the height of a bare one,
-    // and at 640 the fourth card in a full stack was clipped off the bottom.
-    //
-    // Costs nothing: the window is transparent and its input is masked to the
-    // card stack, so the unused area is neither drawn nor clickable.
     readonly property int maxHeight: 900
 
     implicitWidth: root.toastWidth + root.toastGutter * 2 + 14
@@ -43,21 +35,12 @@ PanelWindow {
     WlrLayershell.namespace: "shell-notifications"
     WlrLayershell.layer: WlrLayer.Overlay
 
-    // A toast must never steal keyboard focus from whatever you are typing in.
-    //
-    // The one exception is a reply field the user explicitly opened, and even then
-    // it is OnDemand rather than Exclusive: focus moves when the field is clicked,
-    // never because a notification arrived.
     WlrLayershell.keyboardFocus: Services.NotificationServer.replyTarget !== null ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     exclusionMode: ExclusionMode.Ignore
 
-    // Deliberately not gated on do-not-disturb. Suppression happens in
-    // NotificationServer.showToast, which lets critical alerts through, and
-    // hiding the whole layer here would override that and silence them.
     visible: root.toasts.length > 0 && !Core.PopupManager.isOpen("notifications")
 
-    // Only the actual toast stack receives input.
     mask: Region {
         item: column
     }
@@ -104,20 +87,10 @@ PanelWindow {
 
                 property bool dismissing: false
 
-                // Transform-driven animation.
-                //
-                // 0 = visible
-                // 1 = completely offscreen
                 property real slide: 1.0
 
-                // 1 = normal height
-                // 0 = collapsed
                 property real collapse: 1.0
 
-                // The gesture is Core.SwipeRow, shared with the notification
-                // centre. It sits around the card rather than at the root of
-                // this delegate because the toast's own enter and exit
-                // animations already own this item's opacity and translate.
                 Core.SwipeRow {
                     id: swipe
 
@@ -128,17 +101,12 @@ PanelWindow {
                     onSwiped: wrapper.hide()
                 }
 
-                // Animation-driven only. Binding opacity to slide while the exit
-                // animation also wrote to it broke the binding mid-flight.
                 property real fade: 0.0
 
                 width: root.toastWidth + root.toastGutter * 2
 
-                // Positioned by the parent Column, which measures every card rather than assuming a fixed height.
                 height: Math.max(0, (wrapper.cardHeight + root.toastGutter * 2) * wrapper.collapse)
 
-                // The enter/exit fade times the swipe's own, so a card thrown off
-                // screen dims as it goes rather than cutting out at the edge.
                 opacity: wrapper.fade * swipe.travelFade
 
                 clip: true
@@ -146,8 +114,6 @@ PanelWindow {
                 Component.onCompleted: {
                     enterAnim.start();
                 }
-
-                // Toast lifecycle
 
                 function hide() {
                     if (wrapper.dismissing)
@@ -164,13 +130,6 @@ PanelWindow {
                     Services.NotificationServer.dismiss(wrapper.modelData);
                 }
 
-                // Clicking the card body triggers the sender's "default" action,
-                // which is the convention for "open the thing this is about".
-                //
-                // If there is no default action the card is only dismissed. It is
-                // NOT destroyed: any named actions it carries are rendered as
-                // buttons below, and throwing the entry away would take those with
-                // it before they could be used from the centre.
                 function activate() {
                     const n = wrapper.modelData;
 
@@ -191,8 +150,6 @@ PanelWindow {
                                 }
 
                                 if (actionId === "default") {
-                                    // invokeAction handles closing; a second
-                                    // dismiss here would hit a destroyed object.
                                     Services.NotificationServer.invokeAction(n, acts[i]);
                                     invoked = true;
                                     break;
@@ -200,14 +157,11 @@ PanelWindow {
                             }
                         }
                     } catch (e) {
-                        // No usable action.
                     }
 
                     if (!invoked)
                         wrapper.hide();
                 }
-
-                // Entrance
 
                 ParallelAnimation {
                     id: enterAnim
@@ -236,8 +190,6 @@ PanelWindow {
                         easing.type: Easing.OutQuint
                     }
                 }
-
-                // Exit
 
                 SequentialAnimation {
                     id: exitAnim
@@ -278,9 +230,6 @@ PanelWindow {
                     }
 
                     ScriptAction {
-                        // expireToast, not hideToast: a notification the sender
-                        // marked transient is discarded here instead of being
-                        // filed in the centre, which is what transient means.
                         script: Services.NotificationServer.expireToast(wrapper.modelData)
                     }
                 }
@@ -289,11 +238,6 @@ PanelWindow {
                     interval: 250
                     repeat: true
 
-                    // Also paused while a reply is being typed into this card, and
-                    // while the notification centre is up. In the latter case the
-                    // whole overlay is hidden, so a running timer would burn the
-                    // card's lifetime somewhere the user cannot see it and it would
-                    // be gone by the time they closed the panel.
                     running: wrapper.lifetime > 0 && !cardHover.hovered && !wrapper.dismissing && !wrapper.replying && !Core.PopupManager.isOpen("notifications")
 
                     onTriggered: {
@@ -303,8 +247,6 @@ PanelWindow {
                             wrapper.hide();
                     }
                 }
-
-                // Card
 
                 Rectangle {
                     id: card
@@ -327,16 +269,12 @@ PanelWindow {
 
                     color: Core.Theme.surface
 
-                    // Critical is the only state that gets colour, and it takes
-                    // over the whole rim rather than being added to it.
                     border.width: 1
                     border.color: wrapper.critical ? Core.Theme.danger : Core.Theme.panelRim
 
                     transform: Translate {
                         x: wrapper.slide * 44
                     }
-
-                    // Hover
 
                     HoverHandler {
                         id: cardHover
@@ -346,8 +284,6 @@ PanelWindow {
                                 wrapper.remaining = wrapper.lifetime;
                         }
                     }
-
-                    // Mouse interaction
 
                     MouseArea {
                         anchors.fill: parent
@@ -371,8 +307,6 @@ PanelWindow {
                         }
                     }
 
-                    // Content
-
                     RowLayout {
                         id: contentRow
 
@@ -386,7 +320,6 @@ PanelWindow {
 
                         spacing: 11
 
-                        // Application icon
                         Rectangle {
                             Layout.alignment: Qt.AlignTop
 
@@ -397,14 +330,6 @@ PanelWindow {
 
                             color: Core.Theme.surface
 
-                            // Shared with the notification centre so both surfaces
-                            // resolve icons identically.
-                            //
-                            // This used to also check `n.imagePath`, which is not a
-                            // property Quickshell exposes, so that branch could
-                            // never fire. It was not needed: `image` already
-                            // resolves image-data, image_data, icon_data AND
-                            // image-path/image_path into one value.
                             readonly property string resolvedIcon: Services.NotificationServer.iconFor(wrapper.modelData)
 
                             Image {
@@ -428,12 +353,6 @@ PanelWindow {
                                 mipmap: true
                             }
 
-                            // Nerd Font fallback, picked from the app name.
-                            //
-                            // Was a hardcoded F007F, which is the 60%-battery
-                            // glyph rather than a bell. Icons.forApp already maps
-                            // senders to a sensible glyph, so a mail client gets an
-                            // envelope instead of every app getting the same mark.
                             Text {
                                 anchors.centerIn: parent
 
@@ -450,8 +369,6 @@ PanelWindow {
                                 renderType: Text.NativeRendering
                             }
                         }
-
-                        // Text
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -527,11 +444,6 @@ PanelWindow {
 
                                 elide: Text.ElideRight
 
-                                // The server advertises body-markup and
-                                // body-hyperlinks, so senders are entitled to send
-                                // <b>, <i> and <a href>. StyledText renders exactly
-                                // the subset the spec allows; RichText would also
-                                // accept remote <img> and is not worth the exposure.
                                 textFormat: Text.StyledText
 
                                 linkColor: Core.Theme.accent
@@ -541,11 +453,6 @@ PanelWindow {
                                 }
                             }
 
-                            // Named actions and the reply field.
-                            //
-                            // Previously the toast rendered none of these and only
-                            // the "default" action was reachable, by clicking the
-                            // card. Anything else had to be found in the centre.
                             NotificationActions {
                                 Layout.fillWidth: true
 
@@ -554,8 +461,6 @@ PanelWindow {
                                 notification: wrapper.modelData
                             }
                         }
-
-                        // Close
 
                         Rectangle {
                             Layout.alignment: Qt.AlignTop
@@ -593,9 +498,7 @@ PanelWindow {
                         }
                     }
                 }
-
                 }
-
             }
     }
 }

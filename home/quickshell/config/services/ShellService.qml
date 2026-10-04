@@ -6,8 +6,6 @@ import Quickshell.Io
 
 import "../core" as Core
 
-// Fish functions and commands exposed to the launcher.
-
 QtObject {
     id: root
 

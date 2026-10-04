@@ -3,18 +3,13 @@ import QtQuick
 import "../core" as Core
 import "../services" as Services
 
-// Network bar module
-
 Core.BarButton {
     id: root
 
     implicitWidth: 30
     implicitHeight: Core.Theme.moduleHeight
 
-    // A function literal, not a `{ }` block: a block here is a binding, and this
-    // one both reads PopupManager.current and writes it, which is a loop.
     onPrimary: function () {
-        // Opening with an empty list is the moment a rescan is worth paying for.
         Core.PopupManager.toggle("network", root);
 
         if (Core.PopupManager.isOpen("network") && Services.NetworkService.networkModel.count === 0)
@@ -32,13 +27,7 @@ Core.BarButton {
 
     readonly property string link: Services.NetworkService.primaryLink
 
-    // The wired glyph is not only "ethernet won": on a host with no radio it is
-    // the only link there is, so an unplugged cable still reads as ethernet and
-    // not as a wifi icon for hardware that does not exist. Both glyphs stay
-    // mounted and cross-fade, which is why this is not a choice of Text.
     readonly property bool showEthernet: root.link === "ethernet" || !Services.NetworkService.wifiAvailable
-
-    // Signal tier, with a deadband
 
     property int tier: 3
 
@@ -60,8 +49,6 @@ Core.BarButton {
         root.tier = t;
     }
 
-    // Ethernet icon
-
     Text {
         anchors.centerIn: parent
 
@@ -70,8 +57,6 @@ Core.BarButton {
         font.family: Core.Theme.iconFont
         font.pixelSize: Core.Theme.iconSize
 
-        // Muted while the cable is out, which on a wired-only host is the only
-        // thing the glyph has left to say.
         color: root.link === "ethernet" ? Core.Theme.foreground : Core.Theme.foregroundMuted
 
         opacity: root.showEthernet ? 1.0 : 0.0
@@ -92,8 +77,6 @@ Core.BarButton {
             }
         }
     }
-
-    // Wi-Fi icon
 
     Text {
         anchors.centerIn: parent
@@ -148,8 +131,6 @@ Core.BarButton {
         }
     }
 
-    // Activity dot (connecting / scanning)
-
     Rectangle {
         anchors.top: parent.top
         anchors.right: parent.right
@@ -192,8 +173,6 @@ Core.BarButton {
         }
     }
 
-    // Interaction
-    // Poll faster while the menu is open
     Binding {
         target: Services.NetworkService
         property: "fastPoll"

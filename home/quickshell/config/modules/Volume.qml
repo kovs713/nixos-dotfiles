@@ -3,8 +3,6 @@ import QtQuick
 import "../core" as Core
 import "../services" as Services
 
-// Volume (bar module)
-
 Core.BarButton {
     id: root
 
@@ -47,7 +45,6 @@ Core.BarButton {
                 }
             }
 
-            // Springy pop whenever the icon changes.
             onTextChanged: root.pop()
         }
 
@@ -66,7 +63,6 @@ Core.BarButton {
         }
     }
 
-    // Small badge in the corner while the microphone is muted, so you can tell at a glance without opening anything.
     Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: 1
@@ -91,5 +87,4 @@ Core.BarButton {
             }
         }
     }
-
 }

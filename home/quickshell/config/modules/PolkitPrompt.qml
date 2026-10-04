@@ -5,17 +5,6 @@ import Quickshell.Wayland
 import "../core" as Core
 import "../services" as Services
 
-// Polkit authentication prompt.
-//
-// Its own centred surface rather than a PopupSurface card: the bar is hidden
-// until hovered, and an authentication request is not something that should wait
-// for the user to find the bar. It also has to own the keyboard, since the field
-// is the whole point.
-//
-// Identity selection is deliberately absent. polkit offers a list of users
-// (`flow.identities`) and the Identity type is not introspectable from QML, so
-// there is no way to read a display name off it. The default identity is used,
-// which is the only one on a single-admin machine.
 PanelWindow {
     id: root
 
@@ -40,8 +29,6 @@ PanelWindow {
 
     readonly property int cardWidth: 400
 
-    // A dimmed backdrop rather than a bare card: an auth request is modal by
-    // nature, and this is the only thing in the shell that must not be missed.
     Rectangle {
         anchors.fill: parent
 
@@ -66,8 +53,6 @@ PanelWindow {
 
         color: Core.Theme.background
 
-        // Rim rather than the theme's border: on a dimmed backdrop the card would
-        // otherwise read as a hole cut out of the screen.
         border.width: 1
         border.color: Core.Theme.panelRim
 
@@ -87,7 +72,6 @@ PanelWindow {
             input.text = "";
         }
 
-        // A new request is a new prompt, not a continuation of the last one.
         onVisibleChanged: {
             if (visible) {
                 input.text = "";
@@ -190,14 +174,10 @@ PanelWindow {
 
                 visible: Services.PolkitService.responseRequired
 
-                // The prompt's own label sits to the left of the field, and its
-                // colour tracks focus, so the field is given the label as a
-                // prefix rather than a placeholder.
                 label: Services.PolkitService.inputLabel
 
                 echoPassword: !Services.PolkitService.echo
 
-                // Enter belongs to the prompt, not the field.
                 Keys.onReturnPressed: card.accept()
                 Keys.onEnterPressed: card.accept()
                 Keys.onEscapePressed: card.cancel()

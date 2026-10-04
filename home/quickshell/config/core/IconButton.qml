@@ -2,15 +2,6 @@ import QtQuick
 
 import "." as Core
 
-// IconButton
-//
-// A circular glyph button.
-//
-// The shape was written out six times in the tree, at sizes 22, 24, 26, 28, 30
-// and 38, with six different corner radii: `height / 2`, 14, 12, 11, 9 and 11.
-// Two of those were not circles at all, which is the only reason a size change
-// was ever a thing to think about. The radius is `height / 2` here, so the
-// button is a circle at any size and the call site only says how big.
 Item {
     id: root
 
@@ -18,11 +9,8 @@ Item {
 
     property color color: Core.Theme.foregroundMuted
 
-    // A spinner's own animation, for an action that is still running.
     property bool spinning: false
 
-    // The press dips the button. Off for a control that is already at its
-    // smallest, which is what the two call sites that set it to 0 wanted.
     property real pressScale: 0.88
 
     signal clicked

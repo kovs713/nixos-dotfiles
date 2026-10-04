@@ -6,19 +6,12 @@ import Quickshell.Io
 
 import "../core" as Core
 
-// Shell Apps Service
-//
-// Application list and ranking for the launcher.
-// State: ~/.cache/shell/launcher-usage.json
-
 QtObject {
     id: root
 
     readonly property string usagePath: Core.Paths.cache + "/shell/launcher-usage.json"
 
     property var usage: ({})
-
-    // Frecency
 
     readonly property FileView usageFile: FileView {
         path: root.usagePath
@@ -45,7 +38,6 @@ QtObject {
         if (!id || id.length === 0)
             return
 
-        // Copy, then mutate, then assign.
         const next = ({})
         const keys = Object.keys(root.usage)
 
@@ -58,13 +50,7 @@ QtObject {
         root.usageFile.setText(JSON.stringify(next))
     }
 
-    // Entries
-
     readonly property var entries: {
-        // Guarded like every other Quickshell object list in the tree
-        // (AudioService.allNodes, PrivacyService): the
-        // registry is not there until the .desktop scan has run, and reading
-        // .values off it before then throws.
         const source = DesktopEntries.applications && DesktopEntries.applications.values ? DesktopEntries.applications.values : []
         const out = []
 
@@ -73,7 +59,6 @@ QtObject {
             if (!entry)
                 continue
 
-            // NoDisplay entries are things like MIME handlers and settings panels that are not meant to be launched.
             if (entry.noDisplay === true)
                 continue
 
@@ -99,9 +84,6 @@ QtObject {
         return out
     }
 
-    // Matching
-
-    // Tiers, strongest first.
     function score(entry, q) {
         const name = entry.name ? entry.name.toLowerCase() : ""
 
@@ -152,7 +134,6 @@ QtObject {
             if (s < 0)
                 continue
 
-            // Frecency is a tie-breaker, capped so a heavily used app can never leapfrog a genuine prefix match.
             const hits = root.usage[entry.id] || 0
             s += Math.min(50, hits * 6)
 
@@ -167,8 +148,6 @@ QtObject {
 
         return out
     }
-
-    // Actions
 
     function launch(entry) {
         if (!entry)

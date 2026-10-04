@@ -3,19 +3,6 @@ import QtQuick
 import "../core" as Core
 import "../services" as Services
 
-// TimerPopup
-//
-// The pomodoro panel: what is left after the stopwatch went away. One shape, one
-// job -- so it reads top to bottom as an answer to "what am I doing, for how
-// long, and what happens next", and everything editable is below the fold under
-// INTERVALS.
-//
-// What was missing and is not now: the durations were `readonly` constants in the
-// service, so 25/5/15 was not a default but a decision nobody could revisit, and
-// the three buttons (Start/Pause, Start/Stop, Lap) were three copies of one
-// shape. Skip and Reset are header actions now, so the only filled button left is
-// the one that starts and stops the block.
-
 Core.PopupSurface {
     id: popup
 
@@ -24,17 +11,10 @@ Core.PopupSurface {
     cardWidth: 340
     maxCardHeight: 470
 
-    // This card is 470px tall, so the window beside it is a strip wide enough to
-    // read as desktop. Pressing there is a mis-aim, not a dismissal, and a
-    // mis-aim should not cost you the block you were reading. Escape and the
-    // cross both still work.
     closeOnOutsideClick: false
 
     readonly property var svc: Services.TimerService
 
-    // A labelled integer with -/+ at the right. Not a TextField: a number that
-    // only has two legal neighbours is a stepper, and typing "0" into a minutes
-    // box is a mistake rather than an intention.
     component Stepper: Item {
         id: stepper
 
@@ -69,8 +49,6 @@ Core.PopupSurface {
 
             spacing: 2
 
-            // Greyed rather than hidden: a control that vanishes at its own bound
-            // makes the row jump, and the bound is not obvious.
             readonly property bool canDown: stepper.value > stepper.min
             readonly property bool canUp: stepper.value < stepper.max
 
@@ -130,9 +108,6 @@ Core.PopupSurface {
                     ? popup.svc.phaseLabel + " · cycle " + (popup.svc.cycle + 1) + " of " + popup.svc.cyclesBeforeLongBreak
                     : "cycle " + (popup.svc.cycle + 1) + " of " + popup.svc.cyclesBeforeLongBreak
 
-                // Close last, where a close button belongs, and for the same
-                // reason the chip no longer toggles: dismissing should not need
-                // the pointer to come back down to the bar.
                 actions: [
                     {
                         icon: Core.Icons.chevronRight,
@@ -155,9 +130,6 @@ Core.PopupSurface {
                 ]
             }
 
-            // Phase, then the clock. The phase is the accent-coloured word above
-            // the digits, so a glance at the panel says "break" without reading a
-            // number.
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
 
@@ -183,9 +155,6 @@ Core.PopupSurface {
                 font.weight: Font.DemiBold
             }
 
-            // Progress as a bar under the clock rather than a ring around it: the
-            // panel is 340 wide, a ring that size is mostly empty, and a bar reads
-            // the same at a glance for a third of the code.
             Rectangle {
                 width: body.width
                 height: 4
@@ -211,8 +180,6 @@ Core.PopupSurface {
                 }
             }
 
-            // Which cycle this is, as dots. "Cycle 2 / 4" is a number to parse;
-            // three filled and one hollow is read before the eye arrives.
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
 
@@ -229,8 +196,6 @@ Core.PopupSurface {
 
                         radius: 3
 
-                        // A long break is the cycle that was earned, so it fills
-                        // the row whatever the count says.
                         color: index < popup.svc.cycle
                             ? (popup.svc.isBreak ? Core.Theme.success : Core.Theme.accent)
                             : Core.Theme.surfaceHover
@@ -238,7 +203,6 @@ Core.PopupSurface {
                 }
             }
 
-            // What this block is for.
             Core.TextField {
                 width: body.width
 
@@ -251,8 +215,6 @@ Core.PopupSurface {
                 }
             }
 
-            // One filled button, full width: it is the only thing in the panel
-            // that has to be found without reading.
             Rectangle {
                 width: body.width
                 height: 38
@@ -292,20 +254,14 @@ Core.PopupSurface {
                 }
             }
 
-            // Intervals
-
             Core.SectionHeader {
                 width: body.width
 
                 text: "INTERVALS"
 
-                // Only speaks up when the numbers are nobody's preset, which is
-                // the one case the row of pills below cannot show.
                 trailing: popup.svc.presetId === "custom" ? "Custom" : ""
             }
 
-            // Presets, because picking a shape is faster than stepping four
-            // numbers, and because most sessions are one of these three.
             Row {
                 width: body.width
 

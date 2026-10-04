@@ -59,11 +59,8 @@ Core.LauncherView {
             columns: picker.columns
             rowHeight: picker.cellHeight
 
-            // Cells are packed: the names under the glyphs already have a gap
-            // of their own, so the grid's would double it.
             gap: 0
 
-            // Three states, one string, because the view draws one empty state.
             emptyText: !Services.EmojiService.ready
                 ? "Loading emoji…"
                 : (picker.query.length > 0 ? "No matching emoji" : "No emoji available")
@@ -81,9 +78,6 @@ Core.LauncherView {
 
                 radius: Core.Theme.radiusRow
 
-                // No zoom and no Behavior: the cell being left animated too, and
-                // two cells moving per keypress is what read as a scrolling
-                // list. See ResultsView.
                 color: cell.selected ? Core.Theme.surface : "transparent"
 
                 Text {

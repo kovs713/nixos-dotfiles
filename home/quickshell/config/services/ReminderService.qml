@@ -6,8 +6,6 @@ import Quickshell.Io
 
 import "../core" as Core
 
-// Persistent reminders backed by systemd user timers.
-
 QtObject {
     id: root
 
@@ -18,10 +16,6 @@ QtObject {
     readonly property FileView stateFile: FileView {
         path: root.statePath
 
-        // Same as TimerService: our own write answers back as a change, and
-        // load() replaces the whole array, so the write that stored a new
-        // reminder could hand the panel the list from before it. Nothing else
-        // writes this file.
         watchChanges: false
         blockLoading: true
         printErrors: false
@@ -51,13 +45,6 @@ QtObject {
             return;
         }
 
-        // Validate every entry rather than trusting the shape. This file is
-        // hand-editable, and startTimer() reads minutes, id and message straight
-        // off an entry into a systemd-run argv -- an entry missing `minutes`
-        // became "--on-active=undefinedm" and an entry that is not an object at
-        // all threw on the property read. TimerService.load and
-        // NotificationServer.loadArchive both validate the same way; this one
-        // only checked that the top level was an array.
         root.reminders = (Array.isArray(parsed) ? parsed : []).filter(function (reminder) {
             return reminder
                 && typeof reminder === "object"

@@ -7,8 +7,6 @@ import Quickshell.Bluetooth
 
 import "../core" as Core
 
-// BluetoothService
-
 Singleton {
     id: root
 
@@ -20,12 +18,7 @@ Singleton {
 
     readonly property bool discovering: root.adapter ? root.adapter.discovering : false
 
-    // Written by Bluetooth.qml through a string-keyed Binding, so nothing in the
-    // services layer can see it and qmllint cannot check it. Poll faster while
-    // the popup is up, where a connecting device has to be noticed at once.
     property bool fastPoll: false
-
-    // Desktop notifications
 
     property var lastConnected: []
     property bool btPrimed: false
@@ -33,8 +26,6 @@ Singleton {
     property bool lastPowered: false
     property bool poweredPrimed: false
 
-    // Fire and forget. One shared Process dropped the second notification
-    // whenever two devices changed state in the same instant.
     function notify(summary, body, icon, urgency) {
         Core.Util.notify("Bluetooth", icon, urgency, summary, body);
     }
@@ -55,7 +46,6 @@ Singleton {
 
         root.lastConnected = now;
 
-        // Devices arrive asynchronously after the adapter appears, so the first pass is bookkeeping only.
         if (!root.btPrimed) {
             root.btPrimed = true;
             return;
@@ -90,12 +80,9 @@ Singleton {
             root.notify("Bluetooth off", "Adapter powered off", "bluetooth-disabled", "low");
     }
 
-    // Address of a device with an operation in flight
     property string pendingAddress: ""
 
     readonly property ListModel deviceModel: ListModel {}
-
-    // Raw device list from the binding
 
     readonly property var allDevices: {
         if (!Bluetooth.devices)
@@ -126,8 +113,6 @@ Singleton {
 
         return "Not connected";
     }
-
-    // Helpers
 
     function displayName(dev) {
         if (!dev)
@@ -179,9 +164,6 @@ Singleton {
         return 2;
     }
 
-    // Build the row objects, then hand them to ModelSync, which is what keeps
-    // the delegates stable => real animations.
-
     function rebuildModel() {
         const list = [];
 
@@ -217,19 +199,10 @@ Singleton {
         Core.ModelSync.sync(root.deviceModel, list, "address", false);
     }
 
-    // Rebuild first so deviceByAddress() can resolve names for anything that just appeared, then diff for notifications.
     onAllDevicesChanged: {
         root.rebuildModel();
         root.syncDeviceNotifications();
     }
-
-    // A second trigger on the connected set used to sit here, as a
-    // `connectedKey` derived from allDevices. It fired together with
-    // onAllDevicesChanged on every device change, so rebuildModel sorted and
-    // diffed the whole list twice and set() every row twice; the notification
-    // diff survived that only because lastConnected had already caught up.
-    // The key was a pure function of allDevices, so it could never change
-    // without allDevices changing first.
 
     readonly property Timer syncTimer: Timer {
         interval: root.fastPoll ? 800 : Core.Theme.slowPollMs
@@ -239,8 +212,6 @@ Singleton {
         onTriggered: root.rebuildModel()
     }
 
-    // bluetoothctl fallback
-
     readonly property Process ctlProc: Process {
         stdout: StdioCollector {}
         stderr: StdioCollector {}
@@ -249,8 +220,6 @@ Singleton {
     function btctl(args) {
         Core.Util.restart(root.ctlProc, ["bluetoothctl"].concat(args));
     }
-
-    // Public API
 
     function setPowered(on) {
         if (root.adapter) {

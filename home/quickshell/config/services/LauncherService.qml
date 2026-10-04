@@ -2,27 +2,9 @@ pragma Singleton
 
 import QtQml
 
-// One search surface for applications, Fish commands, and launcher actions.
-//
-// The built-in rows are built first so they outrank the Fish block, which comes
-// last on purpose: `complete -C ""` matches nearly every word, so a command
-// result would otherwise sit above the two things actually worth typing.
-
 QtObject {
     id: root
 
-    // Only switches that would change something are offered. A row for the
-    // night light already in use is a no-op that costs a keystroke to discover.
-    //
-    // The night light is one row, not one per temperature: the bar module is a
-    // toggle, and a launcher full of temperatures would offer a choice the rest
-    // of the shell deliberately does not have. The row is named after what it
-    // will do, so the label reads as the action.
-    //
-    // The theme is not here: two variants make it a toggle, not a choice, and
-    // `SUPER + SHIFT + T` is bound to it. A row per variant would be worse
-    // than nothing — it would put a "rebuilds the system" subtitle back in front
-    // of a switch that no longer rebuilds anything.
     readonly property var actionRows: [{
         "kind": "nightlight",
         "category": "Screen",
@@ -43,8 +25,6 @@ QtObject {
         };
     }
 
-    // Rows are built first and filtered after, rather than each block deciding
-    // which queries it answers to.
     function matches(row, query) {
         if (query.length === 0)
             return true;

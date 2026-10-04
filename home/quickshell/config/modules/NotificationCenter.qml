@@ -3,8 +3,6 @@ import QtQuick
 import "../core" as Core
 import "../services" as Services
 
-// Notification center bar module (leftmost slot)
-
 Core.BarButton {
     id: root
 
@@ -17,7 +15,6 @@ Core.BarButton {
 
     readonly property int count: root.list.length
 
-    // Do-not-disturb is shared with the panel through PopupManager.
     readonly property bool dnd: Services.NotificationServer.dnd
 
     popTarget: icon
@@ -32,8 +29,6 @@ Core.BarButton {
 
         anchors.centerIn: parent
 
-        // Resolved through Core.Icons rather than inlined surrogate pairs --
-        // hand-written pairs here are exactly how a bus ended up in the bar.
         text: root.dnd ? Core.Icons.bellOff : root.count > 0 ? Core.Icons.bellRing : Core.Icons.bell
 
         font.family: Core.Theme.iconFont
@@ -50,8 +45,6 @@ Core.BarButton {
 
         onTextChanged: root.pop()
     }
-
-    // Unread count badge
 
     Rectangle {
         anchors.top: parent.top

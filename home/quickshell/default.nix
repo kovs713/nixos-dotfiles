@@ -9,9 +9,6 @@ let
     mkdir -p "$out"
     cp -r ${./config}/. "$out/"
     chmod -R u+w "$out"
-
-    mkdir -p "$out/assets"
-
     chmod -R u-w "$out"
   '';
 in

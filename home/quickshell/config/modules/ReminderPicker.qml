@@ -13,8 +13,6 @@ Core.LauncherView {
 
     cardWidth: 480
 
-    // The row extent, not the row: 44 plus the list's 4px gap. The card is
-    // sized from this, so being short by the gap sliced the last row.
     rowHeight: 48
 
     columns: 1

@@ -13,13 +13,6 @@ Item {
     implicitWidth: trayRow.implicitWidth
     implicitHeight: Core.Theme.moduleHeight
 
-    // Hidden system tray applications
-
-    // Why these are hidden: NetworkManager and Blueman each put an applet in the
-    // tray, and the shell already has a button for both, so the tray entry is a
-    // second control for something the bar owns. Matched on all three strings an
-    // applet carries, because which one carries the name varies by version --
-    // nm-applet is the id, NetworkManager and Blueman are usually the title.
     readonly property var hiddenMarkers: ["nm-applet", "networkmanager", "blueman"]
 
     function isHidden(item) {
@@ -47,7 +40,6 @@ Item {
 
                 required property var modelData
 
-                // Hide NetworkManager and Blueman from the visual tray while keeping their processes alive.
                 visible: !root.isHidden(modelData)
 
                 implicitWidth: visible ? 26 : 0

@@ -2,12 +2,9 @@ import QtQuick
 
 import "." as Core
 
-// VolumeSlider
-
 Item {
     id: root
 
-    // 0.0 .. 1.0
     property real value: 0
 
     property bool muted: false
@@ -15,7 +12,6 @@ Item {
 
     property color fillColor: Core.Theme.accent
 
-    // Emitted while dragging and on click.
     signal moved(real value)
 
     implicitHeight: 24
@@ -73,7 +69,6 @@ Item {
                 }
             }
 
-            // Only spring the width when the change came from somewhere else.
             Behavior on width {
                 enabled: !root.dragging
 

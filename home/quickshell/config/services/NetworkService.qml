@@ -6,12 +6,8 @@ import Quickshell.Io
 
 import "../core" as Core
 
-// NetworkService
-
 Singleton {
     id: root
-
-    // Wi-Fi state
 
     property bool wifiEnabled: true
     property string wifiDevice: ""
@@ -21,38 +17,21 @@ Singleton {
 
     readonly property bool wifiConnected: root.wifiState === "connected"
 
-    // Ethernet state
-
     property string ethDevice: ""
     property string ethState: "unavailable"
     property string ethConnection: ""
 
     readonly property bool ethAvailable: root.ethDevice !== ""
 
-    // What this host actually has, read off what nmcli reported rather than
-    // asked for once at startup.
-    //
-    // A wired desktop reports the ethernet device and no wifi one; a laptop with
-    // no adapter reports neither. Bar.qml hides the module on `available`, and
-    // NetworkPopup drops its whole WI-FI half on `wifiAvailable`, so the bar says
-    // what the machine has instead of what the shell was written for.
-    //
-    // False for the first few hundred milliseconds, until deviceProc lands. The
-    // module is hidden and then appears, which is the same trade BatteryService
-    // makes with `available`.
     readonly property bool wifiAvailable: root.wifiDevice !== ""
 
     readonly property bool available: root.wifiAvailable || root.ethAvailable
 
     readonly property bool ethConnected: root.ethState === "connected"
 
-    // Unified link
-
     readonly property string primaryLink: root.ethConnected ? "ethernet" : root.wifiConnected ? "wifi" : "none"
 
     readonly property string linkLabel: root.ethConnected ? (root.ethConnection !== "" ? root.ethConnection : "Ethernet") : root.wifiConnected ? root.activeSsid : root.wifiEnabled ? "Not connected" : "Wi-Fi off"
-
-    // Scan results / saved profiles
 
     property var savedProfiles: []     // [ "HomeWifi", ... ]
 
@@ -61,24 +40,18 @@ Singleton {
     property string pendingSsid: ""    // ssid currently being connected
     property string lastError: ""
 
-    // Poll faster while a menu is open
     property bool fastPoll: false
 
     signal connectFailed(string ssid, string message)
     signal connectSucceeded(string ssid)
 
-    // Desktop notifications
-
     property string lastLink: ""
     property bool linkPrimed: false
 
-    // Fire and forget; a shared Process drops rapid back-to-back events.
     function notify(summary, body, icon, urgency) {
         Core.Util.notify("Network", icon, urgency, summary, body);
     }
 
-    // Returns "" when the link cannot be described yet, which is not the same
-    // thing as being offline.
     function linkFingerprint() {
         if (root.ethConnected)
             return "eth:" + (root.ethConnection !== "" ? root.ethConnection : "Ethernet");
@@ -110,8 +83,6 @@ Singleton {
     function syncLinkNotification() {
         const now = root.linkFingerprint();
 
-        // Indeterminate. Leave lastLink alone and wait for the next update
-        // rather than inventing a transition.
         if (now === "")
             return;
 
@@ -122,7 +93,6 @@ Singleton {
 
         root.lastLink = now;
 
-        // The first evaluation lands while nmcli is still being polled for the first time.
         if (!root.linkPrimed) {
             root.linkPrimed = true;
             return;
@@ -162,15 +132,8 @@ Singleton {
     onEthConnectionChanged: root.queueLinkNotification()
     onWifiEnabledChanged: root.queueLinkNotification()
 
-    // ------------------------------------------------------------
-    // Live ListModel (stable rows => real add/remove animations)
-    // ------------------------------------------------------------
-
     readonly property ListModel networkModel: ListModel {}
 
-    // Parsing helpers
-
-    // nmcli -t escapes literal ':' as '\:'
     function splitFields(line) {
         const out = [];
         let cur = "";
@@ -206,8 +169,6 @@ Singleton {
             return Core.Icons.wifi1;
         return Core.Icons.wifi0;
     }
-
-    // Readers
 
     readonly property Process deviceProc: Process {
         command: ["nmcli", "-t", "-f", "DEVICE,TYPE,STATE,CONNECTION", "device", "status"]
@@ -309,7 +270,6 @@ Singleton {
                     const security = f[3].trim();
                     const bssid = f.length > 4 ? f[4] : "";
 
-                    // Hidden networks have an empty SSID
                     if (ssid === "")
                         continue;
                     if (inUse) {
@@ -317,7 +277,6 @@ Singleton {
                         activeSignal = strength;
                     }
 
-                    // Collapse multiple APs of the same SSID, keeping the strongest one.
                     if (seen[ssid] !== undefined) {
                         const prev = list[seen[ssid]];
 
@@ -345,7 +304,6 @@ Singleton {
                     });
                 }
 
-                // Connected first, then by signal strength Sort on BUCKETED strength, never the raw value.
                 list.sort(function (a, b) {
                     if (a.inUse !== b.inUse)
                         return a.inUse ? -1 : 1;
@@ -370,8 +328,6 @@ Singleton {
             }
         }
     }
-
-    // Action runner (serialised queue)
 
     property var actionQueue: []
     property string currentTag: ""
@@ -441,8 +397,6 @@ Singleton {
         root.drainQueue();
     }
 
-    // Public API — Wi-Fi
-
     function toggleWifi() {
         if (!root.wifiAvailable)
             return;
@@ -490,14 +444,11 @@ Singleton {
         root.run(["nmcli", "connection", "modify", "id", ssid, "connection.autoconnect", enabled ? "yes" : "no"]);
     }
 
-    // Public API — Ethernet
-
     function connectEthernet(exclusive) {
         if (root.ethDevice === "")
             return;
         root.run(["nmcli", "device", "connect", root.ethDevice]);
 
-        // "Click one and the other disappears"
         if (exclusive && root.wifiConnected)
             root.disconnectWifi();
     }
@@ -515,22 +466,10 @@ Singleton {
             root.connectEthernet(true);
     }
 
-    // Misc
-
     function openEditor() {
         Quickshell.execDetached(["foot", "-e", "nmcli", "connection", "edit"]);
     }
 
-    // Full refresh: link state, radio state, saved profiles, scan results.
-    //
-    // The wifi half only where there is a radio. `nmcli radio wifi` and
-    // `nmcli device wifi list` are errors without one, and a wired-only host
-    // would pay for both on every refresh -- including the one the poll timer
-    // fires at startup, before the first device read has said there is no radio.
-    //
-    // That startup read is why `wifiEnabled` is a default rather than a reading:
-    // on a wired-only host it stays true and is never used, and on a host with a
-    // radio the first refresh that follows a connected device corrects it.
     function refresh() {
         Core.Util.restart(root.deviceProc);
         Core.Util.restart(root.savedProc);
@@ -558,7 +497,6 @@ Singleton {
         repeat: true
         triggeredOnStart: true
 
-        // fastPoll is bound to "the network popup is open" by Network.qml.
         onTriggered: {
             if (root.fastPoll)
                 root.refresh();

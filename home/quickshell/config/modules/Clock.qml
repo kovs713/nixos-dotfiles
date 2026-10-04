@@ -4,8 +4,6 @@ import Quickshell
 
 import "../core" as Core
 
-// Clock (bar module)
-
 Core.BarButton {
     id: root
 
@@ -79,10 +77,6 @@ Core.BarButton {
         Text {
             text: Qt.formatDateTime(systemClock.date, "mm")
 
-            // The minutes are the accent whether the calendar is open or not:
-            // `clockMinute` resolved to `accent` through the theme's `ui.clock`
-            // key, which no theme wrote, so the open/closed branch was picking
-            // the same colour twice.
             color: Core.Theme.accent
 
             font.family: Core.Theme.fontFamily

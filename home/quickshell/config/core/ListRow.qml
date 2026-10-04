@@ -2,14 +2,9 @@ import QtQuick
 
 import "." as Core
 
-// ListRow
-
 Rectangle {
     id: root
 
-    // A Nerd Font glyph, or an image. `iconSource` wins when both are set: the
-    // launcher rows carry a desktop entry's real icon, and an Image of 20px is
-    // what a 20px glyph column is sized for.
     property string icon: ""
     property string iconSource: ""
 
@@ -24,7 +19,6 @@ Rectangle {
     property bool busy: false
     property bool dimmed: false
 
-    // Right-click gives window-space coordinates for the menu
     signal activated
     signal contextRequested(real mx, real my)
 
@@ -32,10 +26,6 @@ Rectangle {
 
     radius: Core.Theme.radiusRow
 
-    // The hover fill, and the only half of the row's colour that animates.
-    //
-    // Exactly one row is under the pointer at a time, so a transition on hover
-    // is a transition on one row.
     property color hoverFill: mouse.containsMouse ? Core.Theme.surfaceHover : "transparent"
 
     Behavior on hoverFill {
@@ -45,16 +35,6 @@ Rectangle {
         }
     }
 
-    // No Behavior here, deliberately.
-    //
-    // `active` does not belong to one row: a keypress flips it on the row you
-    // are leaving *and* the row you are entering, and animating both meant one
-    // keystroke read as two rows moving and neither looked settled. The row
-    // background, this icon's colour and the indicator bar below all change
-    // instantly for that reason. Selection is a state, not a transition --
-    // ResultsView says so where the lists that obey it are built, and
-    // Clipboard.qml's row worked this out the hard way and says so at the same
-    // length.
     color: root.active ? Core.Theme.surface : root.hoverFill
 
     opacity: root.dimmed ? 0.45 : 1.0
@@ -65,8 +45,6 @@ Rectangle {
             easing.type: Easing.OutQuint
         }
     }
-
-    // Active indicator bar
 
     Rectangle {
         anchors.left: parent.left
@@ -81,8 +59,6 @@ Rectangle {
 
         color: Core.Theme.accent
     }
-
-    // Leading icon
 
     Text {
         id: iconText
@@ -100,7 +76,6 @@ Rectangle {
 
         color: root.active ? Core.Theme.accent : root.iconColor
 
-        // The spinner replaces the glyph, so it replaces the image too.
         visible: (root.icon !== "" || root.iconSource !== "") && !root.busy
 
         Behavior on opacity {
@@ -118,8 +93,6 @@ Rectangle {
 
         source: root.iconSource
 
-        // A 20px box rendering a 48px or 256px PNG is where the memory goes,
-        // and these are rebuilt on every filter keystroke.
         sourceSize.width: 40
         sourceSize.height: 40
 
@@ -128,8 +101,6 @@ Rectangle {
         fillMode: Image.PreserveAspectFit
         smooth: true
     }
-
-    // Busy spinner (replaces the icon)
 
     Text {
         anchors.centerIn: iconText
@@ -160,8 +131,6 @@ Rectangle {
             duration: 900
         }
     }
-
-    // Title + subtitle
 
     Column {
         anchors.left: iconText.right
@@ -203,8 +172,6 @@ Rectangle {
         }
     }
 
-    // Trailing badge
-
     Text {
         id: trailingText
 
@@ -219,8 +186,6 @@ Rectangle {
 
         color: root.trailingColor
     }
-
-    // Interaction
 
     MouseArea {
         id: mouse
@@ -244,8 +209,6 @@ Rectangle {
             root.activated();
         }
     }
-
-    // Press feedback
 
     scale: mouse.pressed ? 0.97 : 1.0
 

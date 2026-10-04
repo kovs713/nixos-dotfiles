@@ -6,21 +6,14 @@ import Quickshell.Services.Pipewire
 
 import "../core" as Core
 
-// AudioService
-
 Singleton {
     id: root
-
-    // Defaults
 
     readonly property var sink: Pipewire.defaultAudioSink
 
     readonly property var source: Pipewire.defaultAudioSource
 
-    // Monitor sources are the "listen to what is playing" loopback devices.
     property bool showMonitors: false
-
-    // Node lists
 
     readonly property var allNodes: (Pipewire.nodes && Pipewire.nodes.values) ? Pipewire.nodes.values : []
 
@@ -70,7 +63,6 @@ Singleton {
         return out;
     }
 
-    // Per-application playback streams (Spotify, Firefox, ...).
     readonly property var streams: {
         const out = [];
 
@@ -82,7 +74,6 @@ Singleton {
             if (!n.isStream)
                 continue;
 
-            // Recording streams are noise in a volume mixer.
             if (!n.isSink)
                 continue;
             out.push(n);
@@ -91,7 +82,6 @@ Singleton {
         return out;
     }
 
-    // Keep the audio properties of everything we display bound and live.
     readonly property var tracked: {
         const out = [];
 
@@ -108,8 +98,6 @@ Singleton {
         objects: root.tracked
     }
 
-    // Derived state for the bar
-
     readonly property real volume: (root.sink && root.sink.audio) ? root.sink.audio.volume : 0
 
     readonly property bool muted: (root.sink && root.sink.audio) ? root.sink.audio.muted : true
@@ -121,8 +109,6 @@ Singleton {
     readonly property bool micMuted: (root.source && root.source.audio) ? root.source.audio.muted : true
 
     readonly property int micPercent: Math.round(root.micVolume * 100)
-
-    // OSD triggers
 
     onVolumeChanged: Core.OsdController.show("volume")
 
@@ -151,8 +137,6 @@ Singleton {
 
     readonly property string micIcon: (!root.source || root.micMuted) ? Core.Icons.micOff : Core.Icons.mic
 
-    // Helpers
-
     function label(node) {
         if (!node)
             return "Unknown device";
@@ -169,7 +153,6 @@ Singleton {
         return "Unknown device";
     }
 
-    // Application name for a stream, falling back to the node name.
     function streamLabel(node) {
         if (!node)
             return "Unknown app";
@@ -185,7 +168,6 @@ Singleton {
                     return props["media.name"];
             }
         } catch (e) {
-            // properties is optional depending on the build
         }
 
         return root.label(node);
@@ -198,7 +180,6 @@ Singleton {
         return node.name.indexOf(".monitor") >= 0;
     }
 
-    // A rough guess at the device type, purely for the row icon.
     function iconFor(node) {
         if (!node)
             return Core.Icons.speaker;
@@ -242,9 +223,6 @@ Singleton {
         return Math.round(root.volumeOf(node) * 100);
     }
 
-    // Mutations
-
-    // Hard ceiling.
     readonly property real maxVolume: 1.0
 
     function setVolume(node, value) {
@@ -254,7 +232,6 @@ Singleton {
 
         node.audio.volume = clamped;
 
-        // Nudging the slider off zero should unmute, otherwise the control appears dead.
         if (clamped > 0.0 && node.audio.muted)
             node.audio.muted = false;
     }
@@ -297,8 +274,6 @@ Singleton {
         else
             root.setDefaultSource(node);
     }
-
-    // External tools
 
     readonly property Process launcher: Process {
         id: launcherImpl

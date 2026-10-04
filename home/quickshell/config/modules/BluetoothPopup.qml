@@ -5,8 +5,6 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// BluetoothPopup
-
 Core.PopupSurface {
     id: popup
 
@@ -17,7 +15,6 @@ Core.PopupSurface {
 
     readonly property var svc: Services.BluetoothService
 
-    // Start discovering as soon as the menu opens
     onDidOpen: {
         if (popup.svc.powered)
             popup.svc.setDiscovering(true);
@@ -28,13 +25,9 @@ Core.PopupSurface {
             popup.svc.setDiscovering(false);
     }
 
-    // Content
-
     contentComponent: Component {
         Column {
             spacing: Core.Theme.spacing
-
-            // Header
 
             Core.PopupHeader {
                 width: parent.width
@@ -77,8 +70,6 @@ Core.PopupSurface {
                 trailing: popup.svc.discovering ? "scanning…" : popup.svc.deviceModel.count + " found"
             }
 
-            // Device list
-
             Core.ExpandableList {
                 id: list
 
@@ -93,7 +84,6 @@ Core.PopupSurface {
                 delegate: Core.ListRow {
                     id: devRow
 
-                    // These roles are prefixed because `name`, `icon` and `state` collide with ListRow's own properties, which produces a self-referential
                     required property string address
                     required property string deviceName
                     required property string deviceIcon
@@ -122,8 +112,6 @@ Core.PopupSurface {
 
                     busy: popup.svc.pendingAddress === devRow.address
 
-                    // Left click: connect / disconnect
-
                     onActivated: {
                         if (!devRow.paired && !devRow.connected) {
                             popup.svc.pairDevice(devRow.address);
@@ -132,8 +120,6 @@ Core.PopupSurface {
 
                         popup.svc.toggleDevice(devRow.address);
                     }
-
-                    // Right click: full device menu
 
                     onContextRequested: function (mx, my) {
                         const items = [];
@@ -215,8 +201,6 @@ Core.PopupSurface {
                 }
             }
 
-            // Empty / off state
-
             Core.EmptyState {
                 width: parent.width
 
@@ -226,7 +210,6 @@ Core.PopupSurface {
 
                 text: popup.svc.powered ? "No devices yet — hit scan" : "Bluetooth is turned off"
             }
-
         }
     }
 }
