@@ -66,7 +66,6 @@ in
       anki.enable = true;
       btop.enable = true;
       mpv.enable = true;
-      opencode.enable = true;
 
       nixvim.enable = false;
       # Zen prioritize gnome shell themes over kvantum

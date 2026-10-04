@@ -38,12 +38,6 @@
       "description": "Interactive tutor — quiz-driven learning, probe → plan → teach loop",
       "prompt": "{file:~/.config/opencode/agent/teach.md}",
       "permission": "allow"
-    },
-    "title": {
-      "disable": true
-    },
-    "summary": {
-      "disable": true
     }
   }
 }
