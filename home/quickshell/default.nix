@@ -9,6 +9,8 @@ let
   '';
 in
 {
+  imports = [ ./theme.nix ];
+
   home.packages = with pkgs; [
     quickshell
 

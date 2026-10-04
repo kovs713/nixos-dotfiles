@@ -1,8 +1,6 @@
 {
   imports = [
-    ./quickshell
-    ./quickshell/theme.nix
-
+    ../quickshell
     ./hyprland.nix
   ];
 }
