@@ -21,7 +21,9 @@ Core.BarButton {
             Services.NetworkService.rescan();
     }
     onSecondary: Services.NetworkService.openEditor
-    onAlternate: Services.NetworkService.toggleWifi
+    onAlternate: function () {
+        Services.NetworkService.toggleWifi();
+    }
     onScrolled: function (delta) {
         if (delta !== 0)
             Services.NetworkService.toggleWifi();
@@ -30,7 +32,11 @@ Core.BarButton {
 
     readonly property string link: Services.NetworkService.primaryLink
 
-    readonly property bool showEthernet: root.link === "ethernet"
+    // The wired glyph is not only "ethernet won": on a host with no radio it is
+    // the only link there is, so an unplugged cable still reads as ethernet and
+    // not as a wifi icon for hardware that does not exist. Both glyphs stay
+    // mounted and cross-fade, which is why this is not a choice of Text.
+    readonly property bool showEthernet: root.link === "ethernet" || !Services.NetworkService.wifiAvailable
 
     // Signal tier, with a deadband
 
@@ -64,7 +70,9 @@ Core.BarButton {
         font.family: Core.Theme.iconFont
         font.pixelSize: Core.Theme.iconSize
 
-        color: Core.Theme.foreground
+        // Muted while the cable is out, which on a wired-only host is the only
+        // thing the glyph has left to say.
+        color: root.link === "ethernet" ? Core.Theme.foreground : Core.Theme.foregroundMuted
 
         opacity: root.showEthernet ? 1.0 : 0.0
 

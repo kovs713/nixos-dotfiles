@@ -29,6 +29,21 @@ Singleton {
 
     readonly property bool ethAvailable: root.ethDevice !== ""
 
+    // What this host actually has, read off what nmcli reported rather than
+    // asked for once at startup.
+    //
+    // A wired desktop reports the ethernet device and no wifi one; a laptop with
+    // no adapter reports neither. Bar.qml hides the module on `available`, and
+    // NetworkPopup drops its whole WI-FI half on `wifiAvailable`, so the bar says
+    // what the machine has instead of what the shell was written for.
+    //
+    // False for the first few hundred milliseconds, until deviceProc lands. The
+    // module is hidden and then appears, which is the same trade BatteryService
+    // makes with `available`.
+    readonly property bool wifiAvailable: root.wifiDevice !== ""
+
+    readonly property bool available: root.wifiAvailable || root.ethAvailable
+
     readonly property bool ethConnected: root.ethState === "connected"
 
     // Unified link
@@ -429,11 +444,14 @@ Singleton {
     // Public API — Wi-Fi
 
     function toggleWifi() {
+        if (!root.wifiAvailable)
+            return;
+
         root.run(["nmcli", "radio", "wifi", root.wifiEnabled ? "off" : "on"]);
     }
 
     function rescan() {
-        if (!root.wifiEnabled)
+        if (!root.wifiAvailable || !root.wifiEnabled)
             return;
         root.scanning = true;
         root.run(["nmcli", "device", "wifi", "rescan"]);
@@ -505,11 +523,22 @@ Singleton {
 
     // Full refresh: link state, radio state, saved profiles, scan results.
     //
-    // Four nmcli processes. Called after every queued action, and by rescan().
+    // The wifi half only where there is a radio. `nmcli radio wifi` and
+    // `nmcli device wifi list` are errors without one, and a wired-only host
+    // would pay for both on every refresh -- including the one the poll timer
+    // fires at startup, before the first device read has said there is no radio.
+    //
+    // That startup read is why `wifiEnabled` is a default rather than a reading:
+    // on a wired-only host it stays true and is never used, and on a host with a
+    // radio the first refresh that follows a connected device corrects it.
     function refresh() {
         Core.Util.restart(root.deviceProc);
-        Core.Util.restart(root.radioProc);
         Core.Util.restart(root.savedProc);
+
+        if (!root.wifiAvailable)
+            return;
+
+        Core.Util.restart(root.radioProc);
         Core.Util.restart(root.wifiListProc);
     }
 

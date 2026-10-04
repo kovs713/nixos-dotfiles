@@ -1,10 +1,17 @@
-{ pkgs, variant, ... }:
+{
+  lib,
+  pkgs,
+  variant,
+  ...
+}:
 let
   quickshellConfig = pkgs.runCommand "quickshell-config" { } ''
     mkdir -p "$out"
     cp -r ${./config}/. "$out/"
     chmod -R u+w "$out"
+
     mkdir -p "$out/assets"
+
     chmod -R u-w "$out"
   '';
 in
@@ -14,8 +21,9 @@ in
   home.packages = with pkgs; [
     quickshell
 
-    # Wayland Utilities
+    # What the bar shells out to.
     wayland-utils
+    libnotify
 
     # Clipboard
     wl-clipboard
@@ -24,7 +32,6 @@ in
 
     # Hardware / Media Controls
     brightnessctl
-    libnotify
     blueman
 
     # Screen colour temperature.
@@ -54,7 +61,7 @@ in
   };
 
   home.activation.hyprsunset = ''
-    systemctl --user enable hyprsunset.service >/dev/null 2>&1 || true
+    ${pkgs.systemd}/bin/systemctl --user enable hyprsunset.service
   '';
 
   systemd.user.services.quickshell = {
@@ -80,7 +87,7 @@ in
         "XDG_SESSION_TYPE=wayland"
       ];
 
-      ExecStart = "${pkgs.quickshell}/bin/qs";
+      ExecStart = "${lib.getExe pkgs.quickshell}";
       Restart = "on-failure";
       RestartSec = 2;
       Slice = "session.slice";

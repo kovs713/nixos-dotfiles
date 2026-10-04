@@ -417,10 +417,14 @@ PanelWindow {
             BarSlot {
                 reveal: root.reveal
 
+                available: Services.BrightnessService.available
+
                 Mods.Brightness { id: brightness }
             }
 
-            Separator {}
+            Separator {
+                available: Services.BrightnessService.available
+            }
 
             BarSlot {
                 reveal: root.reveal
@@ -454,18 +458,26 @@ PanelWindow {
             BarSlot {
                 reveal: root.reveal
 
+                available: Services.NetworkService.available
+
                 Mods.Network { id: network }
             }
 
-            Separator {}
+            Separator {
+                available: Services.NetworkService.available
+            }
 
             BarSlot {
                 reveal: root.reveal
 
+                available: Services.BluetoothService.available
+
                 Mods.Bluetooth { id: bluetooth }
             }
 
-            Separator {}
+            Separator {
+                available: Services.BluetoothService.available
+            }
 
             BarSlot {
                 reveal: root.reveal
@@ -555,9 +567,17 @@ PanelWindow {
 
     // A module in the bar.
     //
-    // Ten of these, and the four properties below were written out ten times,
-    // differing only in the id -- and in the battery module, which hides itself
-    // when the machine has no battery.
+    // Eight of these, and the four properties below were written out eight times,
+    // differing only in the id -- and in the four hardware modules, which hide
+    // themselves when the machine has no battery, no backlight, no network device
+    // or no bluetooth adapter.
+    //
+    // Those four read `available` off their own service, which is what makes the
+    // bar the same on a laptop and on a wired desktop: no host list, no config
+    // file, and the hardware that is plugged in is the hardware in the bar. The
+    // cost is that the service behind a hidden slot still exists -- see
+    // NetworkService.available, which is why a wired-only host never spawns the
+    // wifi readers.
     //
     // The reveal multiplication is the whole reason the bar's width animates: a
     // collapsed module still occupies its slot, at a fraction of it, rather than
