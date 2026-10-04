@@ -30,11 +30,7 @@ in
     cliphist
     wtype
 
-    # Hardware / Media Controls
     brightnessctl
-    blueman
-
-    # Screen colour temperature.
     hyprsunset
   ];
 
@@ -46,19 +42,6 @@ in
     Exec=${pkgs.quickshell}/bin/qs
     SystemdService=quickshell.service
   '';
-
-  dconf.settings = {
-    "org/gnome/nm-applet" = {
-      disable-connected-notifications = true;
-      disable-disconnected-notifications = true;
-      disable-vpn-notifications = true;
-      suppress-wireless-networks-available = true;
-    };
-
-    "org/blueman/general" = {
-      plugin-list = [ "!ConnectionNotifier" ];
-    };
-  };
 
   home.activation.hyprsunset = ''
     ${pkgs.systemd}/bin/systemctl --user enable hyprsunset.service

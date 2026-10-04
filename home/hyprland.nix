@@ -38,6 +38,7 @@ in
     hyprcursor
     hyprshot
     hyprpicker
+    wireplumber
   ];
 
   systemd.user.services = {
