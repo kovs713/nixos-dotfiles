@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Toggle gpu-screen-recorder. Arg selects audio: none (default) | audio | av
+# Notifies on both ends. The second press lands in a fresh process that knows
+# nothing about the first, so the pid + filename live in a state file.
+# `exec` keeps our pid, so the pid we record here is gsr's pid later.
+# -o with an explicit name, not -ro: gsr 6.1.2 silently writes to stdout with
+# -ro, and a compositor launch swallows that.
+set -u
+
+audio=""
+case "${1:-}" in
+    none) ;;
+    audio) audio="default_output" ;;
+    av) audio="default_output|default_input" ;;
+    *) echo "usage: screenrec [none|audio|av]" >&2; exit 2 ;;
+esac
+
+dir="${XDG_VIDEOS_DIR:-$HOME/Videos}"
+state="${XDG_RUNTIME_DIR:-/tmp}/screenrec"
+mkdir -p "$dir"
+
+pid=$(cut -d' ' -f1 "$state" 2>/dev/null)
+
+if [ -n "${pid:-}" ] && kill -0 "$pid" 2>/dev/null; then
+    f=$(cut -d' ' -f2- "$state")
+    kill -INT "$pid"
+    # gsr finalizes the container on the way out; give it 3s, then insist.
+    for _ in $(seq 30); do
+        kill -0 "$pid" 2>/dev/null || break
+        sleep 0.1
+    done
+    kill -0 "$pid" 2>/dev/null && kill -TERM "$pid" 2>/dev/null
+    if [ -s "$f" ]; then
+        notify-send "Recording stopped" "$(basename "$f") ($(du -h "$f" | cut -f1))"
+    else
+        notify-send "Recording stopped" "nothing was written"
+    fi
+    rm -f "$state"
+    exit 0
+fi
+
+f="$dir/record-$(date +%F-%H%M%S).mkv"
+printf %s "$$ $f" >"$state"
+notify-send "Recording started" "$(basename "$f")"
+exec gpu-screen-recorder -w portal -k h264_vulkan -c mkv -f 60 ${audio:+-a "$audio"} -o "$f"

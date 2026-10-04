@@ -20,42 +20,42 @@ QtObject {
         "name": "Screenshot: annotate",
         "subtitle": "Draw on the captured region",
         "mdi": Icons.camera,
-        "command": "hyprshot -m region -z --raw | satty --filename -"
+        "command": "shot annotate"
     }, {
         "kind": "shell",
         "category": "Screen",
         "name": "Screenshot: clipboard",
         "subtitle": "Copy the captured region, no editor",
         "mdi": Icons.camera,
-        "command": "hyprshot -m region -z --clipboard-only"
+        "command": "shot clipboard"
     }, {
         "kind": "shell",
         "category": "Screen",
         "name": "Colour picker",
         "subtitle": "Pick a colour from the screen",
         "mdi": Icons.palette,
-        "command": "hyprpicker -a"
+        "command": "shot pick"
     }, {
         "kind": "shell",
         "category": "Record",
         "name": "Record: screen",
         "subtitle": "Portal picks screen or window, silent. Run again to stop",
         "mdi": Icons.record,
-        "command": "pkill -INT -x gpu-screen-recorder || mkdir -p ~/Videos && gpu-screen-recorder -w portal -k h264_vulkan -c mkv -f 60 -ro ~/Videos"
+        "command": "screenrec none"
     }, {
         "kind": "shell",
         "category": "Record",
         "name": "Record: screen with audio",
         "subtitle": "Portal picks screen or window, desktop audio. Run again to stop",
         "mdi": Icons.record,
-        "command": "pkill -INT -x gpu-screen-recorder || mkdir -p ~/Videos && gpu-screen-recorder -w portal -k h264_vulkan -c mkv -f 60 -a default_output -ro ~/Videos"
+        "command": "screenrec audio"
     }, {
         "kind": "shell",
         "category": "Record",
         "name": "Record: screen with audio and mic",
         "subtitle": "Portal picks screen or window, desktop audio and microphone. Run again to stop",
         "mdi": Icons.mic,
-        "command": "pkill -INT -x gpu-screen-recorder || mkdir -p ~/Videos && gpu-screen-recorder -w portal -k h264_vulkan -c mkv -f 60 -a \"default_output|default_input\" -ro ~/Videos"
+        "command": "screenrec av"
     }]
 
     function appResult(entry) {

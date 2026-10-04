@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Brightness for whatever the machine has: a laptop panel is a sysfs backlight,
+# the desktop monitor is DDC/CI over /dev/i2c-*. One command for both hosts, so
+# the Hyprland binds do not care which one they run on.
+# Usage: backlight [get|up|down]   (get prints the current percent)
+set -uo pipefail
+
+shopt -s nullglob
+panels=(/sys/class/backlight/*)
+
+step=5
+
+case "${1:-get}" in
+    get)
+        if ((${#panels[@]})); then
+            brightnessctl get
+        else
+            ddcutil getvcp 10 | sed -n 's/.*current value = \([0-9]*\).*/\1/p'
+        fi
+        ;;
+    up | down)
+        sign=+
+        [[ $1 == down ]] && sign=-
+        if ((${#panels[@]})); then
+            brightnessctl -e4 -n2 set "$step%$sign"
+        else
+            ddcutil setvcp 10 "$sign" "$step"
+        fi
+        ;;
+    *)
+        echo "usage: backlight [get|up|down]" >&2
+        exit 2
+        ;;
+esac

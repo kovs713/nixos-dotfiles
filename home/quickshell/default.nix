@@ -28,6 +28,7 @@ in
     wtype
 
     brightnessctl
+    ddcutil
     hyprsunset
 
     netcat-openbsd

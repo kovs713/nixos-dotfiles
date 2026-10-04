@@ -104,18 +104,11 @@ in
       (bind "${mod} + CTRL + E" (exec "qs ipc call emoji toggle"))
       (bind "${mod} + SPACE" (exec "qs ipc call launcher toggle"))
 
-      (bind "ALT + Print" (exec "hyprpicker -a"))
-      # Screenshot
-      (bind "Print" (exec "hyprshot -m region -z --clipboard-only"))
-      (bind "${mod} + Print" (exec "hyprshot -m region -z --raw | satty --filename -"))
-
-      # Screen record toggle
-      (bind "CTRL + Print" (
-        exec "pkill -INT -x gpu-screen-recorder || gpu-screen-recorder -w portal -k h264_vulkan -c mkv -f 60 -a \"default_output|default_input\" -ro ~/Videos"
-      ))
-      (bind "CTRL + ALT + Print" (
-        exec "pkill -INT -x gpu-screen-recorder || gpu-screen-recorder -w portal -k h264_vulkan -c mkv -f 60 -a default_output -ro ~/Videos"
-      ))
+      (bind "ALT + Print" (exec "shot pick"))
+      (bind "Print" (exec "shot clipboard"))
+      (bind "${mod} + Print" (exec "shot annotate"))
+      (bind "CTRL + Print" (exec "screenrec av"))
+      (bind "CTRL + ALT + Print" (exec "screenrec audio"))
 
       (bind "${mod} + mouse:272" "hl.dsp.window.drag()")
       (bind "${mod} + mouse:273" "hl.dsp.window.resize()")
@@ -126,8 +119,8 @@ in
       (bind "XF86AudioMute" (exec "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
       (bindRepeat "XF86AudioRaiseVolume" (exec "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"))
       (bindRepeat "XF86AudioLowerVolume" (exec "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%-"))
-      (bindRepeat "XF86MonBrightnessUp" (exec "brightnessctl -e4 -n2 set 5%+"))
-      (bindRepeat "XF86MonBrightnessDown" (exec "brightnessctl -e4 -n2 set 5%-"))
+      (bindRepeat "XF86MonBrightnessUp" (exec "backlight up"))
+      (bindRepeat "XF86MonBrightnessDown" (exec "backlight down"))
 
       # Workspaces
       (bind "${mod} + 1" (focusWorkspace "1"))
@@ -162,7 +155,9 @@ in
 
       input = {
         kb_layout = "us,ru";
-        kb_options = "grp:alt_space_toggle,caps:escape";
+        # no caps:escape: xkb options are global, so they would turn the corne's
+        # capslock into esc too. laptop builtin keyboard gets caps -> esc in keyd.
+        kb_options = "grp:alt_space_toggle";
         repeat_rate = 25;
         repeat_delay = 500;
       };

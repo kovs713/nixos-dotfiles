@@ -55,6 +55,11 @@
     ];
   };
 
+  # NixOS не даёт uaccess обычным HID-устройствам — без этого vial/qmk не видят /dev/hidraw*
+  services.udev.extraRules = ''
+    SUBSYSTEM=="hidraw", GROUP="input", MODE="0660"
+  '';
+
   security.sudo.extraConfig = ''
     Cmnd_Alias X_ROUTINE = \
       /run/current-system/sw/bin/nixos-rebuild switch, \

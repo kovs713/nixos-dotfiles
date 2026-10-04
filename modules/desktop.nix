@@ -45,7 +45,33 @@ in
     ];
   };
 
-  services.xserver.xkb.options = "caps:escape";
+  # no global xkb caps:escape: it would also turn the corne's capslock into esc.
+  # Instead keyd remaps capslock -> esc per device, corne (4653:0004) excluded, so
+  # the split keeps a real capslock anywhere while every other board (laptop builtin
+  # included) gains caps-as-esc.
+  services.keyd = {
+    enable = true;
+    keyboards.caps = {
+      ids = [
+        "*"
+        "-4653:0004"
+      ];
+      settings.main = {
+        raw_modes = "no";
+        capslock = "esc";
+      };
+    };
+  };
+
+  # keyd subsumes the physical keyboard, so libinput would take it for an external
+  # one and disable-while-typing would stop working on the touchpad.
+  services.libinput.enable = true;
+  environment.etc."libinput/local-overrides.quirks".text = ''
+    [Serial Keyboards]
+    MatchUdevType=keyboard
+    MatchName=keyd*keyboard
+    AttrKeyboardIntegration=internal
+  '';
 
   xdg.portal = {
     enable = true;

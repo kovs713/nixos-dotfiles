@@ -3,6 +3,7 @@
     ./packages
     ./quickshell
     ./themed
+    ./mimeapps.nix
 
     ./hyprland.nix
     ./ghostty.nix

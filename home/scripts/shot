@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Screenshot and colour picker, shared by the Hyprland binds and the launcher.
+# Interactive: hyprshot and hyprpicker own the region/cursor grab themselves.
+set -u
+
+case "${1:-}" in
+    annotate) hyprshot -m region -z --raw | satty --filename - ;;
+    clipboard) exec hyprshot -m region -z --clipboard-only ;;
+    pick) exec hyprpicker -a ;;
+    *) echo "usage: shot [annotate|clipboard|pick]" >&2; exit 2 ;;
+esac
