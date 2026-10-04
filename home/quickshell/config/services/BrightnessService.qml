@@ -27,7 +27,7 @@ Singleton {
     property double ignoreReadsUntil: 0
 
     function ingest(percent) {
-        if (percent < 0)
+        if (isNaN(percent) || percent < 0)
             return;
         root.available = true;
 
@@ -90,8 +90,19 @@ Singleton {
         return Math.pow(raw / root.maxRaw, 0.25) * 100;
     }
 
+    readonly property Process ddc: Process {
+        command: ["backlight", "get"]
+
+        stdout: StdioCollector {
+            onStreamFinished: root.ingest(parseInt(text.trim()))
+        }
+    }
+
     function change(amount) {
-        Quickshell.execDetached(["brightnessctl", "-e4", "-n2", "set", amount]);
+        if (root.device === "")
+            Quickshell.execDetached(["backlight", amount > 0 ? "up" : "down"]);
+        else
+            Quickshell.execDetached(["brightnessctl", "-e4", "-n2", "set", amount]);
     }
 
     function applyPredicted(next) {
@@ -139,12 +150,18 @@ Singleton {
     }
 
     readonly property Timer poll: Timer {
-        interval: root.interacting ? 25 : 400
+        // DDC reads cost an i2c roundtrip, the sysfs file is free.
+        interval: root.device === "" ? 1000 : root.interacting ? 25 : 400
 
-        running: root.device !== ""
+        running: root.device !== "" || root.probeTries >= 5
         repeat: true
 
-        onTriggered: root.backlightFile.reload()
+        onTriggered: {
+            if (root.device === "")
+                Core.Util.restart(root.ddc);
+            else
+                root.backlightFile.reload();
+        }
     }
 
     readonly property Timer discoveryRetry: Timer {
