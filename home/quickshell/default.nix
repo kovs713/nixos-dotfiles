@@ -33,6 +33,7 @@ in
     brightnessctl
     hyprsunset
 
+    netcat-openbsd
   ];
 
   xdg.configFile."quickshell".source = quickshellConfig;
