@@ -6,10 +6,7 @@
     "opencode-vibeguard",
     "@dietrichgebert/ponytail"
   ],
-  "provider": {},
-  "model": "",
   "default_agent": "plan",
-  "mcp": {},
   "permission": "allow",
   "agent": {
     "chat": {
@@ -22,17 +19,6 @@
         "task": "deny",
         "todowrite": "deny",
         "lsp": "deny"
-      },
-      "tools": {
-        "write": false,
-        "edit": false,
-        "patch": false,
-        "apply_patch": false,
-        "bash": false,
-        "task": false,
-        "todowrite": false,
-        "todoread": false,
-        "lsp": false
       }
     },
     "build": {
