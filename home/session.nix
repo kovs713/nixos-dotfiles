@@ -41,7 +41,6 @@
   programs.zoxide.enable = true;
   programs.zoxide.enableFishIntegration = true;
   programs.foot.enable = true;
-  programs.ghostty.enable = true;
 
   programs.chromium.enable = true;
   programs.zen-browser = {

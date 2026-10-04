@@ -55,6 +55,9 @@ in
       font-packages.enable = true;
       fontconfig.enable = true;
 
+      foot.enable = true;
+      ghostty.enable = true;
+
       zen-browser = {
         enable = true;
         profileNames = [ "default" ];
