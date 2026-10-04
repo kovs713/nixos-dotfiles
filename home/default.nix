@@ -3,11 +3,9 @@
   hostname,
 
   inputs,
+  lib,
   ...
 }:
-let
-  hostnameDir = if hostname == "desktop" then ./desktop else ./laptop;
-in
 {
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
@@ -20,7 +18,7 @@ in
     inputs.zen-browser.homeModules.default
     inputs.agenix.homeManagerModules.age
 
-    hostnameDir
     ./home.nix
-  ];
+  ]
+  ++ lib.optional (hostname == "laptop") ./laptop;
 }
