@@ -1,7 +1,8 @@
 # nixos dotfiles ❄️ 
 
-One flake, two machines, two very different desktops.  
-Laptop runs a quickshell bar, desktop pretends to be a mac.
+One flake, two machines, one shell. Laptop and desktop run the same
+quickshell bar; what differs is the hardware under it, which the bar reads at
+runtime.
 
 ---
 
@@ -13,7 +14,7 @@ Laptop runs a quickshell bar, desktop pretends to be a mac.
 | shell | fish, autologin straight into hyprland |
 | wm | hyprland (a fork of it) |
 | bar | quickshell — bar, popups, notifications, launcher, notes |
-| desktop shell | illogical-impulse — menubar, mac dock, no agent island |
+| per-host bar | nothing. slots follow the hardware: no radio, no bluetooth, no backlight, no battery means no slot |
 | editor | nvim through the nixvim module, monochrome |
 | theme | stylix, two base16 schemes |
 | rebuilds | `x` |
@@ -34,11 +35,10 @@ sudo nixos-install --flake .#laptop-black
 |---|---|
 | `laptop-black` | laptop, dark |
 | `laptop-white` | laptop, light |
-| `desktop` | desktop, dark, mac shell |
+| `desktop-black` | desktop, dark |
+| `desktop-white` | desktop, light |
 
 `hosts/<name>/hardware-configuration.nix` is whatever the installer generated.
-The desktop doesn't have one yet, so that output needs the file dropped in
-before it evaluates.
 
 ### layout
 
@@ -47,15 +47,17 @@ before it evaluates.
 | `flake.nix` | inputs, `mkHost`, outputs, dev shell |
 | `modules/` | shared, split by domain: base, boot, desktop, networking, users |
 | `hosts/<name>/` | one directory per machine |
-| `home/` | home-manager: `laptop/` and `desktop/` are siblings |
+| `home/` | home-manager: `home.nix` and `hyprland.nix` are shared, `laptop/` and `desktop/` are the two hosts, `quickshell/` is the bar both of them run |
 | `packages/` | what the repo builds rather than configures: `x`, `nixvim` |
 
 ---
 
 ## theme
 
-`black` and `white` live in `home/themed/schemes/`. The variant is part of the
-output name, so switching is a rebuild, not a variable to edit:
+`black` and `white` live in `home/themed/schemes/`, and every machine has one
+output per variant. the variant is part of the output name, so switching is a
+rebuild rather than a variable to edit, and `x theme` is that rebuild with the
+name flipped:
 
 ```bash
 x theme
@@ -63,7 +65,7 @@ x theme
 
 stylix owns every color and font and nothing names a hex value. two things stay
 hand written because stylix has no target for either: the bar's 18 roles in
-`home/laptop/quickshell/theme.nix`, and monochrome in nvim, which reads
+`home/quickshell/theme.nix`, and monochrome in nvim, which reads
 `org.gnome.desktop.interface color-scheme` by itself and likes whatever set it —
 that's also why `stylix.targets.nixvim` is off.
 
@@ -110,15 +112,13 @@ bash packages/x/check.sh laptop-black
 ```
 
 those four node tests lift the bar's pure logic out of QML and assert it, which
-is the part lint can't see. `home/laptop/quickshell/lint.sh` is qmllint over
-every file — 340 warnings is the baseline, so diff against it.
+is the part lint can't see. `home/quickshell/lint.sh` is qmllint over
+every file — 344 warnings is the baseline, so diff against it.
 
-`desktop` is not part of any of this: it has no hardware configuration and no
-display, so there is nothing on it to validate.
-
----
-
-[home/desktop/README.md](home/desktop/README.md).
+`x ch desktop-black` is the same script against the other outputs. All four
+share every file the checks read, so a run against one covers the other's
+configuration too; only the two host directories differ, and neither is more
+than a package list and an import.
 
 ---
 
