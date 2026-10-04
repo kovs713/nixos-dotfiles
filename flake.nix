@@ -40,9 +40,10 @@
         {
           hostname,
           variant,
-          target ? "${hostname}-${variant}",
         }:
         let
+          target = "${hostname}-${variant}";
+
           specialArgs = {
             inherit
               system
@@ -191,10 +192,13 @@
           hostname = "laptop";
           variant = "white";
         };
-        desktop = mkHost {
+        desktop-black = mkHost {
           hostname = "desktop";
           variant = "black";
-          target = "desktop";
+        };
+        desktop-white = mkHost {
+          hostname = "desktop";
+          variant = "white";
         };
       };
     };

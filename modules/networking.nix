@@ -1,6 +1,6 @@
-{ ... }:
+{ hostname, ... }:
 {
-  networking.hostName = "nixos";
+  networking.hostName = hostname;
   networking.networkmanager.enable = true;
 
   services.zerotierone = {
