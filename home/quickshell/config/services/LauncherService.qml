@@ -2,6 +2,8 @@ pragma Singleton
 
 import QtQml
 
+import "../core" as Core
+
 QtObject {
     id: root
 
@@ -12,6 +14,48 @@ QtObject {
         "subtitle": NightLightService.active
             ? "Restore the native colour temperature"
             : "Shift the display warmer"
+    }, {
+        "kind": "shell",
+        "category": "Screen",
+        "name": "Screenshot: annotate",
+        "subtitle": "Draw on the captured region",
+        "mdi": Icons.camera,
+        "command": "hyprshot -m region -z --raw | satty --filename -"
+    }, {
+        "kind": "shell",
+        "category": "Screen",
+        "name": "Screenshot: clipboard",
+        "subtitle": "Copy the captured region, no editor",
+        "mdi": Icons.camera,
+        "command": "hyprshot -m region -z --clipboard-only"
+    }, {
+        "kind": "shell",
+        "category": "Screen",
+        "name": "Colour picker",
+        "subtitle": "Pick a colour from the screen",
+        "mdi": Icons.palette,
+        "command": "hyprpicker -a"
+    }, {
+        "kind": "shell",
+        "category": "Record",
+        "name": "Record: screen",
+        "subtitle": "Portal picks screen or window, silent. Run again to stop",
+        "mdi": Icons.record,
+        "command": "pkill -INT -x gpu-screen-recorder || mkdir -p ~/Videos && gpu-screen-recorder -w portal -k h264_vulkan -c mkv -f 60 -ro ~/Videos"
+    }, {
+        "kind": "shell",
+        "category": "Record",
+        "name": "Record: screen with audio",
+        "subtitle": "Portal picks screen or window, desktop audio. Run again to stop",
+        "mdi": Icons.record,
+        "command": "pkill -INT -x gpu-screen-recorder || mkdir -p ~/Videos && gpu-screen-recorder -w portal -k h264_vulkan -c mkv -f 60 -a default_output -ro ~/Videos"
+    }, {
+        "kind": "shell",
+        "category": "Record",
+        "name": "Record: screen with audio and mic",
+        "subtitle": "Portal picks screen or window, desktop audio and microphone. Run again to stop",
+        "mdi": Icons.mic,
+        "command": "pkill -INT -x gpu-screen-recorder || mkdir -p ~/Videos && gpu-screen-recorder -w portal -k h264_vulkan -c mkv -f 60 -a \"default_output|default_input\" -ro ~/Videos"
     }]
 
     function appResult(entry) {
@@ -29,7 +73,11 @@ QtObject {
         if (query.length === 0)
             return true;
 
-        return (row.name + " " + row.subtitle).toLowerCase().indexOf(query) >= 0;
+        const hay = (row.name + " " + row.subtitle).toLowerCase();
+
+        return hay.indexOf(query) >= 0
+            || Core.Fuzzy.wordPrefix(hay, query)
+            || Core.Fuzzy.subsequence(hay, query);
     }
 
     function search(rawQuery) {

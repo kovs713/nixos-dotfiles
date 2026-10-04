@@ -198,4 +198,6 @@ QtObject {
     readonly property string mouse: "\udb80\udf7c"
     readonly property string watch: "\udb81\udd71"
     readonly property string gamepad: "\udb81\udd8b"
+    readonly property string palette: "\udb80\udfe3"     // F03E3
+    readonly property string record: "\udb80\udfe5"      // F03E5
 }

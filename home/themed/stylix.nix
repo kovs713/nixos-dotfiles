@@ -67,6 +67,7 @@ in
       btop.enable = true;
       mpv.enable = true;
 
+      opencode.enable = false;
       nixvim.enable = false;
       # Zen prioritize gnome shell themes over kvantum
       gnome.enable = false;

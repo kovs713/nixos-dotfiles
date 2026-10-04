@@ -72,6 +72,9 @@ Core.LauncherView {
                 icon: {
                     const kind = row.modelData.kind;
 
+                    if (row.modelData.mdi)
+                        return row.modelData.mdi;
+
                     if (kind === "reminder")
                         return Core.Icons.timer;
 

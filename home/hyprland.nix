@@ -30,14 +30,17 @@ let
   focusDirection = direction: ''hl.dsp.focus({direction = "${direction}"})'';
 
   wallpaper = config.lib.stylix.pixel "base00";
-
 in
 {
   home.packages = with pkgs; [
     awww
     hyprcursor
-    hyprshot
+
     hyprpicker
+    hyprshot
+    satty
+    gpu-screen-recorder
+
     wireplumber
   ];
 
@@ -101,9 +104,19 @@ in
       (bind "${mod} + CTRL + E" (exec "qs ipc call emoji toggle"))
       (bind "${mod} + SPACE" (exec "qs ipc call launcher toggle"))
 
+      (bind "ALT + Print" (exec "hyprpicker -a"))
       # Screenshot
-      (bind "CTRL + Print" (exec "hyprpicker -a"))
       (bind "Print" (exec "hyprshot -m region -z --clipboard-only"))
+      (bind "${mod} + Print" (exec "hyprshot -m region -z --raw | satty --filename -"))
+
+      # Screen record toggle
+      (bind "CTRL + Print" (
+        exec "pkill -INT -x gpu-screen-recorder || gpu-screen-recorder -w portal -k h264_vulkan -c mkv -f 60 -a \"default_output|default_input\" -ro ~/Videos"
+      ))
+      (bind "CTRL + ALT + Print" (
+        exec "pkill -INT -x gpu-screen-recorder || gpu-screen-recorder -w portal -k h264_vulkan -c mkv -f 60 -a default_output -ro ~/Videos"
+      ))
+
       (bind "${mod} + mouse:272" "hl.dsp.window.drag()")
       (bind "${mod} + mouse:273" "hl.dsp.window.resize()")
 
