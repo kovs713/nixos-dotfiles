@@ -105,7 +105,10 @@
       stacks = {
         # quickshell/qml
         quickshell = with pkgs; [
+          quickshell
           qt6.qtdeclarative
+          qt6.qt5compat
+          qt6.qtpositioning
           gtk4-layer-shell
           gtk4
         ];
@@ -215,8 +218,10 @@
     apple-fonts.inputs.nixpkgs.follows = "nixpkgs";
 
     hyprland.url = "github:kovs713/Hyprland?ref=feat/omit-capture";
+    hyprland.inputs.nixpkgs.follows = "nixpkgs";
 
     voxtype.url = "github:peteonrails/voxtype/v1.0.1";
+    voxtype.inputs.nixpkgs.follows = "nixpkgs";
 
     agenix.url = "github:Mic92/agenix";
     agenix.inputs.nixpkgs.follows = "nixpkgs";
