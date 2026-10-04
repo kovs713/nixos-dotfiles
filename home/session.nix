@@ -38,6 +38,7 @@
 
   programs.home-manager.enable = true;
 
+  programs.fish.enable = true;
   programs.zoxide.enable = true;
   programs.zoxide.enableFishIntegration = true;
   programs.foot.enable = true;
