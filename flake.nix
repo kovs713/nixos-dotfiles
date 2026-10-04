@@ -95,6 +95,7 @@
         gcc
         jq
 
+        minikube
         kubectl
         age
 
@@ -105,11 +106,11 @@
       stacks = {
         # quickshell/qml
         quickshell = with pkgs; [
-          quickshell
           qt6.qtdeclarative
-          qt6.qt5compat
           qt6.qtpositioning
           gtk4-layer-shell
+          qt6.qt5compat
+          quickshell
           gtk4
         ];
 
@@ -203,6 +204,9 @@
 
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    quickshell.url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
+    quickshell.inputs.nixpkgs.follows = "nixpkgs";
 
     nixvim.url = "github:nix-community/nixvim";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";

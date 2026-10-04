@@ -33,17 +33,6 @@ in
   time.timeZone = "Asia/Tbilisi";
   i18n.defaultLocale = "en_US.UTF-8";
 
-  services.pipewire = {
-    enable = true;
-    pulse.enable = true;
-
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    wireplumber.enable = true;
-    jack.enable = true;
-    audio.enable = true;
-  };
-
   programs.obs-studio = {
     enable = true;
 

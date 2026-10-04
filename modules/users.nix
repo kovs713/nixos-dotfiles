@@ -1,7 +1,5 @@
 { pkgs, ... }:
 {
-  services.getty.autologinUser = "kovs";
-
   programs.fish.enable = true;
   programs.fish.loginShellInit = ''
     if status is-login; and test -z "$WAYLAND_DISPLAY"; and test "$(tty)" = "/dev/tty1"
