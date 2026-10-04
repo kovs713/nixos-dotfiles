@@ -2,6 +2,15 @@
 # Brightness for whatever the machine has: a laptop panel is a sysfs backlight,
 # the desktop monitor is DDC/CI over /dev/i2c-*. One command for both hosts, so
 # the Hyprland binds do not care which one they run on.
+#
+# The desktop monitor needs ~0.5s per `ddcutil setvcp`, the keys repeat every
+# 25ms. So one ddcutil per keypress just piles up competing processes on the
+# i2c bus: hold the key and the writes fight each other, spam it and every step
+# lands seconds late. Hence a worker owns the monitor -- the client only records
+# the wanted percent (instant, no i2c at all), the worker writes the latest
+# wanted value and lets whatever piled up meanwhile collapse into that one
+# write. That is the whole point: the client never blocks on the slow device.
+#
 # Usage: backlight [get|up|down]   (get prints the current percent)
 set -uo pipefail
 
@@ -10,25 +19,181 @@ panels=(/sys/class/backlight/*)
 
 step=5
 
+dir="${XDG_RUNTIME_DIR:-/tmp}/backlight-$UID"
+# Two lines: the percent the monitor is known to sit at, and the one we want.
+state=$dir/value
+lock=$dir/value.lock
+pid=$dir/worker.pid
+mkdir -p "$dir"
+
+ddc_current() {
+    # `= *`, not `= `: ddcutil pads the value to a fixed width.
+    ddcutil getvcp 10 | sed -n 's/.*current value = *\([0-9][0-9]*\).*/\1/p'
+}
+
+read_value() {
+    local -a l=()
+    if [[ -r $state ]]; then
+        mapfile -t l <"$state"
+    else
+        # First run: ask the monitor. Guessing 0 here would black out the screen,
+        # since that is also what the worker would then write.
+        l=("$(ddc_current)")
+    fi
+    applied=${l[0]:-0}
+    wanted=${l[1]:-$applied}
+}
+
+write_value() {
+    printf '%s\n%s\n' "$applied" "$wanted" >"$state.$$" && mv "$state.$$" "$state"
+}
+
+# Run $1 on the state under a lock: the key repeat spawns overlapping processes,
+# and without this two of them can both add a step to the same old value.
+locked() {
+    local fd
+    exec {fd}>"$lock" || return 1
+    flock "$fd"
+    read_value
+    "$@"
+    flock -u "$fd"
+    exec {fd}>&-
+}
+
+bump() {
+    case $1 in
+    up) ((wanted += step)) ;;
+    down) ((wanted -= step)) ;;
+    esac
+    ((wanted < 0)) && wanted=0
+    ((wanted > 100)) && wanted=100
+    write_value
+}
+
+# Adopt a value read from the monitor itself, unless a step of ours is still in
+# flight -- then the read is stale and adopting it would eat that step.
+adopt() {
+    if [[ $wanted == "$applied" && -n $seen ]]; then
+        applied=$wanted=$seen
+        write_value
+    fi
+}
+
+apply() {
+    [[ $wanted == "$applied" ]] && return 0
+    if ddcutil setvcp 10 "$wanted" >/dev/null 2>&1; then
+        applied=$wanted
+        write_value
+    else
+        return 1 # monitor asleep, retry in a second instead of hammering the bus
+    fi
+}
+
+worker() {
+    # The worker is only useful while the key is held, so it leaves when it runs
+    # out of work -- next press starts a fresh one. Otherwise it would outlive the
+    # session and keep rewriting a state file under a /run dir that is gone.
+    local idle_since=$SECONDS
+    while ((SECONDS - idle_since < 300)); do
+        if locked apply; then
+            idle_since=$SECONDS
+        else
+            sleep 1
+            continue
+        fi
+        sleep 0.05
+    done
+}
+
+start_worker() {
+    # Same reason as locked(): the key repeat hits us from many processes at once
+    # and they would all start a worker before any of them wrote the pid file.
+    local fd
+    exec {fd}>"$dir/start.lock" || return 1
+    flock "$fd"
+    if [[ ! -s $pid ]] || ! kill -0 "$(<"$pid")" 2>/dev/null; then
+        setsid bash "$0" worker >/dev/null 2>&1 &
+        disown
+        echo $! >"$pid"
+    fi
+    flock -u "$fd"
+    exec {fd}>&-
+}
+
+# The one thing worth checking: a burst of presses (what holding the key does)
+# must cost a handful of writes instead of one per press, and get must report the
+# monitor's own value. Run it with `backlight test`.
+test() {
+    local t
+    t=$(mktemp -d)
+    export XDG_RUNTIME_DIR=$t/run
+    mkdir -p "$XDG_RUNTIME_DIR" "$t/bin"
+    # A monitor as slow as the real one, logging every write. Body flush left
+    # because only tabs may be stripped by <<-, and this file indents with spaces.
+    cat >"$t/bin/ddcutil" <<'STUB'
+case $1 in
+    getvcp) printf 'VCP code 0x10 (Brightness): current value = %5d, max value = 100\n' "$(<"$STUB_STATE")" ;;
+    setvcp)
+        printf 'set %s\n' "$3" >>"$STUB_LOG"
+        sleep 0.3
+        printf %s "$3" >"$STUB_STATE"
+        ;;
+esac
+STUB
+    chmod +x "$t/bin/ddcutil"
+    export STUB_STATE=$t/value STUB_LOG=$t/log PATH=$t/bin:$PATH
+    printf 20 >"$STUB_STATE"
+
+    local i
+    for i in {1..10}; do bash "$0" up & done
+    wait
+    sleep 2
+    # Not one write: the worker may start mid-burst and write what exists then.
+    # The point is that 10 presses cost a handful of writes, not 10, and that the
+    # monitor ends up where the presses asked for.
+    local writes
+    writes=$(wc -l <"$STUB_LOG")
+    ((writes < 10)) && [[ $(tail -1 "$STUB_LOG") == "set 70" ]] || {
+        echo "FAIL: 10 presses cost $writes writes, want few, last one 70:" >&2
+        cat "$STUB_LOG" >&2
+        rm -rf "$t"
+        return 1
+    }
+    [[ $(bash "$0" get) == 70 ]] || {
+        echo "FAIL: get does not report the monitor value" >&2
+        rm -rf "$t"
+        return 1
+    }
+    # $pid is from the real runtime dir; the worker's is the one we just made.
+    local wpid=$XDG_RUNTIME_DIR/backlight-$UID/worker.pid
+    [[ -s $wpid ]] && kill "$(<"$wpid")" 2>/dev/null
+    rm -rf "$t"
+    echo "ok"
+}
+
 case "${1:-get}" in
-    get)
-        if ((${#panels[@]})); then
-            brightnessctl get
-        else
-            ddcutil getvcp 10 | sed -n 's/.*current value = \([0-9]*\).*/\1/p'
-        fi
-        ;;
-    up | down)
-        sign=+
-        [[ $1 == down ]] && sign=-
-        if ((${#panels[@]})); then
-            brightnessctl -e4 -n2 set "$step%$sign"
-        else
-            ddcutil setvcp 10 "$sign" "$step"
-        fi
-        ;;
-    *)
-        echo "usage: backlight [get|up|down]" >&2
-        exit 2
-        ;;
+get)
+    if ((${#panels[@]})); then
+        brightnessctl get
+    else
+        seen=$(ddc_current)
+        locked adopt
+        printf '%s\n' "$seen"
+    fi
+    ;;
+up | down)
+    if ((${#panels[@]})); then
+        [[ $1 == up ]] && sign=+ || sign=-
+        brightnessctl -e4 -n2 set "$step%$sign"
+    else
+        start_worker
+        locked bump "$1"
+    fi
+    ;;
+worker) worker ;;
+test) test ;;
+*)
+    echo "usage: backlight [get|up|down]" >&2
+    exit 2
+    ;;
 esac
