@@ -93,12 +93,8 @@
         libpulseaudio
         pkg-config
         gnumake
-        gcc
-        jq
-
-        minikube
-        kubectl
         age
+        gcc
 
         nixfmt
         nodejs

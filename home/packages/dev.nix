@@ -16,6 +16,10 @@
     nodejs
     nil
 
+    (lib.lowPrio minikube) # bundles its own kubectl
+    kubectl
+    k9s
+
     nixvim
     x
   ];
