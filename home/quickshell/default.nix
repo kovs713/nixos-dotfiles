@@ -32,6 +32,7 @@ in
 
     brightnessctl
     hyprsunset
+
   ];
 
   xdg.configFile."quickshell".source = quickshellConfig;
@@ -72,6 +73,29 @@ in
 
       ExecStart = "${lib.getExe pkgs.quickshell}";
       Restart = "on-failure";
+      RestartSec = 2;
+      Slice = "session.slice";
+
+      KillMode = "process";
+    };
+
+    Install = {
+      WantedBy = [ "graphical-session.target" ];
+    };
+  };
+
+  systemd.user.services.cliphist = {
+    Unit = {
+      Description = "Clipboard history watcher";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+      ConditionEnvironment = "WAYLAND_DISPLAY";
+    };
+
+    Service = {
+      Type = "exec";
+      ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --watch ${lib.getExe pkgs.cliphist} store";
+      Restart = "always";
       RestartSec = 2;
       Slice = "session.slice";
 
