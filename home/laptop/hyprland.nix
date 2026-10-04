@@ -5,24 +5,6 @@
   ...
 }:
 let
-  lua = lib.generators.mkLuaInline;
-  mod = "SUPER";
-
-  bind = keys: disp: {
-    _args = [
-      keys
-      (lua disp)
-    ];
-  };
-  bindRepeat = keys: disp: {
-    _args = [
-      keys
-      (lua disp)
-      (lua "{ repeating = true }")
-    ];
-  };
-  exec = cmd: "hl.dsp.exec_cmd([[${cmd}]])";
-
   colors = n: config.lib.stylix.colors.withHashtag.${n};
 in
 {
@@ -109,33 +91,5 @@ in
       Restart = "on-failure";
     };
     Install.WantedBy = [ "graphical-session.target" ];
-  };
-
-  wayland.windowManager.hyprland.settings = {
-    layer_rule = [
-      {
-        name = "gtk-layer-shell-olay";
-        match = {
-          namespace = "^(olay-overlay)$";
-        };
-        screen_share_mode = "omit";
-        blur = true;
-      }
-    ];
-
-    bind = [
-      (bind "F7" (exec "test -r /tmp/olay-overlay.pid && kill -USR1 \"$(cat /tmp/olay-overlay.pid)\""))
-      (bind "F8" (exec "test -r /tmp/olay-overlay.pid && kill -USR2 \"$(cat /tmp/olay-overlay.pid)\""))
-
-      (bindRepeat "XF86MonBrightnessUp" (exec "brightnessctl -e4 -n2 set 5%+"))
-      (bindRepeat "XF86MonBrightnessDown" (exec "brightnessctl -e4 -n2 set 5%-"))
-
-      (bind "${mod} + B" (exec "qs ipc call bar toggleAutoReveal"))
-      (bind "${mod} + V" (exec "qs ipc call clipboard toggle"))
-      (bind "${mod} + N" (exec "qs ipc call notes toggle"))
-      (bind "${mod} + SHIFT + N" (exec "qs ipc call nightlight toggle"))
-      (bind "${mod} + CTRL + E" (exec "qs ipc call emoji toggle"))
-      (bind "${mod} + SPACE" (exec "qs ipc call launcher toggle"))
-    ];
   };
 }

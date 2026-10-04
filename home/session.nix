@@ -37,6 +37,9 @@
   };
 
   programs.home-manager.enable = true;
+
+  programs.zoxide.enable = true;
+  programs.zoxide.enableFishIntegration = true;
   programs.foot.enable = true;
   programs.ghostty.enable = true;
 
@@ -46,7 +49,7 @@
     setAsDefaultBrowser = true;
 
     profiles.default = {
-      userChrome = builtins.readFile ./zen/userChrome.css;
+      userChrome = builtins.readFile ./themed/zen/userChrome.css;
 
       settings = {
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;

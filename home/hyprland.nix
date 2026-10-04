@@ -71,27 +71,34 @@ in
     monitor = [
       {
         output = "";
-        mode = "preferred";
+        mode = "highrr";
         position = "auto";
         scale = "1";
       }
     ];
 
-    window_rule = [
+    layer_rule = [
       {
-        name = "bitwarden";
+        name = "gtk-layer-shell-olay";
         match = {
-          title = ".*Bitwarden Password Manager.*";
+          namespace = "^(olay-overlay)$";
         };
-        float = true;
+        screen_share_mode = "omit";
+        blur = true;
       }
     ];
 
     bind = [
-      (bind "${mod} + Q" (exec "xdg-terminal-exec"))
+      (bind "${mod} + Q" (exec "ghostty"))
       (bind "${mod} + C" "hl.dsp.window.close()")
       (bind "${mod} + F" ''hl.dsp.window.float({ action = "toggle" })'')
       (bind "${mod} + X" (exec "voxtype record toggle"))
+      (bind "${mod} + B" (exec "qs ipc call bar toggleAutoReveal"))
+      (bind "${mod} + V" (exec "qs ipc call clipboard toggle"))
+      (bind "${mod} + N" (exec "qs ipc call notes toggle"))
+      (bind "${mod} + SHIFT + N" (exec "qs ipc call nightlight toggle"))
+      (bind "${mod} + CTRL + E" (exec "qs ipc call emoji toggle"))
+      (bind "${mod} + SPACE" (exec "qs ipc call launcher toggle"))
 
       # Screenshot
       (bind "CTRL + Print" (exec "hyprpicker -a"))
@@ -99,11 +106,14 @@ in
       (bind "${mod} + mouse:272" "hl.dsp.window.drag()")
       (bind "${mod} + mouse:273" "hl.dsp.window.resize()")
 
+      (bind "F7" (exec "test -r /tmp/olay-overlay.pid && kill -USR1 \"$(cat /tmp/olay-overlay.pid)\""))
+      (bind "F8" (exec "test -r /tmp/olay-overlay.pid && kill -USR2 \"$(cat /tmp/olay-overlay.pid)\""))
+
       (bind "XF86AudioMute" (exec "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
       (bindRepeat "XF86AudioRaiseVolume" (exec "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"))
       (bindRepeat "XF86AudioLowerVolume" (exec "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%-"))
-
-      (bind "${mod} + SHIFT + T" (exec "x theme"))
+      (bindRepeat "XF86MonBrightnessUp" (exec "brightnessctl -e4 -n2 set 5%+"))
+      (bindRepeat "XF86MonBrightnessDown" (exec "brightnessctl -e4 -n2 set 5%-"))
 
       # Workspaces
       (bind "${mod} + 1" (focusWorkspace "1"))
@@ -125,6 +135,8 @@ in
     ];
 
     config = {
+      cursor.no_hardware_cursors = 1;
+
       general = {
         gaps_in = 0;
         gaps_out = 0;
