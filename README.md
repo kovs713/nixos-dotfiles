@@ -80,7 +80,7 @@ x rb            # nixos-rebuild switch, live target
 x b             # nixos-rebuild build, live target
 x gc            # nix store gc
 x upd [input]   # nix flake update
-x ch            # everything under checks
+x ch            # nix parse, nixfmt, flake eval, qmllint
 x sh            # list the dev shell stacks
 x sh <stack>... # enter one or more: node, rust, go, python, lua,
                 #   quickshell, data, infra
@@ -93,27 +93,24 @@ never has to guess the machine or the theme.
 it, because the union is a rust toolchain, four language servers and a
 `qtdeclarative` build nobody wants at the same time. `flake.nix` holds the map,
 `x sh` reads the names out of it. every stack gets gcc, pkg-config, make and jq
-on top of its own list; `checks` is the one `x ch` uses. one stack goes through
-`nix develop`; two or more go through `nix shell`, because `nix develop` takes a
-single attribute and merges nothing while `nix shell` unions the PATH of
-several. `default` is empty, because `nix develop` with no name should ask which
-stack rather than answer for you.
+on top of its own list. one stack goes through `nix develop`; two or more go
+through `nix shell`, because `nix develop` takes a single attribute and merges
+nothing while `nix shell` unions the PATH of several. `default` is empty, because
+`nix develop` with no name should ask which stack rather than answer for you.
 
 ---
 
 ## checks
 
-`x ch` is `packages/x/check.sh`, run inside the `checks` dev shell because
-`nixfmt` and `node` are in neither the system nor the user `PATH`. the script
-takes the live target as its only argument:
+`x ch` is `packages/x/check.sh`. it takes the live target as its only argument:
 
 ```bash
-bash packages/x/check.sh laptop-black 
+bash packages/x/check.sh laptop-black
 ```
 
-those four node tests lift the bar's pure logic out of QML and assert it, which
-is the part lint can't see. `home/quickshell/lint.sh` is qmllint over
-every file — 344 warnings is the baseline, so diff against it.
+it parses every `.nix`, checks formatting with `nixfmt`, evaluates the target's
+toplevel, then runs `home/quickshell/lint.sh` — `qmllint` over every QML file.
+344 warnings is the baseline, so diff against it; errors must be zero.
 
 `x ch desktop-black` is the same script against the other outputs. All four
 share every file the checks read, so a run against one covers the other's
