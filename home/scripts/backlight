@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 # Brightness for whatever the machine has: a laptop panel is a sysfs backlight,
 # the desktop monitor is DDC/CI over /dev/i2c-*. One command for both hosts, so
-# the Hyprland binds do not care which one they run on.
+# the Hyprland binds do not care which one they run on. `get` prints the current
+# percent on either, so the shell has a single thing to poll.
 #
-# The desktop monitor needs ~0.5s per `ddcutil setvcp`, the keys repeat every
-# 25ms. So one ddcutil per keypress just piles up competing processes on the
-# i2c bus: hold the key and the writes fight each other, spam it and every step
-# lands seconds late. Hence a worker owns the monitor -- the client only records
-# the wanted percent (instant, no i2c at all), the worker writes the latest
-# wanted value and lets whatever piled up meanwhile collapse into that one
-# write. That is the whole point: the client never blocks on the slow device.
+# ddcutil re-reads the monitor's whole DDC capability table on every call unless
+# told not to, which costs ~0.5s of mostly system time -- that alone is what
+# made this unusable to poll. `--skip-ddc-checks` plus a cached bus number
+# (`detect` is the other 0.5s) brings a read to ~35ms. The shell polls this once
+# a second, so that number is the whole budget.
 #
-# Usage: backlight [get|up|down]   (get prints the current percent)
+# A write still costs ~80ms and the keys repeat every 25ms, so a worker owns the
+# monitor: the client only records the wanted percent (instant, no i2c at all),
+# the worker writes the latest wanted value and lets whatever piled up meanwhile
+# collapse into that one write. That is the point: the client never blocks on
+# the slow device.
+#
+# Usage: backlight [get|up|down]
 set -uo pipefail
 
 shopt -s nullglob
@@ -24,24 +29,114 @@ dir="${XDG_RUNTIME_DIR:-/tmp}/backlight-$UID"
 state=$dir/value
 lock=$dir/value.lock
 pid=$dir/worker.pid
+# The buses `ddcutil detect` found and the max the monitor reports, so the
+# slow detection runs once instead of on every poll.
+monitor=$dir/monitor
 mkdir -p "$dir"
 
+ddc_buses=()
+ddc_max=0
+ddc_percent=0
+
+# `VCP 10 C <current> <max>` for one bus. `--brief` skips the capability dump,
+# which is the expensive half of a plain `getvcp`.
+vcp() {
+    ddcutil --bus "$1" --skip-ddc-checks getvcp 10 --brief 2>/dev/null |
+        awk '$1 == "VCP" && $2 == "10" && $3 == "C" { print $4, $5; exit }'
+}
+
+read_monitor() {
+    local key value
+    ddc_buses=()
+    ddc_max=0
+    [[ -r $monitor ]] || return 1
+    while read -r key value; do
+        [[ $value =~ ^[0-9]+$ ]] || return 1
+        case $key in
+        bus) ddc_buses+=("$value") ;;
+        max) ddc_max=$value ;;
+        esac
+    done <"$monitor"
+    ((${#ddc_buses[@]} > 0 && ddc_max > 0))
+}
+
+detect_monitor() {
+    local -a found=()
+    local bus
+    # `detect --brief` prints the bus of a display before that display's
+    # connector, so a connector line is where one bus is complete.
+    while read -r bus; do
+        [[ $bus =~ ^[0-9]+$ ]] && found+=("bus $bus")
+    done < <(ddcutil detect --brief 2>/dev/null |
+        awk '/I2C bus:/ { bus = $NF; sub(/.*i2c-/, "", bus) }
+             /DRM connector:/ { print bus; bus = "" }')
+    ((${#found[@]} > 0)) || return 1
+
+    read -r _ max < <(vcp "${found[0]#bus }") || max=
+    [[ $max =~ ^[0-9]+$ ]] && ((max > 0)) || return 1
+    printf '%s\nmax %s\n' "${found[@]}" "$max" >"$monitor.$$" && mv "$monitor.$$" "$monitor"
+}
+
+# Any bus that answers counts; a display that is asleep does not.
 ddc_current() {
-    # `= *`, not `= `: ddcutil pads the value to a fixed width.
-    ddcutil getvcp 10 | sed -n 's/.*current value = *\([0-9][0-9]*\).*/\1/p'
+    local out current
+    read_monitor || { detect_monitor || return 1; read_monitor || return 1; }
+    for out in "${ddc_buses[@]}"; do
+        out=$(vcp "$out") || continue
+        read -r current _ <<<"$out"
+        [[ $current =~ ^[0-9]+$ ]] || continue
+        ddc_percent=$(((current * 100 + ddc_max / 2) / ddc_max))
+        return 0
+    done
+    return 1
+}
+
+# The monitor is asleep or the bus moved under us: drop the cache so the next
+# call redetects instead of writing to a bus that no longer answers.
+ddc_stale() {
+    rm -f "$monitor"
+    return 1
+}
+
+# ponytail: every cached bus gets the same percent, which is what a plain
+# `ddcutil setvcp` (no --bus) did before. Per-bus values when a second monitor
+# wants a different one.
+ddc_set() {
+    local bus
+    read_monitor || { detect_monitor || return 1; read_monitor || return 1; }
+    for bus in "${ddc_buses[@]}"; do
+        ddcutil --bus "$bus" --skip-ddc-checks --noverify setvcp 10 \
+            "$((($1 * ddc_max + 50) / 100))" >/dev/null 2>&1 || ddc_stale
+    done
+}
+
+panel_percent() {
+    local raw max
+    [[ -r ${panels[0]}/brightness && -r ${panels[0]}/max_brightness ]] || return 1
+    read -r raw <"${panels[0]}/brightness"
+    read -r max <"${panels[0]}/max_brightness"
+    ((max > 0)) || return 1
+    printf '%s\n' "$((raw * 100 / max))"
 }
 
 read_value() {
     local -a l=()
-    if [[ -r $state ]]; then
-        mapfile -t l <"$state"
-    else
-        # First run: ask the monitor. Guessing 0 here would black out the screen,
-        # since that is also what the worker would then write.
-        l=("$(ddc_current)")
+    [[ -r $state ]] && mapfile -t l <"$state"
+
+    # A level we cannot read is worse than no level at all: stepping from 0 makes
+    # the worker write 0, which is a black screen. So ask the hardware instead,
+    # and fail rather than guess if it will not answer.
+    if [[ ! ${l[0]-} =~ ^[0-9]+$ ]]; then
+        if ((${#panels[@]})); then
+            l=("$(panel_percent)")
+        else
+            ddc_current && l=("$ddc_percent")
+        fi
     fi
-    applied=${l[0]:-0}
-    wanted=${l[1]:-$applied}
+
+    [[ ${l[0]-} =~ ^[0-9]+$ ]] || return 1
+    applied=${l[0]}
+    [[ ${l[1]-} =~ ^[0-9]+$ ]] && wanted=${l[1]} || wanted=$applied
 }
 
 write_value() {
@@ -49,15 +144,16 @@ write_value() {
 }
 
 # Run $1 on the state under a lock: the key repeat spawns overlapping processes,
-# and without this two of them can both add a step to the same old value.
+# and without this two of them can both add a step to the same old value. A
+# state that will not read means no write either -- see read_value.
 locked() {
-    local fd
+    local fd rc=0
     exec {fd}>"$lock" || return 1
     flock "$fd"
-    read_value
-    "$@"
+    read_value && "$@" || rc=1
     flock -u "$fd"
     exec {fd}>&-
+    return "$rc"
 }
 
 bump() {
@@ -74,29 +170,41 @@ bump() {
 # flight -- then the read is stale and adopting it would eat that step.
 adopt() {
     if [[ $wanted == "$applied" && -n $seen ]]; then
-        applied=$wanted=$seen
+        # Two statements, not `applied=$wanted=$seen`: bash does not chain those,
+        # it expands the right hand side, so applied became the literal "100=100".
+        applied=$seen
+        wanted=$seen
         write_value
     fi
 }
 
 apply() {
+    ((ddc_buses[0])) || ddc_current || return 1
     [[ $wanted == "$applied" ]] && return 0
-    if ddcutil setvcp 10 "$wanted" >/dev/null 2>&1; then
-        applied=$wanted
-        write_value
-    else
-        return 1 # monitor asleep, retry in a second instead of hammering the bus
-    fi
+    ddc_set "$wanted" || return 1
+    applied=$wanted
+    write_value
 }
 
 worker() {
     # The worker is only useful while the key is held, so it leaves when it runs
     # out of work -- next press starts a fresh one. Otherwise it would outlive the
     # session and keep rewriting a state file under a /run dir that is gone.
-    local idle_since=$SECONDS
-    while ((SECONDS - idle_since < 300)); do
+    #
+    # Only a real write bumps the idle clock. Finding nothing to do must not: that
+    # is what kept the old worker alive for 300s, spinning on the lock at 20Hz and
+    # starving every `get` that came in behind it.
+    #
+    # The idle window is short on purpose. A worker that outlives the key hold by
+    # more than that has nothing to gain: the next press starts a fresh one, which
+    # writes immediately. So no press ever waits on a sleeping worker.
+    local idle_since=$SECONDS last="" applied
+    while ((SECONDS - idle_since < 2)); do
         if locked apply; then
-            idle_since=$SECONDS
+            [[ $applied == "$last" ]] || {
+                last=$applied
+                idle_since=$SECONDS
+            }
         else
             sleep 1
             continue
@@ -131,12 +239,19 @@ test() {
     # A monitor as slow as the real one, logging every write. Body flush left
     # because only tabs may be stripped by <<-, and this file indents with spaces.
     cat >"$t/bin/ddcutil" <<'STUB'
-case $1 in
-    getvcp) printf 'VCP code 0x10 (Brightness): current value = %5d, max value = 100\n' "$(<"$STUB_STATE")" ;;
+verb=
+for arg; do
+    case $arg in
+    detect | getvcp | setvcp) verb=$arg ;;
+    esac
+done
+case $verb in
+    detect) printf 'Display 1\n   I2C bus:          /dev/i2c-5\n   DRM connector:    card1-HDMI-A-1\n' ;;
+    getvcp) printf 'VCP 10 C %s 100\n' "$(<"$STUB_STATE")" ;;
     setvcp)
-        printf 'set %s\n' "$3" >>"$STUB_LOG"
+        printf 'set %s\n' "${@: -1}" >>"$STUB_LOG"
         sleep 0.3
-        printf %s "$3" >"$STUB_STATE"
+        printf %s "${@: -1}" >"$STUB_STATE"
         ;;
 esac
 STUB
@@ -164,6 +279,29 @@ STUB
         rm -rf "$t"
         return 1
     }
+    # The detection is cached, so a get after the burst must not ask `detect`
+    # again -- that is the cost this script exists to avoid.
+    local monitor_cache=$XDG_RUNTIME_DIR/backlight-$UID/monitor
+    grep -q '^max 100$' "$monitor_cache" || {
+        echo "FAIL: monitor cache not written" >&2
+        rm -rf "$t"
+        return 1
+    }
+    # A state file that is not a number must not become the level: the worker
+    # would write whatever it reads, and 0 is a black screen.
+    printf 'not-a-number\nneither\n' >"$XDG_RUNTIME_DIR/backlight-$UID/value"
+    [[ $(bash "$0" get) == 70 ]] || {
+        echo "FAIL: get does not recover from a corrupt state file" >&2
+        rm -rf "$t"
+        return 1
+    }
+    bash "$0" down
+    sleep 1
+    [[ $(bash "$0" get) == 65 ]] || {
+        echo "FAIL: a step from a corrupt state file did not come off the monitor" >&2
+        rm -rf "$t"
+        return 1
+    }
     # $pid is from the real runtime dir; the worker's is the one we just made.
     local wpid=$XDG_RUNTIME_DIR/backlight-$UID/worker.pid
     [[ -s $wpid ]] && kill "$(<"$wpid")" 2>/dev/null
@@ -174,9 +312,10 @@ STUB
 case "${1:-get}" in
 get)
     if ((${#panels[@]})); then
-        brightnessctl get
+        panel_percent
     else
-        seen=$(ddc_current)
+        seen=$(ddc_current && printf %s "$ddc_percent")
+        [[ -n $seen ]] || exit 1
         locked adopt
         printf '%s\n' "$seen"
     fi

@@ -7,6 +7,15 @@ import Quickshell.Io
 
 import "../core" as Core
 
+// One source of truth for brightness on both hosts: `backlight` reads a sysfs
+// backlight on the laptop and drives the monitor over DDC on the desktop, and
+// prints a plain percent either way. So nothing here detects devices or knows
+// about sysfs -- it reads a number, predicts the next one, and asks for the step.
+//
+// Reads cost a DDC roundtrip on the desktop, so they are a plain poll and the
+// level shown right after a press is a prediction. The poll is what makes it
+// converge; the short quiet window after a press is what stops a read that
+// caught the monitor mid-write from bouncing the OSD backwards.
 Singleton {
     id: root
 
@@ -18,79 +27,24 @@ Singleton {
 
     readonly property int stepSize: 5
 
-    property string device: ""
-
-    property int maxRaw: 0
-
-    property int probeTries: 0
-
     property double ignoreReadsUntil: 0
 
     function ingest(percent) {
         if (isNaN(percent) || percent < 0)
             return;
+
         root.available = true;
 
         if (Date.now() < root.ignoreReadsUntil)
             return;
+
         const value = Math.max(0, Math.min(100, Math.round(percent)));
 
-        if (value !== root.level) {
+        if (value !== root.level)
             root.level = value;
-
-            root.markInteraction();
-        }
     }
 
     readonly property Process probe: Process {
-        command: ["brightnessctl", "-m"]
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const line = text.trim().split("\n")[0];
-
-                if (!line)
-                    return;
-                const fields = line.split(",");
-
-                if (fields.length < 5)
-                    return;
-                const max = parseInt(fields[4]);
-
-                if (isNaN(max) || max <= 0)
-                    return;
-                root.device = fields[0];
-                root.maxRaw = max;
-
-                root.ingest(parseInt(String(fields[3]).replace("%", "")));
-            }
-        }
-    }
-
-    function runProbe() {
-        root.probeTries += 1;
-        Core.Util.restart(root.probe);
-    }
-
-    readonly property FileView backlightFile: FileView {
-        path: root.device === "" ? "" : "/sys/class/backlight/" + root.device + "/actual_brightness"
-
-        onLoaded: {
-            if (root.maxRaw <= 0)
-                return;
-            const raw = parseInt(root.backlightFile.text().trim());
-
-            if (isNaN(raw))
-                return;
-            root.ingest(root.percentOf(raw));
-        }
-    }
-
-    function percentOf(raw) {
-        return Math.pow(raw / root.maxRaw, 0.25) * 100;
-    }
-
-    readonly property Process ddc: Process {
         command: ["backlight", "get"]
 
         stdout: StdioCollector {
@@ -98,81 +52,37 @@ Singleton {
         }
     }
 
-    function change(amount) {
-        if (root.device === "")
-            Quickshell.execDetached(["backlight", amount > 0 ? "up" : "down"]);
-        else
-            Quickshell.execDetached(["brightnessctl", "-e4", "-n2", "set", amount]);
-    }
-
-    function applyPredicted(next) {
-        const clamped = Math.max(0, Math.min(100, Math.round(next)));
-
-        root.ignoreReadsUntil = Date.now() + 120;
-
-        root.markInteraction();
-
-        if (clamped !== root.level) {
-            root.level = clamped;
-        } else {
-            Core.OsdController.show("brightness");
-        }
+    function refresh() {
+        Core.Util.restart(root.probe);
     }
 
     function step(up) {
-        root.applyPredicted(root.level + (up ? root.stepSize : -root.stepSize));
+        const next = Math.max(0, Math.min(100, root.level + (up ? root.stepSize : -root.stepSize)));
 
-        root.change(up ? root.stepSize + "%+" : root.stepSize + "%-");
-    }
+        // At an end of the range there is no write to wait for, so the OSD still
+        // has to show the press happened.
+        if (next === root.level) {
+            Core.OsdController.show("brightness");
+            return;
+        }
 
-    function refresh() {
-        if (root.device === "")
-            root.runProbe();
-        else
-            root.backlightFile.reload();
+        root.ignoreReadsUntil = Date.now() + 150;
+        root.level = next;
+
+        Quickshell.execDetached(["backlight", up ? "up" : "down"]);
     }
 
     onLevelChanged: Core.OsdController.show("brightness")
 
-    property bool interacting: false
-
-    function markInteraction() {
-        root.interacting = true;
-        root.interactionCooldown.restart();
-    }
-
-    readonly property Timer interactionCooldown: Timer {
-        interval: 2500
-
-        repeat: false
-
-        onTriggered: root.interacting = false
-    }
-
     readonly property Timer poll: Timer {
-        // DDC reads cost an i2c roundtrip, the sysfs file is free.
-        interval: root.device === "" ? 1000 : root.interacting ? 25 : 400
-
-        running: root.device !== "" || root.probeTries >= 5
-        repeat: true
-
-        onTriggered: {
-            if (root.device === "")
-                Core.Util.restart(root.ddc);
-            else
-                root.backlightFile.reload();
-        }
-    }
-
-    readonly property Timer discoveryRetry: Timer {
         interval: 1000
 
-        running: root.device === "" && root.probeTries < 5
+        running: true
 
         repeat: true
 
-        onTriggered: root.runProbe()
+        onTriggered: root.refresh()
     }
 
-    Component.onCompleted: root.runProbe()
+    Component.onCompleted: root.refresh()
 }
