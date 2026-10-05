@@ -155,8 +155,6 @@ in
 
       input = {
         kb_layout = "us,ru";
-        # no caps:escape: xkb options are global, so they would turn the corne's
-        # capslock into esc too. laptop builtin keyboard gets caps -> esc in keyd.
         kb_options = "grp:alt_space_toggle";
         repeat_rate = 25;
         repeat_delay = 500;

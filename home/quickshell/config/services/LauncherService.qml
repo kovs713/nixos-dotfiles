@@ -19,42 +19,42 @@ QtObject {
         "category": "Screen",
         "name": "Screenshot: annotate",
         "subtitle": "Draw on the captured region",
-        "mdi": Icons.camera,
+        "mdi": Core.Icons.camera,
         "command": "shot annotate"
     }, {
         "kind": "shell",
         "category": "Screen",
         "name": "Screenshot: clipboard",
         "subtitle": "Copy the captured region, no editor",
-        "mdi": Icons.camera,
+        "mdi": Core.Icons.camera,
         "command": "shot clipboard"
     }, {
         "kind": "shell",
         "category": "Screen",
         "name": "Colour picker",
         "subtitle": "Pick a colour from the screen",
-        "mdi": Icons.palette,
+        "mdi": Core.Icons.palette,
         "command": "shot pick"
     }, {
         "kind": "shell",
         "category": "Record",
         "name": "Record: screen",
         "subtitle": "Portal picks screen or window, silent. Run again to stop",
-        "mdi": Icons.record,
+        "mdi": Core.Icons.record,
         "command": "screenrec none"
     }, {
         "kind": "shell",
         "category": "Record",
         "name": "Record: screen with audio",
         "subtitle": "Portal picks screen or window, desktop audio. Run again to stop",
-        "mdi": Icons.record,
+        "mdi": Core.Icons.record,
         "command": "screenrec audio"
     }, {
         "kind": "shell",
         "category": "Record",
         "name": "Record: screen with audio and mic",
         "subtitle": "Portal picks screen or window, desktop audio and microphone. Run again to stop",
-        "mdi": Icons.mic,
+        "mdi": Core.Icons.mic,
         "command": "screenrec av"
     }]
 

@@ -128,39 +128,19 @@
         notify_on_formatter = false;
 
         format_on_save = {
-          timeout_ms = 200;
+          timeout_ms = 1000;
           lsp_fallback = true;
         };
 
+        # oxlint is a linter, not a formatter -- nvim-lint handles it
         formatters_by_ft = {
-          javascript = [
-            "oxfmt"
-            "oxlint"
-          ];
-          typescript = [
-            "oxfmt"
-            "oxlint"
-          ];
-          javascriptreact = [
-            "oxfmt"
-            "oxlint"
-          ];
-          typescriptreact = [
-            "oxfmt"
-            "oxlint"
-          ];
-          vue = [
-            "oxfmt"
-            "oxlint"
-          ];
-          svelte = [
-            "oxfmt"
-            "oxlint"
-          ];
-          astro = [
-            "oxfmt"
-            "oxlint"
-          ];
+          javascript = [ "oxfmt" ];
+          typescript = [ "oxfmt" ];
+          javascriptreact = [ "oxfmt" ];
+          typescriptreact = [ "oxfmt" ];
+          vue = [ "oxfmt" ];
+          svelte = [ "oxfmt" ];
+          astro = [ "oxfmt" ];
           solidity = [ "solhint" ];
           css = [ "prettier" ];
           html = [ "prettier" ];
