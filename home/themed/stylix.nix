@@ -78,6 +78,9 @@ in
   programs.zen-browser.profiles.default.settings."layout.css.devPixelsPerPx" =
     (import ../../display-scale.nix).scale;
 
+  gtk.gtk3.extraConfig.gtk-application-prefer-dark-theme = polarity == "dark";
+  gtk.gtk4.extraConfig.gtk-application-prefer-dark-theme = polarity == "dark";
+
   dconf.settings."org/gnome/desktop/interface" = {
     icon-theme = "Adwaita";
     text-scaling-factor = (import ../../display-scale.nix).scale;
