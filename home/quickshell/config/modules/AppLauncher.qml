@@ -10,7 +10,7 @@ Core.LauncherView {
 
     launcherId: "launcher"
     promptIcon: Core.Icons.search
-    placeholder: "Search apps, > for commands"
+    placeholder: "Search apps, = calc, > commands"
 
     cardWidth: 460
     rowHeight: 44

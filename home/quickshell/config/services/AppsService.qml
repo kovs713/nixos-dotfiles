@@ -118,11 +118,16 @@ QtObject {
         return -1
     }
 
-    function search(query) {
+    function rank(query) {
         const all = root.entries
 
-        if (!query || query.trim().length === 0)
-            return all
+        if (!query || query.trim().length === 0) {
+            const plain = []
+            // empty query: alphabetical, but always above non-app rows
+            for (let i = 0; i < all.length; i++)
+                plain.push({ "entry": all[i], "score": 1000 - i, "index": i })
+            return plain
+        }
 
         const q = query.trim().toLowerCase()
         const scored = []
@@ -140,13 +145,7 @@ QtObject {
             scored.push({ "entry": entry, "score": s, "index": i })
         }
 
-        const ranked = Core.Fuzzy.byScore(scored)
-
-        const out = []
-        for (let j = 0; j < ranked.length; j++)
-            out.push(ranked[j].entry)
-
-        return out
+        return Core.Fuzzy.byScore(scored)
     }
 
     function launch(entry) {

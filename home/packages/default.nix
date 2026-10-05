@@ -26,6 +26,8 @@
 
       # files manager, videos, images
       nautilus
+      chafa
+      imagemagick # snacks.image needs magick/identify
       mpv
       imv
     ]
