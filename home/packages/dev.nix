@@ -23,4 +23,9 @@
     nixvim
     x
   ];
+
+  xdg.configFile."lazygit/config.yml".text = ''
+    git:
+      overrideGpg: true
+  '';
 }
