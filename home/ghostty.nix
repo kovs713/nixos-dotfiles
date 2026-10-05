@@ -41,9 +41,8 @@
         "shift+page_down=scroll_page_down"
 
         # window
-        "escape=end_search"
-        "ctrl+plus=increase_font_size:1"
-        "ctrl+-=decrease_font_size:1"
+        "ctrl+equal=increase_font_size:1"
+        "ctrl+minus=decrease_font_size:1"
         "ctrl+0=reset_font_size"
         "ctrl+enter=toggle_fullscreen"
         "alt+f4=close_window"

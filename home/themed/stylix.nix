@@ -66,6 +66,7 @@ in
       anki.enable = true;
       btop.enable = true;
       mpv.enable = true;
+      starship.enable = true;
 
       opencode.enable = false;
       nixvim.enable = false;

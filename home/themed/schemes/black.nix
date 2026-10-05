@@ -6,7 +6,7 @@
   base01 = "1a1a1a"; # surface
   base02 = "505050"; # surfaceHover, border
   base03 = "7a7a7a"; # muted, textSecondary
-  base04 = "505050"; # не используется
+  base04 = "9b9b9b"; # fish_color_param command args
   base05 = "ffffff"; # text
   base06 = "ececec";
   base07 = "ffffff"; # accentActive
