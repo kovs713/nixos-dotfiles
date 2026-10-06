@@ -55,5 +55,5 @@
   };
 
   xdg.configFile."ghostty/shaders/cursor_sweep.glsl".text =
-    builtins.readFile ./ghostty/shaders/cursor_sweep.glsl;
+    builtins.readFile ./shaders/cursor_sweep.glsl;
 }

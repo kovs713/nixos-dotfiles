@@ -1,15 +1,15 @@
 {
   imports = [
+    ./ghostty
+    ./opencode
     ./packages
     ./quickshell
     ./themed
-    ./mimeapps.nix
 
     ./hyprland.nix
-    ./ghostty.nix
-    ./opencode.nix
-    ./voxtype.nix
-    ./session.nix
+    ./mimeapps.nix
     ./secrets.nix
+    ./session.nix
+    ./voxtype.nix
   ];
 }

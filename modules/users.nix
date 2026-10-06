@@ -1,5 +1,11 @@
 { pkgs, ... }:
 {
+  virtualisation.docker.enable = true;
+  virtualisation.docker.rootless = {
+    enable = true;
+    setSocketVariable = true;
+  };
+
   programs.fish.enable = true;
   programs.fish.loginShellInit = ''
     if status is-login; and test -z "$WAYLAND_DISPLAY"; and test "$(tty)" = "/dev/tty1"
@@ -14,6 +20,7 @@
       "networkmanager"
       "render"
       "input"
+      "docker"
     ];
     initialPassword = " ";
     shell = pkgs.fish;
