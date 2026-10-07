@@ -4,6 +4,7 @@
     ./opencode
     ./packages
     ./quickshell
+    ./shell
     ./themed
 
     ./hyprland.nix

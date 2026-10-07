@@ -161,8 +161,8 @@
         data = with pkgs; [
           postgres-language-server
           vscode-solidity-server
-          checkstyle
           pgformatter
+          checkstyle
           sqlfluff
         ];
       };

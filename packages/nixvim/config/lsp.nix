@@ -8,6 +8,8 @@ let
     includeInlayPropertyDeclarationTypeHints = true;
     includeInlayFunctionLikeReturnTypeHints = true;
   };
+
+  k8sSchemaUrl = "https://raw.githubusercontent.com/kubernetes/kubernetes/master/api/openapi-spec/swagger.json";
 in
 {
   plugins.lsp = {
@@ -240,8 +242,39 @@ in
           diagnostics.statice.enabled = true;
           formatting.command = [ "nixfmt" ];
         };
-
         filetypes = [ "nix" ];
+      };
+
+      yamlls = {
+        enable = true;
+        filetypes = [ "yaml" ];
+        settings = {
+          yaml = {
+            format.enable = true;
+            schemas = {
+              "${k8sSchemaUrl}" = [
+                "*.yaml"
+                "*.yml"
+              ];
+            };
+            customTags = [
+              "!include"
+              "!ref"
+              "!anchor"
+            ];
+          };
+        };
+      };
+
+      helm_ls = {
+        enable = true;
+        rootMarkers = [ "Chart.yaml" ];
+        settings = {
+          helm-ls = {
+            lintOnSave = true;
+            diagnostics.enabled = true;
+          };
+        };
       };
     };
   };

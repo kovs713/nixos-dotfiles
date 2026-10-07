@@ -204,7 +204,7 @@
         typescriptreact = [ "oxlint" ];
         lua = [ "luacheck" ];
         python = [ "ruff" ];
-        sql = [ "postgres-language-server" ];
+        # sql: postgres-language-server runs as LSP (lua/kovs/lsp.lua), not an nvim-lint linter
       };
     };
 

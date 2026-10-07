@@ -14,7 +14,6 @@
       bitwarden-cli
       ripgrep
       ffmpeg
-      zoxide
       nitch
       unzip
       btop
@@ -22,6 +21,7 @@
       curl
       tree
       wget
+      bat
       fd
 
       # files manager, videos, images
