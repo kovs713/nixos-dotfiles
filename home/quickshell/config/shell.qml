@@ -10,6 +10,7 @@ Scope {
     Bar {}
     NetworkPopup {}
     BluetoothPopup {}
+    AirPodsPopup {}
     BatteryPopup {}
     AudioPopup {}
     TimerPopup {}

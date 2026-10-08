@@ -154,14 +154,18 @@ Singleton {
         return null;
     }
 
+    // The card grows upward from a bar at the bottom of the screen, so the last
+    // row sits closest to it. Known devices go last and the volatile discovered
+    // ones first: a device that appears while the list is open is then the row
+    // furthest from the pointer instead of the nearest one.
     function rank(dev) {
         if (!dev)
             return 3;
-        if (dev.connected)
-            return 0;
-        if (dev.paired || dev.bonded)
-            return 1;
-        return 2;
+
+        if (dev.connected || dev.paired || dev.bonded)
+            return 2;
+
+        return 0;
     }
 
     function rebuildModel() {

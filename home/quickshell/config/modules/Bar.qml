@@ -344,6 +344,14 @@ PanelWindow {
             BarSlot {
                 reveal: root.reveal
 
+                Mods.AirPods { id: airpods }
+            }
+
+            Separator {}
+
+            BarSlot {
+                reveal: root.reveal
+
                 available: Services.BatteryService.available
 
                 Mods.Battery { id: battery }

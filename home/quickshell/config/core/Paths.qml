@@ -12,6 +12,8 @@ QtObject {
 
     readonly property string cache: root.xdg("XDG_CACHE_HOME", "/.cache")
 
+    readonly property string state: root.xdg("XDG_STATE_HOME", "/.local/state")
+
     readonly property string runtime: Quickshell.env("XDG_RUNTIME_DIR")
 
     readonly property string shell: root.config + "/shell"

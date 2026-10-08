@@ -6,6 +6,7 @@ singleton NetworkService 1.0 NetworkService.qml
 singleton BluetoothService 1.0 BluetoothService.qml
 singleton BatteryService 1.0 BatteryService.qml
 singleton AudioService 1.0 AudioService.qml
+singleton AirPodsService 1.0 AirPodsService.qml
 singleton NightLightService 1.0 NightLightService.qml
 singleton BrightnessService 1.0 BrightnessService.qml
 singleton AppsService 1.0 AppsService.qml
