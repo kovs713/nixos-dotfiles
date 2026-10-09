@@ -7,6 +7,7 @@
     ./shell
     ./themed
 
+    ./airpods.nix
     ./hyprland.nix
     ./mimeapps.nix
     ./secrets.nix

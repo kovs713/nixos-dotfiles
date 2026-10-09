@@ -1,6 +1,5 @@
 { ... }:
 let
-  # imv.desktop advertises these; pin them so chromium's image/* claims don't win
   images = [
     "image/x-farbfeld"
     "image/tiff"
@@ -45,10 +44,8 @@ in
 {
   xdg.mimeApps.enable = true;
 
-  # videos/audio need nothing: mpv.desktop is the only claimant, xdg already picks it
   xdg.mimeApps.defaultApplications = apps;
 
-  # scheme handlers only get registered from [Added Associations]
   xdg.mimeApps.associations.added = apps // {
     "application/x-zerosize" = "umpv.desktop";
   };

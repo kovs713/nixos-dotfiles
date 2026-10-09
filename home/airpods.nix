@@ -1,7 +1,7 @@
 { lib, pkgs, ... }:
 
 let
-  librepods = pkgs.callPackage ../../packages/librepods { };
+  librepods = pkgs.callPackage ../packages/librepods { };
 in
 {
   home.packages = [ librepods ];

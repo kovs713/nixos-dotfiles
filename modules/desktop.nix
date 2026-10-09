@@ -10,6 +10,9 @@ in
 {
   hardware.graphics.enable = true;
 
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
+
   programs.throne = {
     enable = true;
     tunMode.enable = true;

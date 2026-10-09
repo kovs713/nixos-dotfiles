@@ -41,6 +41,7 @@ in
     satty
     gpu-screen-recorder
 
+    blueman
     wireplumber
   ];
 
