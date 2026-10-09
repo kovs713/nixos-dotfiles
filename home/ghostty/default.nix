@@ -44,12 +44,11 @@
         "ctrl+equal=increase_font_size:1"
         "ctrl+minus=decrease_font_size:1"
         "ctrl+0=reset_font_size"
-        "ctrl+enter=toggle_fullscreen"
         "alt+f4=close_window"
 
-        # config
-        "ctrl+,=open_config"
-        "ctrl+shift+,=reload_config"
+        # org.nvim owns these inside nvim (see :checkhealth org)
+        "ctrl+enter=unbind"
+        "ctrl+,=unbind"
       ];
     };
   };

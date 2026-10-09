@@ -2,13 +2,7 @@
   programs.fish.enable = true;
   programs.fish.functions = {
     bd = {
-      body = ''
-        set -l target $argv[1]
-        if test -z "$target"
-            set target .
-        end
-        find $target -type f -exec bat {{}} + | wl-copy
-      '';
+      body = builtins.readFile ./bd.fish;
       description = "Copy contents of all files in directory to clipboard";
     };
 

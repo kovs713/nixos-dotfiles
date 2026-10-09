@@ -1,4 +1,7 @@
 { pkgs, lib, ... }:
+let
+  photocraft = pkgs.callPackage ../../packages/photocraft { };
+in
 {
   imports = [
     ./dev.nix
@@ -9,6 +12,7 @@
     [
       ayugram-desktop
       vial
+      photocraft
 
       # cli
       bitwarden-cli

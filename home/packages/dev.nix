@@ -6,6 +6,7 @@
 }:
 {
   home.packages = with pkgs; [
+    lazydocker
     lazygit
     tmux
     git

@@ -64,6 +64,8 @@
     Cmnd_Alias X_ROUTINE = \
       /run/current-system/sw/bin/nixos-rebuild switch, \
       /run/current-system/sw/bin/nixos-rebuild switch *, \
+      /run/current-system/sw/bin/nixos-rebuild build, \
+      /run/current-system/sw/bin/nixos-rebuild build *, \
       /run/current-system/sw/bin/nixos-rebuild test, \
       /run/current-system/sw/bin/nixos-rebuild test *, \
       /run/current-system/sw/bin/nix store gc, \

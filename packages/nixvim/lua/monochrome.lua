@@ -215,6 +215,22 @@ link("@diff.delta", "DiffChange")
 link("diffAdded", "DiffAdd")
 link("diffRemoved", "DiffDelete")
 
+-- ORG (org.nvim): уровни хедеров — bg из палитры, текст обычным fg;
+-- TODO-слова — только fg, без фона (Todo в теме с reverse, поэтому явно)
+hi("OrgHeadlineLevel1", { guifg = palette.fg, guibg = palette.change_text, gui = "bold" })
+hi("OrgHeadlineLevel2", { guifg = palette.fg, guibg = palette.add, gui = "bold" })
+hi("OrgHeadlineLevel3", { guifg = palette.fg, guibg = palette.change, gui = "bold" })
+hi("OrgHeadlineLevel4", { guifg = palette.fg, guibg = palette.remove, gui = "bold" })
+hi("OrgHeadlineLevel5", { guifg = palette.fg, guibg = palette.elevated, gui = "bold" })
+hi("OrgHeadlineLevel6", { guifg = palette.fg, guibg = palette.subtle, gui = "bold" })
+hi("OrgHeadlineLevel7", { guifg = palette.fg, guibg = palette.change_text, gui = "bold" })
+hi("OrgHeadlineLevel8", { guifg = palette.fg, guibg = palette.elevated, gui = "bold" })
+
+vim.cmd("highlight clear OrgTodo")
+vim.cmd("highlight clear OrgDone")
+hi("OrgTodo", { guifg = palette.search, guibg = "NONE", gui = "bold" })
+hi("OrgDone", { guifg = palette.muted, guibg = "NONE" })
+
 -- UI ELEMENTS
 hi("MiniStatuslineFilename", { guifg = palette.fg, guibg = palette.elevated })
 hi("MiniStatuslineDevinfo", { guifg = palette.fg, guibg = palette.elevated })

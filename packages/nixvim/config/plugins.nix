@@ -8,10 +8,7 @@
     render-markdown = {
       enable = true;
       settings = {
-        ft = [
-          "markdown"
-          "org"
-        ];
+        ft = [ "markdown" ];
         heading = {
           sign = false;
           icons = [
@@ -491,14 +488,6 @@
       };
     };
 
-    orgmode = {
-      enable = true;
-      settings = {
-        org_agenda_files = "~/Documents/vault/org/**/*";
-        org_default_notes_file = "~/Documents/vault/org/refile.org";
-      };
-    };
-
     wakatime.enable = true;
 
     # cmp
@@ -598,12 +587,19 @@
           };
           ghost_text.enabled = true;
         };
-        sources.default = [
-          "lsp"
-          "path"
-          "snippets"
-          "buffer"
-        ];
+        sources = {
+          default = [
+            "lsp"
+            "path"
+            "snippets"
+            "buffer"
+            "org"
+          ];
+          providers.org = {
+            name = "Org";
+            module = "org.completion.blink";
+          };
+        };
         snippets.preset = "luasnip";
         fuzzy.implementation = "lua";
       };
@@ -618,9 +614,21 @@
     [
       vim-tpipeline
       snacks-nvim
-      orgmode
     ]
+
     ++ [
+      (pkgs.vimUtils.buildVimPlugin {
+        pname = "org.nvim";
+        version = "2.3.1";
+        nvimRequireCheck = "org";
+        src = pkgs.fetchFromGitHub {
+          owner = "xheisenbugx";
+          repo = "org.nvim";
+          rev = "25b544bbc374e5893dbd7fc8c49ea2b29f9c91b7";
+          hash = "sha256-l1//Mwd+kotPHQN7j9hZpOaqpms+mczn4jvpfLmSnqM=";
+        };
+      })
+
       (pkgs.vimUtils.buildVimPlugin {
         pname = "auto-gnome-theme";
         version = "2025-12-02";

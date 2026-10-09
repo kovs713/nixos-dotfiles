@@ -1,8 +1,4 @@
-{
-  nixpkgsSource,
-  pkgs,
-  ...
-}:
+{ nixpkgsSource, ... }:
 {
   imports = [
     ./options.nix

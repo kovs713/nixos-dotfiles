@@ -1,4 +1,29 @@
-vim.lsp.enable('org') -- Experimental LSP support
+do
+  vim.lsp.enable('org')
+
+  require('org').setup {
+    org_directory = '~/Documents/vault/org',
+    agenda_files = { '~/Documents/vault/org/**/*' },
+    default_notes_file = '~/Documents/vault/org/refile.org',
+    ui = {
+      hide_emphasis_markers = true,
+      conceal_links = true,
+      indent_mode = true,
+    },
+    todo_keywords = {
+      "TODO(t) NEXT(n) WAITING(w) | DONE(d) CANCELLED(c)",
+    },
+    tags = {
+      "easy(e)",
+      "hard(h)",
+      "work(w)",
+      "home(H)",
+    },
+    agenda = {
+      span = "week",
+    },
+  }
+end
 
 require('auto-gnome-theme').setup { theme = 'monochrome' }
 

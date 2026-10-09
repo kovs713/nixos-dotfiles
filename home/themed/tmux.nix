@@ -33,6 +33,8 @@ in
     extraConfig = lib.mkAfter ''
       ### Behaviour
       set -g allow-passthrough on
+      set -s extended-keys on
+      set -as terminal-features 'xterm-ghostty:extkeys'
 
       ### Key modes
       bind-key -T copy-mode-vi 'v' send -X begin-selection
@@ -88,9 +90,6 @@ in
       ### Work with sessions
       bind q choose-session
       bind-key -T choose-tree x kill-session -t "#{session_name}"
-
-      bind -n M-Enter split-window -v -c "#{pane_current_path}"
-      bind -n M-S-Enter split-window -h -c "#{pane_current_path}"
       bind -n M-Escape kill-pane
 
       # Enable OSC 52 clipboard forwarding for remote Neovim yanks.
