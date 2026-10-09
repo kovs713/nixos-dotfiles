@@ -11,9 +11,9 @@
         "n"
         "v"
       ];
-      key = "<leader>ca";
+      key = "<leader>d";
       action.__raw = "function() vim.lsp.buf.code_action() end";
-      options.desc = "[C]ode [A]ctions";
+      options.desc = "Co[xD]e Actions";
     }
     {
       mode = [

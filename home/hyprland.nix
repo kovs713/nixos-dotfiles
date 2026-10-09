@@ -43,6 +43,7 @@ in
 
     blueman
     wireplumber
+    playerctl
   ];
 
   systemd.user.services = {
@@ -120,6 +121,9 @@ in
       (bind "XF86AudioMute" (exec "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
       (bindRepeat "XF86AudioRaiseVolume" (exec "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"))
       (bindRepeat "XF86AudioLowerVolume" (exec "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%-"))
+      (bind "XF86AudioPlay" (exec "playerctl play-pause"))
+      (bind "XF86AudioPrev" (exec "playerctl previous"))
+      (bind "XF86AudioNext" (exec "playerctl next"))
       (bindRepeat "XF86MonBrightnessUp" (exec "backlight up"))
       (bindRepeat "XF86MonBrightnessDown" (exec "backlight down"))
 

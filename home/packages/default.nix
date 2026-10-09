@@ -24,6 +24,7 @@ in
       cloc
       curl
       tree
+      yaak
       wget
       bat
       fd
