@@ -69,7 +69,7 @@ in
 
     listener {
         timeout = 300
-        on-timeout = loginctl lock-session
+        on-timeout = case "$(playerctl --player=all status 2>/dev/null)" in *Playing*) exit 0;; *) loginctl lock-session;; esac
     }
 
     listener {
@@ -80,7 +80,7 @@ in
 
     listener {
         timeout = 1800
-        on-timeout = systemctl suspend
+        on-timeout = case "$(playerctl --player=all status 2>/dev/null)" in *Playing*) exit 0;; *) systemctl suspend;; esac
     }
   '';
 
