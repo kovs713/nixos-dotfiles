@@ -115,8 +115,14 @@ in
       (bind "${mod} + mouse:272" "hl.dsp.window.drag()")
       (bind "${mod} + mouse:273" "hl.dsp.window.resize()")
 
-      (bind "F7" (exec "test -r /tmp/olay-overlay.pid && kill -USR1 \"$(cat /tmp/olay-overlay.pid)\""))
-      (bind "F8" (exec "test -r /tmp/olay-overlay.pid && kill -USR2 \"$(cat /tmp/olay-overlay.pid)\""))
+      # F13
+      (bind "XF86Tools" (
+        exec "test -r /tmp/olay-overlay.pid && kill -USR2 \"$(cat /tmp/olay-overlay.pid)\""
+      ))
+      # F14
+      (bind "XF86Launch5" (
+        exec "test -r /tmp/olay-overlay.pid && kill -USR1 \"$(cat /tmp/olay-overlay.pid)\""
+      ))
 
       (bind "XF86AudioMute" (exec "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
       (bindRepeat "XF86AudioRaiseVolume" (exec "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"))

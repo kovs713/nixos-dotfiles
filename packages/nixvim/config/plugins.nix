@@ -786,6 +786,58 @@
     }
     {
       mode = "n";
+      key = "<leader>j";
+      action.__raw = ''
+        function()
+          require("harpoon"):list():next({ ui_nav_wrap = true })
+        end
+      '';
+      options.desc = "Harpoon next";
+    }
+    {
+      mode = "n";
+      key = "<leader>k";
+      action.__raw = ''
+        function()
+          require("harpoon"):list():prev({ ui_nav_wrap = true })
+        end
+      '';
+      options.desc = "Harpoon previous";
+    }
+    {
+      mode = "n";
+      key = "<F8>";
+      action.__raw = ''
+        function() require("harpoon"):list():select(1) end
+      '';
+      options.desc = "Harpoon 1";
+    }
+    {
+      mode = "n";
+      key = "<F9>";
+      action.__raw = ''
+        function() require("harpoon"):list():select(2) end
+      '';
+      options.desc = "Harpoon 2";
+    }
+    {
+      mode = "n";
+      key = "<F10>";
+      action.__raw = ''
+        function() require("harpoon"):list():select(3) end
+      '';
+      options.desc = "Harpoon 3";
+    }
+    {
+      mode = "n";
+      key = "<F11>";
+      action.__raw = ''
+        function() require("harpoon"):list():select(4) end
+      '';
+      options.desc = "Harpoon 4";
+    }
+    {
+      mode = "n";
       key = "gf";
       action.__raw = "function() return require('obsidian').util.gf_passthrough() end";
       options = {

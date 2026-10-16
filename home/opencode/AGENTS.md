@@ -15,11 +15,11 @@
 
 ## Commits (ALWAYS)
 
-- Use Conventional Commits: `type(scope?): description`
+- Use Conventional Commits: `type: description`
 - One logical change per commit (atomic).
 - Examples:
-  - `feat(ui): add dark mode toggle to header`
-  - `fix(auth): prevent token refresh loop`
+  - `feat: add dark mode toggle to header`
+  - `fix: prevent auth token refresh loop`
   - `refactor: extract form validation schema`
 
 ## External File Loading

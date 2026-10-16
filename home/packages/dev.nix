@@ -9,18 +9,25 @@
     lazydocker
     lazygit
     tmux
+    yaak
     git
     gh
 
     tree-sitter
+    nest-cli
     nixfmt
     nodejs
+    oxlint
+    oxfmt
+    pnpm
+    bun
     nil
 
     (lib.lowPrio minikube) # bundles its own kubectl
     kubectl
     k9s
 
+    zed-editor
     nixvim
     x
   ];

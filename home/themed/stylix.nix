@@ -66,7 +66,11 @@ in
       anki.enable = true;
       btop.enable = true;
       mpv.enable = true;
+      lazygit.enable = true;
+      k9s.enable = true;
       starship.enable = true;
+      zed.enable = true;
+      obsidian.enable = true;
 
       opencode.enable = false;
       nixvim.enable = false;

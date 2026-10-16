@@ -11,8 +11,9 @@ in
     with pkgs;
     [
       ayugram-desktop
-      vial
       photocraft
+      obsidian
+      vial
 
       # cli
       bitwarden-cli
@@ -20,11 +21,9 @@ in
       ffmpeg
       nitch
       unzip
-      btop
       cloc
       curl
       tree
-      yaak
       wget
       bat
       fd

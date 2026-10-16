@@ -137,12 +137,9 @@
 
           prettier
           eslint_d
-          oxlint
           biome
-          oxfmt
 
           pnpm
-          bun
         ];
 
         python = with pkgs; [

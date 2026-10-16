@@ -9,7 +9,7 @@ let
 in
 {
   home.packages = [
-    voxtype.default
+    voxtype.vulkan
     voxtype."osd-gtk4"
   ];
 
@@ -18,12 +18,12 @@ in
 
     if [ ! -e "$dest" ]; then
       mkdir -p "$(dirname "$dest")"
-      install -Dm644 ${voxtype.default}/share/voxtype/default-config.toml "$dest"
+      install -Dm644 ${voxtype.vulkan}/share/voxtype/default-config.toml "$dest"
     fi
   '';
 
   systemd.user.services.voxtype = {
-    Service.ExecStart = "${lib.getExe voxtype.default} daemon";
+    Service.ExecStart = "${lib.getExe voxtype.vulkan} daemon";
     Install.WantedBy = [ "graphical-session.target" ];
   };
 }

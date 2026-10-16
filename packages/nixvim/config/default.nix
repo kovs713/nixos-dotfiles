@@ -1,4 +1,4 @@
-{ nixpkgsSource, ... }:
+{ pkgs, nixpkgsSource, ... }:
 {
   imports = [
     ./options.nix
@@ -19,4 +19,5 @@
   withRuby = false;
   withPython3 = true;
   withNodeJs = true;
+  extraPackages = [ pkgs.mermaid-cli ];
 }
