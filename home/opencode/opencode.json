@@ -6,6 +6,13 @@
     "opencode-vibeguard",
     "@dietrichgebert/ponytail"
   ],
+  "mcp": {
+    "excalidraw": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-excalidraw-server"],
+      "enabled": true
+    }
+  },
   "default_agent": "plan",
   "permission": "allow",
   "agent": {

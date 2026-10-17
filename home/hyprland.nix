@@ -98,6 +98,8 @@ in
       (bind "${mod} + Q" (exec "ghostty"))
       (bind "${mod} + C" "hl.dsp.window.close()")
       (bind "${mod} + F" ''hl.dsp.window.float({ action = "toggle" })'')
+      (bind "${mod} + P" ''hl.dsp.window.fullscreen({ action = "toggle" })'')
+      (bind "${mod} + R" ''hl.dsp.layout("colresize +conf")'')
       (bind "${mod} + X" (exec "voxtype record toggle"))
       (bind "${mod} + B" (exec "qs ipc call bar toggleAutoReveal"))
       (bind "${mod} + V" (exec "qs ipc call clipboard toggle"))
