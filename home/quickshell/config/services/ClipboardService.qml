@@ -58,6 +58,16 @@ QtObject {
         refresh();
     }
 
+    function promote(item) {
+        if (!item)
+            return;
+
+        const command = "printf '%s\\n' " + shellQuote(item.raw) + " | cliphist decode | wl-copy";
+
+        Quickshell.execDetached(["sh", "-c", command]);
+        refresh();
+    }
+
     function remove(item) {
         if (!item)
             return;

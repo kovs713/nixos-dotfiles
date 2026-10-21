@@ -1,13 +1,12 @@
 {
   imports = [
-    ./ghostty
-    ./opencode
     ./packages
     ./quickshell
-    ./shell
+    ./terminal
     ./themed
 
     ./airpods.nix
+    ./applications.nix
     ./hyprland.nix
     ./mimeapps.nix
     ./secrets.nix

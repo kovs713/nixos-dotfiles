@@ -12,6 +12,14 @@
 
   nixpkgs.source = nixpkgsSource;
 
+  package = pkgs.neovim-unwrapped.overrideAttrs (old: {
+    version = "0.12.6";
+    src = old.src.override {
+      tag = "v0.12.6";
+      hash = "sha256-lK1gbJyESMN3C/i8cyPFzzlJDYZHzEXugGhCwPVEbNk=";
+    };
+  });
+
   version.enableNixpkgsReleaseCheck = false;
   colorscheme = "monochrome";
   viAlias = true;

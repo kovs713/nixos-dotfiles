@@ -60,7 +60,7 @@ PanelWindow {
         regions: [root.surfaceInput, root.edgeInput]
     }
 
-    mask: root.launcherOpen ? null : root.barInput
+    mask: root.launcherOpen ? null : (root.showing ? root.barInput : root.edgeInput)
 
     readonly property bool modulePopupOpen: {
         const id = Core.PopupManager.current;

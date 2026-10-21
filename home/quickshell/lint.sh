@@ -4,7 +4,7 @@ set -u
 
 for bin in qmllint qs; do
     command -v "$bin" >/dev/null || {
-        echo "$bin not on PATH, run: x sh quickshell" >&2
+        echo "$bin not on PATH, run: x rb" >&2
         exit 1
     }
 done

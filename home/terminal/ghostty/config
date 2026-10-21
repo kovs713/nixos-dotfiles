@@ -1,0 +1,44 @@
+# Window
+window-padding-x = 0
+window-padding-y = 0
+confirm-close-surface = false
+resize-overlay = never
+background-opacity = 1
+
+# Cursor styling
+cursor-style = block
+cursor-style-blink = false
+shell-integration-features = no-cursor
+custom-shader = shaders/cursor_sweep.glsl
+
+# Ghostty is just a window; tmux owns everything inside it.
+keybind = clear
+
+# Clipboard
+keybind = copy=copy_to_clipboard:mixed
+keybind = paste=paste_from_clipboard
+keybind = ctrl+insert=copy_to_clipboard:mixed
+keybind = shift+insert=paste_from_selection
+keybind = ctrl+shift+c=copy_to_clipboard:mixed
+keybind = ctrl+shift+v=paste_from_clipboard
+
+# Selection + scrollback
+keybind = shift+arrow_up=adjust_selection:up
+keybind = shift+arrow_down=adjust_selection:down
+keybind = shift+arrow_left=adjust_selection:left
+keybind = shift+arrow_right=adjust_selection:right
+keybind = shift+home=scroll_to_top
+keybind = shift+end=scroll_to_bottom
+keybind = shift+page_up=scroll_page_up
+keybind = shift+page_down=scroll_page_down
+
+# Window
+keybind = ctrl+equal=increase_font_size:1
+keybind = ctrl+minus=decrease_font_size:1
+keybind = ctrl+0=reset_font_size
+keybind = alt+f4=close_window
+keybind = ctrl+shift+,=reload_config
+
+# org.nvim owns these inside nvim (see :checkhealth org).
+keybind = ctrl+enter=unbind
+keybind = ctrl+,=unbind

@@ -1,6 +1,13 @@
 {
+  inputs,
+  system,
+  ...
+}:
+{
   programs.opencode = {
     enable = true;
+
+    package = inputs.nixpkgs-opencode.legacyPackages.${system}.opencode;
 
     settings = builtins.fromJSON (builtins.readFile ./opencode.json);
     context = ./AGENTS.md;

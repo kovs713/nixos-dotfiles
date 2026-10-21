@@ -2,38 +2,11 @@
   config,
   pkgs,
   lib,
-  inputs,
-  system,
+  osConfig,
   ...
 }:
-let
-  lua = lib.generators.mkLuaInline;
-  mod = "SUPER";
-
-  bind = keys: disp: {
-    _args = [
-      keys
-      (lua disp)
-    ];
-  };
-  bindRepeat = keys: disp: {
-    _args = [
-      keys
-      (lua disp)
-      (lua "{ repeating = true }")
-    ];
-  };
-  exec = cmd: "hl.dsp.exec_cmd([[${cmd}]])";
-
-  moveWorkspace = workspace: ''hl.dsp.window.move({ workspace = "${workspace}"})'';
-  focusWorkspace = workspace: ''hl.dsp.focus({workspace = "${workspace}"})'';
-  focusDirection = direction: ''hl.dsp.focus({direction = "${direction}"})'';
-
-  wallpaper = config.lib.stylix.pixel "base00";
-in
 {
   home.packages = with pkgs; [
-    awww
     hyprcursor
 
     hyprpicker
@@ -46,23 +19,20 @@ in
     playerctl
   ];
 
-  systemd.user.services = {
-    awww = {
-      Unit.Description = "awww wallpaper daemon";
-      Service = {
-        ExecStart = "${lib.getExe pkgs.awww}-daemon";
-        Restart = "on-failure";
-
-        ExecStartPost = "${lib.getExe pkgs.bash} -c 'for _ in {1..10}; do ${lib.getExe pkgs.awww} img --transition-type fade --transition-duration 0.2 ${wallpaper} >/dev/null 2>&1; sleep 0.4; ${lib.getExe pkgs.awww} query 2>/dev/null | grep -qF ${wallpaper} && break; done || echo \"awww: ${wallpaper} did not stick\" >&2'";
-      };
-      Install.WantedBy = [ "graphical-session.target" ];
-    };
-
+  xdg.configFile."hypr/theme.lua" = {
+    text = ''
+      hl.config({misc = {background_color = "rgb(${config.lib.stylix.colors.base00})", disable_hyprland_logo = true, disable_splash_rendering = true}})
+    '';
+    onChange = ''
+      if [ -n "''${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+        ${lib.getExe' osConfig.programs.hyprland.package "hyprctl"} reload config-only
+      fi
+    '';
   };
 
   wayland.windowManager.hyprland = {
     enable = true;
-    package = inputs.hyprland.packages.${system}.hyprland;
+    package = osConfig.programs.hyprland.package;
     xwayland.enable = true;
 
     portalPackage = null;
@@ -73,116 +43,6 @@ in
     };
   };
 
-  wayland.windowManager.hyprland.settings = {
-    monitor = [
-      {
-        output = "";
-        mode = "highrr";
-        position = "auto";
-        scale = "1";
-      }
-    ];
-
-    layer_rule = [
-      {
-        name = "gtk-layer-shell-olay";
-        match = {
-          namespace = "^(olay-overlay)$";
-        };
-        screen_share_mode = "omit";
-        blur = true;
-      }
-    ];
-
-    bind = [
-      (bind "${mod} + Q" (exec "ghostty"))
-      (bind "${mod} + C" "hl.dsp.window.close()")
-      (bind "${mod} + F" ''hl.dsp.window.float({ action = "toggle" })'')
-      (bind "${mod} + P" ''hl.dsp.window.fullscreen({ action = "toggle" })'')
-      (bind "${mod} + R" ''hl.dsp.layout("colresize +conf")'')
-      (bind "${mod} + X" (exec "voxtype record toggle"))
-      (bind "${mod} + B" (exec "qs ipc call bar toggleAutoReveal"))
-      (bind "${mod} + V" (exec "qs ipc call clipboard toggle"))
-      (bind "${mod} + N" (exec "qs ipc call notes toggle"))
-      (bind "${mod} + SHIFT + N" (exec "qs ipc call nightlight toggle"))
-      (bind "${mod} + CTRL + E" (exec "qs ipc call emoji toggle"))
-      (bind "${mod} + SPACE" (exec "qs ipc call launcher toggle"))
-
-      (bind "ALT + Print" (exec "shot pick"))
-      (bind "Print" (exec "shot clipboard"))
-      (bind "${mod} + Print" (exec "shot annotate"))
-      (bind "CTRL + Print" (exec "screenrec av"))
-      (bind "CTRL + ALT + Print" (exec "screenrec audio"))
-
-      (bind "${mod} + mouse:272" "hl.dsp.window.drag()")
-      (bind "${mod} + mouse:273" "hl.dsp.window.resize()")
-
-      # F13
-      (bind "XF86Tools" (
-        exec "test -r /tmp/olay-overlay.pid && kill -USR2 \"$(cat /tmp/olay-overlay.pid)\""
-      ))
-      # F14
-      (bind "XF86Launch5" (
-        exec "test -r /tmp/olay-overlay.pid && kill -USR1 \"$(cat /tmp/olay-overlay.pid)\""
-      ))
-
-      (bind "XF86AudioMute" (exec "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
-      (bindRepeat "XF86AudioRaiseVolume" (exec "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"))
-      (bindRepeat "XF86AudioLowerVolume" (exec "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%-"))
-      (bind "XF86AudioPlay" (exec "playerctl play-pause"))
-      (bind "XF86AudioPrev" (exec "playerctl previous"))
-      (bind "XF86AudioNext" (exec "playerctl next"))
-      (bindRepeat "XF86MonBrightnessUp" (exec "backlight up"))
-      (bindRepeat "XF86MonBrightnessDown" (exec "backlight down"))
-
-      # Workspaces
-      (bind "${mod} + 1" (focusWorkspace "1"))
-      (bind "${mod} + 2" (focusWorkspace "2"))
-      (bind "${mod} + 3" (focusWorkspace "3"))
-      (bind "${mod} + 4" (focusWorkspace "4"))
-      (bind "${mod} + 5" (focusWorkspace "5"))
-
-      (bind "${mod} + SHIFT + 1" (moveWorkspace "1"))
-      (bind "${mod} + SHIFT + 2" (moveWorkspace "2"))
-      (bind "${mod} + SHIFT + 3" (moveWorkspace "3"))
-      (bind "${mod} + SHIFT + 4" (moveWorkspace "4"))
-      (bind "${mod} + SHIFT + 5" (moveWorkspace "5"))
-
-      (bind "${mod} + h" (focusDirection "l"))
-      (bind "${mod} + j" (focusDirection "d"))
-      (bind "${mod} + k" (focusDirection "u"))
-      (bind "${mod} + l" (focusDirection "r"))
-    ];
-
-    config = {
-      cursor.no_hardware_cursors = 1;
-
-      general = {
-        gaps_in = 0;
-        gaps_out = 0;
-
-        border_size = 2;
-
-        layout = "scrolling";
-      };
-
-      input = {
-        kb_layout = "us,ru";
-        kb_options = "grp:alt_space_toggle";
-        repeat_rate = 25;
-        repeat_delay = 500;
-      };
-
-      decoration = {
-        rounding = 0;
-        shadow.enabled = false;
-        blur.enabled = false;
-      };
-      animations.enabled = false;
-    };
-
-    require = {
-      _var = lua "__require";
-    };
-  };
+  xdg.configFile."hypr/hyprland.lua".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dotfiles/home/hyprland.lua";
 }

@@ -1,5 +1,16 @@
 { pkgs, ... }:
 {
+  programs.steam = {
+    enable = true;
+    extraCompatPackages = [ pkgs.proton-ge-bin ];
+    remotePlay.openFirewall = false;
+    dedicatedServer.openFirewall = false;
+    localNetworkGameTransfers.openFirewall = false;
+  };
+
+  programs.gamemode.enable = true;
+  hardware.graphics.enable32Bit = true;
+
   services.udev.extraRules = ''
     SUBSYSTEM=="i2c-dev", KERNEL=="i2c-[0-9]*", MODE="0660", GROUP="users"
   '';
@@ -11,6 +22,8 @@
     udisks
     gnome-disk-utility
     gvfs
+    mangohud
+    vulkan-tools
   ];
 
   services.udisks2.enable = true;

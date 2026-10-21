@@ -29,53 +29,16 @@ Core.PopupSurface {
         Column {
             spacing: Core.Theme.spacing
 
-            Core.PopupHeader {
-                width: parent.width
-
-                title: "Bluetooth"
-
-                subtitle: popup.svc.primaryLabel
-
-                showToggle: true
-                toggled: popup.svc.powered
-
-                onToggleRequested: popup.svc.togglePowered()
-
-                actions: [
-                    {
-                        icon: popup.svc.discovering ? Core.Icons.refresh : Core.Icons.scan,
-                        spinning: popup.svc.discovering,
-                        action: function () {
-                            if (!popup.svc.powered)
-                                popup.svc.setPowered(true);
-
-                            popup.svc.toggleDiscovering();
-                        }
-                    },
-                    {
-                        icon: Core.Icons.gear,
-                        action: function () {
-                            popup.svc.openManager();
-                            Core.PopupManager.close();
-                        }
-                    }
-                ]
-            }
-
-            Core.SectionHeader {
-                width: parent.width
-
-                text: "DEVICES"
-
-                trailing: popup.svc.discovering ? "scanning…" : popup.svc.deviceModel.count + " found"
-            }
-
             Core.ExpandableList {
                 id: list
 
                 width: parent.width
 
                 maxHeight: 300
+
+                animated: false
+
+                verticalLayoutDirection: ListView.BottomToTop
 
                 expanded: popup.svc.powered
 
@@ -201,6 +164,14 @@ Core.PopupSurface {
                 }
             }
 
+            Core.SectionHeader {
+                width: parent.width
+
+                text: "DEVICES"
+
+                trailing: popup.svc.discovering ? "scanning…" : popup.svc.deviceModel.count + " found"
+            }
+
             Core.EmptyState {
                 width: parent.width
 
@@ -209,6 +180,39 @@ Core.PopupSurface {
                 icon: popup.svc.powered ? Core.Icons.bluetooth : Core.Icons.btOff
 
                 text: popup.svc.powered ? "No devices yet — hit scan" : "Bluetooth is turned off"
+            }
+
+            Core.PopupHeader {
+                width: parent.width
+
+                title: "Bluetooth"
+
+                subtitle: popup.svc.primaryLabel
+
+                showToggle: true
+                toggled: popup.svc.powered
+
+                onToggleRequested: popup.svc.togglePowered()
+
+                actions: [
+                    {
+                        icon: popup.svc.discovering ? Core.Icons.refresh : Core.Icons.scan,
+                        spinning: popup.svc.discovering,
+                        action: function () {
+                            if (!popup.svc.powered)
+                                popup.svc.setPowered(true);
+
+                            popup.svc.toggleDiscovering();
+                        }
+                    },
+                    {
+                        icon: Core.Icons.gear,
+                        action: function () {
+                            popup.svc.openManager();
+                            Core.PopupManager.close();
+                        }
+                    }
+                ]
             }
         }
     }

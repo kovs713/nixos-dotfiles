@@ -269,7 +269,8 @@ Core.LauncherView {
 
                             onClicked: {
                                 clipboard.selectedIndex = row.index;
-                                clipboard.accepted();
+                                Services.ClipboardService.promote(row.modelData);
+                                clipboard.dismiss();
                             }
                         }
                     }

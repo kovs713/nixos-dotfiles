@@ -45,6 +45,8 @@
 
   nix.settings = {
     auto-optimise-store = true;
+    max-jobs = 1;
+    cores = 2;
 
     substituters = [
       "https://cache.nixos.org/"
@@ -55,7 +57,11 @@
     ];
   };
 
-  # NixOS не даёт uaccess обычным HID-устройствам — без этого vial/qmk не видят /dev/hidraw*
+  systemd.services.nix-daemon.serviceConfig = {
+    MemoryHigh = "4G";
+    MemoryMax = "6G";
+  };
+
   services.udev.extraRules = ''
     SUBSYSTEM=="hidraw", GROUP="input", MODE="0660"
   '';

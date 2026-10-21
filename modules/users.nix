@@ -61,6 +61,8 @@
 
       ta = "tmux attach";
 
+      t = "dstask";
+
       oc = "opencode";
     };
   };

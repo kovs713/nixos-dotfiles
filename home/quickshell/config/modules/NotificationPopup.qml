@@ -130,24 +130,77 @@ Core.PopupSurface {
                     Rectangle {
                         anchors.fill: parent
 
+                        z: -2
+
                         radius: Core.Theme.radiusRow
 
-                        color: noteMouse.containsMouse ? Core.Theme.surfaceHover : Core.Theme.surface
-
-                        Behavior on color {
-                            ColorAnimation {
-                                duration: 120
-                                easing.type: Easing.OutQuint
-                            }
-                        }
+                        color: Core.Theme.surface
                     }
 
-                    scale: noteMouse.pressed ? 0.97 : 1.0
+                    MouseArea {
+                        id: noteMouse
 
-                    Behavior on scale {
-                        NumberAnimation {
-                            duration: 110
-                            easing.type: Easing.OutQuint
+                        anchors.fill: parent
+
+                        hoverEnabled: true
+
+                        cursorShape: Qt.PointingHandCursor
+
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+                        onClicked: function (event) {
+                            if (event.button === Qt.LeftButton) {
+                                popup.dismiss(noteRow.modelData);
+                                return;
+                            }
+
+                            const note = noteRow.modelData;
+                            const summary = note.summary ? String(note.summary) : "";
+                            const bodyText = note.body ? String(note.body) : "";
+                            const app = popup.appLabel(note);
+                            const point = noteRow.mapToItem(null, event.x, event.y);
+
+                            popup.openMenu(point.x, point.y, [
+                                {
+                                    icon: Core.Icons.close,
+                                    label: "Dismiss",
+                                    action: function () {
+                                        popup.dismiss(note);
+                                    }
+                                },
+                                {
+                                    icon: Core.Icons.copy,
+                                    label: "Copy text",
+                                    action: function () {
+                                        Services.ClipboardService.copy(summary + (bodyText !== "" ? "\n" + bodyText : ""));
+                                    }
+                                },
+                                {
+                                    icon: Core.Icons.info,
+                                    label: "Copy app name",
+                                    action: function () {
+                                        Services.ClipboardService.copy(app);
+                                    }
+                                },
+                                {
+                                    separator: true
+                                },
+                                {
+                                    icon: Core.Icons.bellOff,
+                                    label: popup.dnd ? "Turn off do not disturb" : "Turn on do not disturb",
+                                    action: function () {
+                                        popup.setDnd(!popup.dnd);
+                                    }
+                                },
+                                {
+                                    icon: Core.Icons.trash,
+                                    label: "Clear all",
+                                    danger: true,
+                                    action: function () {
+                                        popup.clearAll();
+                                    }
+                                }
+                            ]);
                         }
                     }
 
@@ -323,125 +376,6 @@ Core.PopupSurface {
                         }
                     }
 
-                    Rectangle {
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-
-                        anchors.rightMargin: 6
-                        anchors.topMargin: 6
-
-                        width: 22
-                        height: 22
-
-                        radius: 11
-
-                        color: closeMouse.containsMouse ? Core.Theme.surfaceHover : "transparent"
-
-                        opacity: noteMouse.containsMouse || closeMouse.containsMouse ? 1.0 : 0.0
-
-                        Behavior on opacity {
-                            NumberAnimation {
-                                duration: 140
-                                easing.type: Easing.OutQuint
-                            }
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-
-                            text: Core.Icons.close
-
-                            font.family: Core.Theme.iconFont
-                            font.pixelSize: Core.Theme.iconSizeSmall
-
-                            color: Core.Theme.foregroundMuted
-                        }
-
-                        MouseArea {
-                            id: closeMouse
-
-                            anchors.fill: parent
-
-                            hoverEnabled: true
-
-                            cursorShape: Qt.PointingHandCursor
-
-                            onClicked: popup.dismiss(noteRow.modelData)
-                        }
-                    }
-
-                    MouseArea {
-                        id: noteMouse
-
-                        anchors.fill: parent
-
-                        hoverEnabled: true
-
-                        cursorShape: Qt.PointingHandCursor
-
-                        acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-                        z: -1
-
-                        onClicked: function (event) {
-                            if (event.button === Qt.LeftButton) {
-                                popup.dismiss(noteRow.modelData);
-                                return;
-                            }
-
-                            const note = noteRow.modelData;
-
-                            const summary = note.summary ? String(note.summary) : "";
-
-                            const bodyText = note.body ? String(note.body) : "";
-
-                            const app = popup.appLabel(note);
-
-                            const point = noteRow.mapToItem(null, event.x, event.y);
-
-                            popup.openMenu(point.x, point.y, [
-                                {
-                                    icon: Core.Icons.close,
-                                    label: "Dismiss",
-                                    action: function () {
-                                        popup.dismiss(note);
-                                    }
-                                },
-                                {
-                                    icon: Core.Icons.copy,
-                                    label: "Copy text",
-                                    action: function () {
-                                        Services.ClipboardService.copy(summary + (bodyText !== "" ? "\n" + bodyText : ""));
-                                    }
-                                },
-                                {
-                                    icon: Core.Icons.info,
-                                    label: "Copy app name",
-                                    action: function () {
-                                        Services.ClipboardService.copy(app);
-                                    }
-                                },
-                                {
-                                    separator: true
-                                },
-                                {
-                                    icon: Core.Icons.bellOff,
-                                    label: popup.dnd ? "Turn off do not disturb" : "Turn on do not disturb",
-                                    action: function () {
-                                        popup.setDnd(!popup.dnd);
-                                    }
-                                },
-                                {
-                                    icon: Core.Icons.trash,
-                                    label: "Clear all",
-                                    danger: true,
-                                    action: function () {
-                                        popup.clearAll();
-                                    }
-                                }
-                            ]);
-                        }
-                    }
                 }
             }
 

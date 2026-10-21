@@ -28,7 +28,7 @@ in
       };
     };
     "ftplugin/sql.lua" = {
-      localOpts.formatprg = "sqlfluff format --dialect postgres -";
+      localOpts.formatprg = "pg_format";
     };
   };
 }

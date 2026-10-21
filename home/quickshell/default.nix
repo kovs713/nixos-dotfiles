@@ -1,17 +1,10 @@
 {
+  config,
   lib,
   pkgs,
   variant,
   ...
 }:
-let
-  quickshellConfig = pkgs.runCommand "quickshell-config" { } ''
-    mkdir -p "$out"
-    cp -r ${./config}/. "$out/"
-    chmod -R u+w "$out"
-    chmod -R u-w "$out"
-  '';
-in
 {
   imports = [ ./theme.nix ];
 
@@ -34,7 +27,8 @@ in
     netcat-openbsd
   ];
 
-  xdg.configFile."quickshell".source = quickshellConfig;
+  xdg.configFile."quickshell".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dotfiles/home/quickshell/config";
 
   xdg.dataFile."dbus-1/services/org.freedesktop.Notifications.service".text = ''
     [D-BUS Service]

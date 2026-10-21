@@ -14,7 +14,7 @@ running the same config, black and white themes.
 | rebuild | `x` — run `x` for help |
 
 ```
-flake.nix      inputs, outputs, dev shells
+flake.nix      inputs, outputs, packages
 modules/       shared nixos config
 hosts/         one dir per machine
 home/          home-manager, quickshell bar

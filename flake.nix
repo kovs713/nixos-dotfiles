@@ -89,92 +89,12 @@
           ];
         };
 
-      common = with pkgs; [
-        libpulseaudio
-        pkg-config
-        gnumake
-        age
-        gcc
-
-        nixfmt
-        nodejs
-      ];
-
-      stacks = {
-        # quickshell/qml
-        quickshell = with pkgs; [
-          qt6.qtdeclarative
-          qt6.qtpositioning
-          gtk4-layer-shell
-          qt6.qt5compat
-          quickshell
-          gtk4
-        ];
-
-        rust = with pkgs; [
-          rust-analyzer
-          rustfmt
-          clippy
-          cargo
-          rustc
-        ];
-
-        go = with pkgs; [
-          golangci-lint
-          gofumpt
-          gopls
-          go
-        ];
-
-        node = with pkgs; [
-          vscode-langservers-extracted
-          tailwindcss-language-server
-          svelte-language-server
-          astro-language-server
-          typescript
-          emmet-ls
-          vtsls
-
-          prettier
-          eslint_d
-          biome
-
-          pnpm
-        ];
-
-        python = with pkgs; [
-          python3Packages.python-lsp-server
-          pyright
-          ruff
-        ];
-
-        lua = with pkgs; [
-          luaPackages.luacheck
-          lua-language-server
-          stylua
-        ];
-
-        # languages that here are only ever a language server
-        data = with pkgs; [
-          postgres-language-server
-          vscode-solidity-server
-          pgformatter
-          checkstyle
-          sqlfluff
-        ];
-      };
     in
     {
       packages.${system} = {
         inherit x;
         nvim = nixvim;
       };
-
-      devShells.${system} =
-        (builtins.mapAttrs (_: p: pkgs.mkShell { packages = common ++ p; }) stacks)
-        // {
-          default = pkgs.mkShell { };
-        };
 
       nixosConfigurations = {
         laptop-black = mkHost {
@@ -204,6 +124,8 @@
 
     quickshell.url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
     quickshell.inputs.nixpkgs.follows = "nixpkgs";
+
+    nixpkgs-opencode.url = "github:nixos/nixpkgs/nixos-unstable";
 
     nixvim.url = "github:nix-community/nixvim";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";

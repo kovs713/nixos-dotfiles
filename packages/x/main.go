@@ -10,7 +10,6 @@ import (
 const (
 	TARGET_FILE   = "/etc/x/target"
 	DOTFILES_PATH = "/home/kovs/dotfiles"
-	SYSTEM        = "x86_64-linux"
 )
 
 func printUsage() {
@@ -21,8 +20,7 @@ func printUsage() {
   x b             nixos-rebuild build current target
   x gc            nix store gc
   x upd [input]   nix flake update [input]
-  x ch            parse, format and evaluate, as the README says
-  x sh [stack...] dev shell for one or more stacks; no name lists them`)
+  x ch            parse, format and evaluate, as the README says`)
 	os.Exit(2)
 }
 
@@ -61,6 +59,15 @@ func run(argv ...string) {
 	}
 }
 
+func rebuild(action, target string) {
+	run(
+		"systemd-run", "--user", "--unit=x-rebuild", "--collect", "--wait", "--pipe",
+		"--property=MemoryHigh=4G", "--property=MemoryMax=6G",
+		"sudo", "-n", "nixos-rebuild", action,
+		"--max-jobs", "1", "--cores", "2", "--flake", DOTFILES_PATH+"#"+target,
+	)
+}
+
 func main() {
 	args := os.Args[1:]
 
@@ -77,34 +84,13 @@ func main() {
 
 		fmt.Println("theme:", from, "->", to)
 
-		run(
-			"sudo",
-			"-n",
-			"nixos-rebuild",
-			"switch",
-			"--flake",
-			DOTFILES_PATH+"#"+to,
-		)
+		rebuild("switch", to)
 
 	case "rb":
-		run(
-			"sudo",
-			"-n",
-			"nixos-rebuild",
-			"switch",
-			"--flake",
-			DOTFILES_PATH+"#"+target,
-		)
+		rebuild("switch", target)
 
 	case "b":
-		run(
-			"sudo",
-			"-n",
-			"nixos-rebuild",
-			"build",
-			"--flake",
-			DOTFILES_PATH+"#"+target,
-		)
+		rebuild("build", target)
 
 	case "gc":
 		run(
@@ -131,41 +117,6 @@ func main() {
 			"bash",
 			DOTFILES_PATH+"/packages/x/check.sh",
 			target,
-		)
-
-	case "sh":
-		if len(args) == 1 {
-			run(
-				"nix",
-				"eval",
-				DOTFILES_PATH+"#devShells."+SYSTEM,
-				"--apply", "builtins.attrNames",
-			)
-			return
-		}
-
-		stacks := make([]string, 0, len(args)-1)
-		for _, name := range args[1:] {
-			stacks = append(
-				stacks,
-				DOTFILES_PATH+"#devShells."+SYSTEM+"."+name,
-			)
-		}
-
-		if len(stacks) == 1 {
-			run(
-				"nix",
-				"develop",
-				stacks[0],
-			)
-		}
-
-		run(
-			append(append([]string{
-				"nix", "shell",
-			}, stacks...),
-				"--command",
-				"bash")...,
 		)
 
 	default:

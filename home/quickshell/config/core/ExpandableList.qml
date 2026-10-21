@@ -13,6 +13,8 @@ Item {
 
     property int spacing: 1
 
+    property int verticalLayoutDirection: ListView.TopToBottom
+
     property var model: null
 
     property Component delegate
@@ -37,6 +39,8 @@ Item {
         clip: true
 
         spacing: root.spacing
+
+        verticalLayoutDirection: root.verticalLayoutDirection
 
         boundsBehavior: Flickable.StopAtBounds
 

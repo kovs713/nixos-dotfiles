@@ -133,8 +133,6 @@ PanelWindow {
                 function activate() {
                     const n = wrapper.modelData;
 
-                    var invoked = false;
-
                     try {
                         const acts = n.actions;
 
@@ -151,7 +149,6 @@ PanelWindow {
 
                                 if (actionId === "default") {
                                     Services.NotificationServer.invokeAction(n, acts[i]);
-                                    invoked = true;
                                     break;
                                 }
                             }
@@ -159,8 +156,7 @@ PanelWindow {
                     } catch (e) {
                     }
 
-                    if (!invoked)
-                        wrapper.hide();
+                    wrapper.hide();
                 }
 
                 ParallelAnimation {

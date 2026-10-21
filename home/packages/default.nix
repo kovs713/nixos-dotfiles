@@ -13,6 +13,8 @@ in
       ayugram-desktop
       photocraft
       obsidian
+      dstask
+      anki
       vial
 
       # cli

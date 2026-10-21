@@ -1,16 +1,17 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "lsp": true,
-  "plugin": [
+  "plugins": [
     "@mohak34/opencode-notifier@latest",
-    "opencode-vibeguard",
-    "@dietrichgebert/ponytail"
+    "@dietrichgebert/ponytail",
+    "opencode-todolist",
+    "@madsoftwaredev/opencode-direnv"
   ],
   "mcp": {
     "excalidraw": {
       "type": "local",
       "command": ["npx", "-y", "mcp-excalidraw-server"],
-      "enabled": true
+      "enabled": false
     }
   },
   "default_agent": "plan",
@@ -42,7 +43,7 @@
     },
     "teach": {
       "mode": "primary",
-      "description": "Interactive tutor — quiz-driven learning, probe → plan → teach loop",
+      "description": "Adaptive tutor — diagnose understanding, derive ideas, check transfer, practice",
       "prompt": "{file:~/.config/opencode/agent/teach.md}",
       "permission": "allow"
     }
