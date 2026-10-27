@@ -7,6 +7,14 @@ GridView {
 
     property int selectedIndex: 0
 
+    signal selectionRequested(int index)
+
+    function selectAt(x, y) {
+        const index = root.indexAt(x, y);
+        if (index >= 0 && index !== root.selectedIndex)
+            root.selectionRequested(index);
+    }
+
     property string emptyText: ""
 
     property int columns: 1

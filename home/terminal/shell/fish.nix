@@ -25,6 +25,11 @@
       body = builtins.readFile ./tmux-new.fish;
       description = "Create new tmux session named after current directory";
     };
+
+    ytchunks = {
+      body = builtins.readFile ./ytchunks.fish;
+      description = "Download YouTube audio split by chapters";
+    };
   };
 
   programs.zoxide.enable = true;

@@ -283,19 +283,10 @@ PanelWindow {
                             Component {
                                 id: entryComp
 
-                                Rectangle {
+                                Core.ListItem {
                                     height: 30
 
                                     radius: 9
-
-                                    color: entryMouse.containsMouse ? Core.Theme.surfaceHover : "transparent"
-
-                                    Behavior on color {
-                                        ColorAnimation {
-                                            duration: 90
-                                            easing.type: Easing.OutQuint
-                                        }
-                                    }
 
                                     Row {
                                         anchors.left: parent.left
@@ -334,23 +325,13 @@ PanelWindow {
                                         }
                                     }
 
-                                    MouseArea {
-                                        id: entryMouse
+                                    onActivated: {
+                                        const act = entryLoader.modelData.action;
 
-                                        anchors.fill: parent
+                                        menuLayer.close();
 
-                                        hoverEnabled: true
-
-                                        cursorShape: Qt.PointingHandCursor
-
-                                        onClicked: {
-                                            const act = entryLoader.modelData.action;
-
-                                            menuLayer.close();
-
-                                            if (typeof act === "function")
-                                                act();
-                                        }
+                                        if (typeof act === "function")
+                                            act();
                                     }
                                 }
                             }

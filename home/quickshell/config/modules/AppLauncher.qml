@@ -51,6 +51,7 @@ Core.LauncherView {
 
             model: launcher.results
             selectedIndex: launcher.selectedIndex
+            onSelectionRequested: index => launcher.selectedIndex = index
 
             rowHeight: 40
 
@@ -94,7 +95,7 @@ Core.LauncherView {
                 subtitle: row.prefix
                 trailing: row.modelData.category
 
-                active: row.index === list.selectedIndex
+                selected: row.index === list.selectedIndex
 
                 onActivated: {
                     launcher.selectedIndex = row.index;

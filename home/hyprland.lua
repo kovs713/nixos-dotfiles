@@ -28,6 +28,7 @@ bind("SUPER + mouse:273", hl.dsp.window.resize())
 
 bind("XF86Tools", hl.dsp.exec_cmd('test -r /tmp/olay-overlay.pid && kill -USR2 "$(cat /tmp/olay-overlay.pid)"'))
 bind("XF86Launch5", hl.dsp.exec_cmd('test -r /tmp/olay-overlay.pid && kill -USR1 "$(cat /tmp/olay-overlay.pid)"'))
+bind("XF86Launch6", hl.dsp.exec_cmd('test -r /tmp/olay-overlay.pid && kill -IO "$(cat /tmp/olay-overlay.pid)"'))
 
 bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
 bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { repeating = true })

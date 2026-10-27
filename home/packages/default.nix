@@ -21,6 +21,7 @@ in
       bitwarden-cli
       ripgrep
       ffmpeg
+      yt-dlp
       nitch
       unzip
       cloc

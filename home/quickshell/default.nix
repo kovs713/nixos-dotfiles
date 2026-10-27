@@ -18,7 +18,6 @@
     # Clipboard
     wl-clipboard
     cliphist
-    wtype
 
     brightnessctl
     ddcutil
@@ -29,6 +28,8 @@
 
   xdg.configFile."quickshell".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dotfiles/home/quickshell/config";
+
+  xdg.configFile."cliphist/config".text = "max-items 10000\n";
 
   xdg.dataFile."dbus-1/services/org.freedesktop.Notifications.service".text = ''
     [D-BUS Service]

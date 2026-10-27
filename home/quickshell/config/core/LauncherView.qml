@@ -107,7 +107,11 @@ Item {
         const next = root.selectedIndex + delta;
 
         root.selectedIndex = Math.max(0, Math.min(root.itemCount - 1, next));
+    }
 
+    onSelectedIndexChanged: schedulePreview()
+
+    function schedulePreview() {
         if (root.liveSelect && root.open)
             previewTimer.restart();
     }

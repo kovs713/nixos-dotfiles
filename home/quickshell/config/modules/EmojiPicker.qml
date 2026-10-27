@@ -55,6 +55,7 @@ Core.LauncherView {
 
             model: picker.results
             selectedIndex: picker.selectedIndex
+            onSelectionRequested: index => picker.selectedIndex = index
 
             columns: picker.columns
             rowHeight: picker.cellHeight
@@ -65,20 +66,16 @@ Core.LauncherView {
                 ? "Loading emoji…"
                 : (picker.query.length > 0 ? "No matching emoji" : "No emoji available")
 
-            delegate: Rectangle {
+            delegate: Core.ListItem {
                 id: cell
 
                 required property var modelData
                 required property int index
 
-                readonly property bool selected: cell.index === grid.selectedIndex
+                selected: cell.index === grid.selectedIndex
 
                 width: grid.cellWidth
                 height: grid.rowHeight
-
-                radius: Core.Theme.radiusRow
-
-                color: cell.selected ? Core.Theme.surface : "transparent"
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -120,16 +117,9 @@ Core.LauncherView {
                     maximumLineCount: 1
                 }
 
-                MouseArea {
-                    anchors.fill: parent
-
-                    cursorShape: Qt.PointingHandCursor
-
-                    onClicked: {
-                        picker.selectedIndex = cell.index;
-
-                        picker.insertSelected();
-                    }
+                onActivated: {
+                    picker.selectedIndex = cell.index;
+                    picker.insertSelected();
                 }
             }
         }

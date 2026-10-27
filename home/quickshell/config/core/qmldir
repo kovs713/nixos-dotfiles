@@ -9,6 +9,7 @@ singleton Fuzzy 1.0 Fuzzy.qml
 IconButton 1.0 IconButton.qml
 singleton Icons 1.0 Icons.qml
 LauncherView 1.0 LauncherView.qml
+ListItem 1.0 ListItem.qml
 ListRow 1.0 ListRow.qml
 singleton ModelSync 1.0 ModelSync.qml
 singleton OsdController 1.0 OsdController.qml

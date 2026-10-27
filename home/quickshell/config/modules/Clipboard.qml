@@ -40,6 +40,8 @@ Core.LauncherView {
     liveSelect: true
     liveSelectDelay: 120
 
+    onSelectedChanged: clipboard.schedulePreview()
+
     onPreviewSelection: {
         Services.ClipboardService.loadPreview(clipboard.selected);
     }
@@ -80,8 +82,8 @@ Core.LauncherView {
         if (!item)
             return;
 
-        Services.ClipboardService.paste(item);
         clipboard.dismiss();
+        Services.ClipboardService.promote(item);
     }
 
     function deleteSelected() {
@@ -122,7 +124,8 @@ Core.LauncherView {
 
             readonly property int previewWidth: 400
 
-            readonly property bool previewVisible: clipboard.selected !== null && clipboard.selected.image === true
+            readonly property bool previewVisible: clipboard.selected !== null
+            readonly property bool imagePreview: clipboard.selected !== null && clipboard.selected.image === true
 
             Row {
                 anchors.left: parent.left
@@ -139,25 +142,23 @@ Core.LauncherView {
 
                     model: clipboard.results
                     selectedIndex: clipboard.selectedIndex
+                    onSelectionRequested: index => clipboard.selectedIndex = index
 
                     rowHeight: 48
 
                     emptyText: clipboard.query.length > 0 ? "No clipboard matches" : "Clipboard is empty"
 
-                    delegate: Rectangle {
+                    delegate: Core.ListItem {
                         id: row
 
                         required property var modelData
                         required property int index
 
-                        readonly property bool selected: row.index === list.selectedIndex
+                        selected: row.index === list.selectedIndex
+                        actionWidth: 36
 
                         width: list.cellWidth
                         height: list.rowHeight
-
-                        radius: Core.Theme.radiusRow
-
-                        color: row.selected ? Core.Theme.surface : "transparent"
 
                         Rectangle {
                             anchors.left: parent.left
@@ -212,6 +213,7 @@ Core.LauncherView {
                             anchors.verticalCenter: parent.verticalCenter
 
                             text: row.modelData.image ? row.modelData.meta : row.modelData.text
+                            textFormat: Text.PlainText
 
                             color: row.selected ? Core.Theme.foreground : Core.Theme.foregroundMuted
 
@@ -261,17 +263,9 @@ Core.LauncherView {
                             }
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            anchors.rightMargin: 36
-
-                            cursorShape: Qt.PointingHandCursor
-
-                            onClicked: {
-                                clipboard.selectedIndex = row.index;
-                                Services.ClipboardService.promote(row.modelData);
-                                clipboard.dismiss();
-                            }
+                        onActivated: {
+                            clipboard.selectedIndex = row.index;
+                            clipboard.accepted();
                         }
                     }
                 }
@@ -298,7 +292,8 @@ Core.LauncherView {
                         anchors.margins: 8
                         anchors.bottomMargin: 28
 
-                        source: Services.ClipboardService.previewSource
+                        visible: content.imagePreview
+                        source: visible ? Services.ClipboardService.previewSource : ""
 
                         fillMode: Image.PreserveAspectFit
 
@@ -308,13 +303,22 @@ Core.LauncherView {
                         cache: true
                     }
 
+                    ClipboardTextPreview {
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        anchors.bottomMargin: 28
+
+                        visible: !content.imagePreview
+                        text: Services.ClipboardService.previewText
+                    }
+
                     Text {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
                         anchors.margins: 8
 
-                        text: clipboard.selected ? clipboard.selected.meta : ""
+                        text: content.imagePreview ? clipboard.selected.meta : "Text preview · up to 64 KiB"
 
                         color: Core.Theme.foregroundFaint
 

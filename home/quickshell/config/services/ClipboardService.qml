@@ -15,6 +15,7 @@ QtObject {
 
     property string previewKey: ""
     property string previewSource: ""
+    property string previewText: ""
     property int previewBust: 0
 
     function refresh() {
@@ -43,19 +44,6 @@ QtObject {
 
     function shellQuote(value) {
         return "'" + String(value).replace(/'/g, "'\\''") + "'";
-    }
-
-    function paste(item) {
-        if (!item)
-            return;
-
-        const command = "printf '%s\\n' " + shellQuote(item.raw) + " | cliphist decode | wl-copy";
-
-        Quickshell.execDetached(["sh", "-c", command]);
-
-        Quickshell.execDetached(["sh", "-c", "sleep 0.05; wtype -M ctrl v -m ctrl"]);
-
-        refresh();
     }
 
     function promote(item) {
@@ -88,14 +76,32 @@ QtObject {
     property var previewUrls: ({})
 
     property string decodingKey: ""
+    property string textPreviewId: ""
+
+    function startTextPreview() {
+        if (!root.textPreviewId || textPreviewProcess.running)
+            return;
+
+        // shortcut: preview only the first 64 KiB; paginate if larger previews become necessary.
+        textPreviewProcess.command = ["sh", "-c", "cliphist decode \"$1\" | head -c 65536", "clipboard-preview", root.textPreviewId];
+        textPreviewProcess.running = true;
+    }
 
     function loadPreview(item) {
-        const key = item && item.image ? item.id + "." + item.ext : "";
+        const key = item ? item.id + (item.image ? "." + item.ext : ".text") : "";
 
         if (key === root.previewKey)
             return;
 
         root.previewKey = key;
+        root.previewText = "";
+        root.textPreviewId = item && !item.image ? item.id : "";
+
+        if (root.textPreviewId) {
+            root.decodingKey = "";
+            root.startTextPreview();
+            return;
+        }
 
         if (!key) {
             root.decodingKey = "";
@@ -167,6 +173,21 @@ QtObject {
 
             root.previewUrls[key] = url;
             root.previewSource = url;
+        }
+    }
+
+    readonly property Process textPreviewProcess: Process {
+        stdout: StdioCollector {
+            id: textOutput
+        }
+
+        onExited: {
+            const id = root.textPreviewProcess.command[4];
+            if (root.previewKey === id + ".text")
+                root.previewText = textOutput.text;
+
+            if (root.textPreviewId !== id)
+                Qt.callLater(root.startTextPreview);
         }
     }
 
