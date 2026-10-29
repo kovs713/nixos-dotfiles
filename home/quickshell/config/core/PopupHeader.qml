@@ -7,6 +7,8 @@ Item {
 
     property string title: ""
     property string subtitle: ""
+    property color foregroundColor: Core.Theme.foreground
+    property color mutedColor: Core.Theme.foregroundMuted
 
     property bool showToggle: false
     property bool toggled: false
@@ -37,7 +39,7 @@ Item {
             font.pixelSize: Core.Theme.fontSizeLarge
             font.weight: Font.DemiBold
 
-            color: Core.Theme.foreground
+            color: root.foregroundColor
         }
 
         Text {
@@ -52,7 +54,7 @@ Item {
             font.family: Core.Theme.fontFamily
             font.pixelSize: Core.Theme.fontSizeSmall
 
-            color: Core.Theme.foregroundMuted
+            color: root.mutedColor
         }
     }
 
@@ -75,6 +77,7 @@ Item {
                 height: 28
 
                 icon: modelData.icon
+                color: root.mutedColor
 
                 spinning: modelData.spinning === true
 

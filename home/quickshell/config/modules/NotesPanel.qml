@@ -15,6 +15,11 @@ PanelWindow {
 
     property bool open: false
 
+    readonly property color noteBackground: Core.Theme.isLight ? "#faf7ed" : "#24231f"
+    readonly property color noteForeground: Core.Theme.isLight ? "#3d392e" : "#e9e4d5"
+    readonly property color noteMuted: Core.Theme.isLight ? "#746d5c" : "#b3ac97"
+    readonly property color noteHeaderBackground: Core.Theme.isLight ? "#fff1ad" : "#39311d"
+
     property real fade: root.open ? 1.0 : 0.0
 
     Behavior on fade {
@@ -108,7 +113,7 @@ PanelWindow {
 
         radius: Core.Theme.radiusMenu
 
-        color: Core.Theme.surface
+        color: root.noteBackground
 
         border.width: Core.Theme.borderWidth
         border.color: Core.Theme.borderActive
@@ -116,6 +121,17 @@ PanelWindow {
         antialiasing: true
 
         opacity: root.fade
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+
+            height: header.y + header.height + 4
+            topLeftRadius: card.radius
+            topRightRadius: card.radius
+            color: root.noteHeaderBackground
+        }
 
         Core.PopupHeader {
             id: header
@@ -127,8 +143,10 @@ PanelWindow {
             anchors.margins: Core.Theme.padding
 
             title: "Notes"
+            foregroundColor: Core.Theme.isLight ? "#443615" : "#f4e6b5"
+            mutedColor: Core.Theme.isLight ? "#79612b" : "#c3b17a"
 
-            subtitle: root.savedNotice !== "" ? "Saved " + root.savedNotice.split("/").pop() : "Autosaved"
+            subtitle: root.savedNotice !== "" ? "Saved " + root.savedNotice.split("/").pop() : ""
 
             actions: [
                 {
@@ -149,6 +167,13 @@ PanelWindow {
         Flickable {
             id: scroller
 
+            readonly property int ruleSpacing: Math.ceil(noteMetrics.height)
+
+            FontMetrics {
+                id: noteMetrics
+                font: editor.font
+            }
+
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: header.bottom
@@ -156,7 +181,7 @@ PanelWindow {
 
             anchors.leftMargin: Core.Theme.padding
             anchors.rightMargin: Core.Theme.padding
-            anchors.topMargin: 4
+            anchors.topMargin: 12
             anchors.bottomMargin: 4
 
             clip: true
@@ -166,7 +191,20 @@ PanelWindow {
 
             boundsBehavior: Flickable.StopAtBounds
 
-            TextEdit {
+            Repeater {
+                model: Math.ceil(scroller.height / scroller.ruleSpacing) + 1
+
+                delegate: Rectangle {
+                    required property int index
+
+                    width: scroller.width
+                    height: 1
+                    y: (Math.floor(scroller.contentY / scroller.ruleSpacing) + index + 1) * scroller.ruleSpacing - 1
+                    color: Qt.alpha(root.noteMuted, 0.2)
+                }
+            }
+
+            NotesEditor {
                 id: editor
 
                 width: scroller.width
@@ -179,15 +217,18 @@ PanelWindow {
                 font.pixelSize: Core.Theme.fontSize
                 font.letterSpacing: 0.2
 
-                color: Core.Theme.foreground
-                selectionColor: Qt.alpha(Core.Theme.accent, 0.4)
-                selectedTextColor: Core.Theme.foreground
-
-                selectByMouse: true
+                color: root.noteForeground
+                selectionColor: Qt.alpha(root.noteForeground, 0.2)
+                selectedTextColor: root.noteForeground
 
                 onTextChanged: Services.NotesService.edit(editor.text)
 
-                Keys.onEscapePressed: root.open = false
+                onCursorRectangleChanged: {
+                    if (editor.cursorRectangle.y < scroller.contentY)
+                        scroller.contentY = editor.cursorRectangle.y;
+                    else if (editor.cursorRectangle.y + editor.cursorRectangle.height > scroller.contentY + scroller.height)
+                        scroller.contentY = editor.cursorRectangle.y + editor.cursorRectangle.height - scroller.height;
+                }
             }
         }
 
@@ -200,14 +241,12 @@ PanelWindow {
 
             anchors.margins: Core.Theme.padding
 
-            visible: editor.text.length === 0
-
-            text: "Type here. Mod+N closes."
+            text: editor.mode
 
             font.family: Core.Theme.fontFamily
             font.pixelSize: Core.Theme.fontSizeSmall
 
-            color: Core.Theme.foregroundFaint
+            color: root.noteMuted
         }
     }
 

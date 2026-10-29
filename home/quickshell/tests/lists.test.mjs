@@ -32,6 +32,8 @@ for (const variant of ['black', 'white']) {
             await copyFile(new URL('tst_lists.qml', import.meta.url), join(dir, 'tests/tst_lists.qml'));
             await copyFile(new URL('../config/modules/ClipboardTextPreview.qml', import.meta.url), join(dir, 'config/modules/ClipboardTextPreview.qml'));
             await copyFile(new URL('tst_clipboard_preview.qml', import.meta.url), join(dir, 'tests/tst_clipboard_preview.qml'));
+            await copyFile(new URL('../config/modules/NotesEditor.qml', import.meta.url), join(dir, 'config/modules/NotesEditor.qml'));
+            await copyFile(new URL('tst_notes_editor.qml', import.meta.url), join(dir, 'tests/tst_notes_editor.qml'));
             const { stdout: lintPath } = await exec('sh', ['-c', 'command -v qmllint']);
             const imports = join(dirname(await realpath(lintPath.trim())), '../lib/qt-6/qml');
             const { stdout } = await exec('qmltestrunner', ['-input', join(dir, 'tests')], {

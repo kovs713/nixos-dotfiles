@@ -15,6 +15,7 @@ in
       obsidian
       dstask
       anki
+      kid3
       vial
 
       # cli
